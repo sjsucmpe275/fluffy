@@ -17,5 +17,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/gemfire-core-1.0.0-incubating.M1.jar" sourcepath="/home/saurabh/Downloads/apache-geode-src-1.0.0-incubating.M1"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
