@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<project name="NIO-based (JBoss Netty) communication pipeline" basedir="." default="build">
+
+	<target name="init">
+		<property name="src.dir" location="${basedir}/src" />
+		<property name="test.dir" location="${basedir}/test" />
+		<property name="build.dir" location="${basedir}/classes" />
+
+		<property name="config.dir" location="${basedir}/resources" />
+		<property name="protobuf.dir" location="/Users/gash/Developer/protobuf/current" />
+		<property name="junit.jar" location="/Users/gash/Developer/junit-4.8.2.jar" />
+		<property name="logging.jar" location="${basedir}/lib/slf4j-log4j12-1.6.1.jar" />
+
+		<path id="project.classpath">
+			<pathelement location="${build.dir}" />
+			<pathelement location="${junit.jar}" />
+			<pathelement location="${logging.jar}" />
+			<fileset dir="${basedir}/lib">
+				<include name="*.jar" />
+			</fileset>
+			<!--
+			<fileset dir="${protobuf.dir}">
+				<include name="*.jar" />
+			</fileset>
+			-->
+		</path>
+	</target>
+
+	<target name="clean" depends="init">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<target name="build" depends="init">
+		<mkdir dir="${build.dir}" />
+
+		<javac destdir="${build.dir}" debug="true" deprecation="false" optimize="false" failonerror="true">
+			<src path="${src.dir}" />
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="build.test" depends="build">
+		<javac destdir="${build.dir}" debug="true" deprecation="false" optimize="false" failonerror="true">
+			<src path="${test.dir}" />
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="test.hello" depends="build.test">
+		<junit>
+			<classpath refid="project.classpath" />
+			<test name="gash.router.client.ClientTest" haltonfailure="no">
+			</test>
+		</junit>
+	</target>
+
+	<target name="hello" depends="build">
+		<java fork="yes" classname="gash.router.app.DemoApp">
+			<classpath refid="project.classpath" />
+		</java>
+	</target>
+
+	<target name="server" depends="build">
+		<java fork="yes" classname="gash.router.server.MessageApp">
+			<classpath refid="project.classpath" />
+			<arg value="resources/routing.conf" />
+		</java>
+	</target>
+
+</project>
