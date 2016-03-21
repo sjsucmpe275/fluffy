@@ -1,6 +1,5 @@
 *.class
 .classpath
-.project
 fluffy.eml
 fluffy.iml
 
