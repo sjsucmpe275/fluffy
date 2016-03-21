@@ -1,0 +1,12 @@
+1. Download source from http://geode.incubator.apache.org/releases/
+2. Unzip/untar it
+3. Install JDK 1.8
+4. Install gradle sudo apt-get install gradle
+5. gradle build installDist
+6. 
+$ cd geode-assembly/build/install/apache-geode
+$ ./bin/gfsh
+gfsh> start locator --name=locator
+gfsh> start server --name=server
+
+More info: https://github.com/apache/incubator-geode

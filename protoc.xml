@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<project name="Proto">
+
+	<target name="clean-generated">
+		<delete dir="${generated.dir}" />
+	</target>
+
+	  <target name="protoc" depends="clean-generated">
+		<mkdir dir="${generated.dir}" />
+		    <exec executable="protoc" failonerror="true">
+			<arg value="--java_out=${generated.dir}" />
+		        <arg value="--proto_path=${resources.dir}" />
+			<arg value="${resources.dir}/common.proto"/>
+			<arg value="${resources.dir}/election.proto"/>
+			<arg value="${resources.dir}/pipe.proto"/>
+			<arg value="${resources.dir}/work.proto"/>			
+		    </exec>
+	  </target>
+</project>
