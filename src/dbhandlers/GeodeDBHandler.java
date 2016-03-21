@@ -1,6 +1,7 @@
 /**
  * 
- */
+ *//*
+
 package dbhandlers;
 
 import java.util.Map;
@@ -11,10 +12,12 @@ import com.gemstone.gemfire.cache.client.ClientCache;
 import com.gemstone.gemfire.cache.client.ClientCacheFactory;
 import com.gemstone.gemfire.cache.client.ClientRegionShortcut;
 
+*/
 /**
  * @author root
  *
- */
+ *//*
+
 public class GeodeDBHandler implements IDBHandler {
 
 	private Region<String, Object> region;
@@ -79,3 +82,4 @@ public class GeodeDBHandler implements IDBHandler {
 		return "ApacheGeode";
 	}
 }
+*/

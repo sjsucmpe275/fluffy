@@ -1,0 +1,21 @@
+option optimize_for = SPEED;
+option java_package = "pipe.election";
+
+// enquire about the state of the leader/election
+message LeaderStatus {
+   required LeaderQuery action = 1;
+   optional LeaderState state = 2;
+   optional string leader_host= 3;
+   optional int32 leader_id = 4;
+   
+   enum LeaderState {
+      LEADERUNKNOWN = 1;
+      LEADERALIVE = 2;
+      LEADERDEAD = 3;
+   }
+
+   enum LeaderQuery {
+      WHOISTHELEADER = 1;
+      THELEADERIS = 2;
+   }
+}

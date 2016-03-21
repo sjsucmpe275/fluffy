@@ -1,4 +1,7 @@
 *.class
+.classpath
+fluffy.eml
+fluffy.iml
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/

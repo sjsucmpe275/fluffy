@@ -1,0 +1,24 @@
+option optimize_for = SPEED;
+option java_package = "pipe.common";
+
+/**
+ * the accompanying information for all messages. Provides origination,
+ * security, authentication, and tracking information
+ */
+message Header {  
+    required int32 node_id = 1;
+    required int64 time = 2;
+   
+    // if the message is for a specific node, this will be set
+    optional int32 destination = 8;
+
+    // This factor limits the distance that a msg travels from the originating 
+    // node. Default (-1) is the whole network (not restricted).
+    optional int32 max_hops = 10 [default = -1];
+}
+
+message Failure {
+    required int32 id = 1;
+    optional int32 ref_id = 2;
+    optional string message = 3;
+}
