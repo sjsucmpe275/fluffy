@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Failure;
+import pipe.common.Common.Header;
 import pipe.work.Work.Heartbeat;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
@@ -53,14 +54,37 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 	 * @param msg
 	 */
 	public void handleMessage(WorkMessage msg, Channel channel) {
+		
 		if (msg == null) {
 			// TODO add logging
 			System.out.println("ERROR: Unexpected content - " + msg);
 			return;
 		}
-
+		
 		if (debug)
 			PrintUtil.printWork(msg);
+
+		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
+			
+			if (msg.getHeader().getMaxHops() == 0) {
+				//TODO This might be the detination.. Think before dropping..
+				System.out.println("MAX HOPS is Zero! Dropping message...");
+				return;
+			}
+			
+			if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
+				System.out.println("Same message received by source! Dropping message...");
+				return;
+			}
+			
+			System.out.println("Forwarding message...");
+			WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
+			Header.Builder hb = Header.newBuilder(wb.getHeader());
+			hb.setMaxHops(hb.getMaxHops() - 1);
+			wb.setHeader(hb);
+			state.getEmon().broadcastMessage(wb.build());
+			return;
+		}
 
 		// TODO How can you implement this without if-else statements?
 		try {
