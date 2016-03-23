@@ -78,7 +78,7 @@ public class DemoApp implements CommListener {
 
 			System.out.println("\n** exiting in 10 seconds. **");
 			System.out.flush();
-			Thread.sleep(10 * 1000);
+			//Thread.sleep(10 * 1000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
