@@ -15,13 +15,11 @@
  */
 package gash.router.server;
 
+import gash.router.container.RoutingConf;
+import io.netty.channel.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import gash.router.container.RoutingConf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import pipe.common.Common;
 import pipe.common.Common.Failure;
 import routing.Pipe.CommandMessage;
 
@@ -63,6 +61,20 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 			// TODO How can you implement this without if-else statements?
 			if (msg.hasPing()) {
 				logger.info("ping from " + msg.getHeader().getNodeId());
+				// construct the message to send
+				Common.Header.Builder hb = Common.Header.newBuilder();
+				hb.setNodeId(888);
+				hb.setTime(System.currentTimeMillis());
+				hb.setDestination(-1);
+
+				CommandMessage.Builder rb = CommandMessage.newBuilder();
+				rb.setHeader(hb);
+				rb.setPing(true);
+
+				ChannelFuture cf = channel.writeAndFlush (rb.build());
+				if(!cf.isSuccess ())    {
+					System.out.println("Reasion for failure : " + cf);
+				}
 			} else if (msg.hasMessage()) {
 				logger.info(msg.getMessage());
 			} else {
@@ -70,6 +82,7 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 
 		} catch (Exception e) {
 			// TODO add logging
+			logger.info ("Got an exception in command");
 			Failure.Builder eb = Failure.newBuilder();
 			eb.setId(conf.getNodeId());
 			eb.setRefId(msg.getHeader().getNodeId());
@@ -101,6 +114,18 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
+	}
+
+
+	public static class Listener implements ChannelFutureListener {
+
+		@Override
+		public void operationComplete(ChannelFuture future) throws Exception {
+			logger.info("Inside Operation COImplete - in command handler");
+			if(!future.isSuccess ()) {
+				logger.info("Sorry, I was not able to send the message");
+			}
+		}
 	}
 
 }

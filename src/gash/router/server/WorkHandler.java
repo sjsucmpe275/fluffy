@@ -15,12 +15,13 @@
  */
 package gash.router.server;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pipe.common.Common;
 import pipe.common.Common.Failure;
 import pipe.work.Work.Heartbeat;
 import pipe.work.Work.Task;
@@ -66,12 +67,29 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 			if (msg.hasBeat()) {
 				Heartbeat hb = msg.getBeat();
 				logger.info("heartbeat from " + msg.getHeader().getNodeId());
+				// construct the message to send
+				Common.Header.Builder wm = Common.Header.newBuilder();
+				wm.setNodeId(state.getConf().getNodeId());
+				wm.setDestination(-1);
+				wm.setTime(System.currentTimeMillis());
+
+				WorkMessage.Builder wb = WorkMessage.newBuilder();
+				wb.setHeader(wm);
+				wb.setPing (true);
+				wb.setSecret(1);
+
+				ChannelFuture cf = channel.writeAndFlush (wb.build ());
+				if(!cf.isSuccess ())    {
+					System.out.println (cf.cause ());
+				}
+
 			} else if (msg.hasPing()) {
 				logger.info("ping from " + msg.getHeader().getNodeId());
-				boolean p = msg.getPing();
+				//Todo: I commented this code to avoid infinite loop. Will update later
+				/*boolean p = msg.getPing();
 				WorkMessage.Builder rb = WorkMessage.newBuilder();
 				rb.setPing(true);
-				channel.write(rb.build());
+				channel.write(rb.build());*/
 			} else if (msg.hasErr()) {
 				Failure err = msg.getErr();
 				logger.error("failure from " + msg.getHeader().getNodeId());
@@ -83,6 +101,7 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 			}
 		} catch (Exception e) {
 			// TODO add logging
+			logger.info ("Got an exception in work");
 			Failure.Builder eb = Failure.newBuilder();
 			eb.setId(state.getConf().getNodeId());
 			eb.setRefId(msg.getHeader().getNodeId());

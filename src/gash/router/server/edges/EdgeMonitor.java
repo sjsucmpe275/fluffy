@@ -15,12 +15,7 @@
  */
 package gash.router.server.edges;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gash.router.client.CommConnection.ClientClosedListener;
 import gash.router.container.RoutingConf.RoutingEntry;
-import gash.router.server.CommandInit;
 import gash.router.server.ServerState;
 import gash.router.server.WorkInit;
 import io.netty.bootstrap.Bootstrap;
@@ -29,6 +24,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common.Header;
 import pipe.work.Work.Heartbeat;
 import pipe.work.Work.WorkMessage;
@@ -112,6 +109,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 							b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 							b.option(ChannelOption.TCP_NODELAY, true);
 							b.option(ChannelOption.SO_KEEPALIVE, true);
+							b.option (ChannelOption.SO_RCVBUF, 1024);
 
 							// Make the connection attempt.
 							ChannelFuture channel = b.connect(ei.getHost(), ei.getPort()).syncUninterruptibly();
@@ -149,5 +147,11 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	@Override
 	public synchronized void onRemove(EdgeInfo ei) {
 		// TODO ?
+	}
+
+	/* Heart Beat Message received from the */
+	public void setHeartBeat(WorkMessage heartBeatMsg) {
+		int fromNode = heartBeatMsg.getHeader ().getNodeId ();
+		this.outboundEdges.getNode (fromNode).setLastHeartbeat (heartBeatMsg.getHeader ().getTime ());
 	}
 }
