@@ -71,7 +71,6 @@ public class CommHandler extends SimpleChannelInboundHandler<CommandMessage> {
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, CommandMessage msg) throws Exception {
 		System.out.println("--> got incoming message");
-		logger.info ("***^^^%%%&&&)&(*&*");
 		for (String id : listeners.keySet()) {
 			CommListener cl = listeners.get(id);
 

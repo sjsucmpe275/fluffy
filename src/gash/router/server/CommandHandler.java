@@ -115,17 +115,4 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
 	}
-
-
-	public static class Listener implements ChannelFutureListener {
-
-		@Override
-		public void operationComplete(ChannelFuture future) throws Exception {
-			logger.info("Inside Operation COImplete - in command handler");
-			if(!future.isSuccess ()) {
-				logger.info("Sorry, I was not able to send the message");
-			}
-		}
-	}
-
 }

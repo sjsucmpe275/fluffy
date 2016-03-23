@@ -146,7 +146,6 @@ public class MessageServer {
 				b.option(ChannelOption.SO_BACKLOG, 100);
 				b.option(ChannelOption.TCP_NODELAY, true);
 				b.option(ChannelOption.SO_KEEPALIVE, true);
-				b.option (ChannelOption.SO_RCVBUF, 1024);
 
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
@@ -160,8 +159,6 @@ public class MessageServer {
 
 				logger.info(f.channel().localAddress() + " -> open: " + f.channel().isOpen() + ", write: "
 						+ f.channel().isWritable() + ", act: " + f.channel().isActive());
-
-				f.addListener(new Listener ());
 
 				// block until the server socket is closed.
 				f.channel().closeFuture().sync();
@@ -215,7 +212,6 @@ public class MessageServer {
 				b.option(ChannelOption.SO_BACKLOG, 100);
 				b.option(ChannelOption.TCP_NODELAY, true);
 				b.option(ChannelOption.SO_KEEPALIVE, true);
-				//b.option (ChannelOption.SO_RCVBUF, 1024);
 
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
@@ -230,7 +226,6 @@ public class MessageServer {
 				logger.info(f.channel().localAddress() + " -> open: " + f.channel().isOpen() + ", write: "
 						+ f.channel().isWritable() + ", act: " + f.channel().isActive());
 
-				f.addListener(new Listener ());
 				// block until the server socket is closed.
 				f.channel().closeFuture().sync();
 			} catch (Exception ex) {
@@ -285,17 +280,6 @@ public class MessageServer {
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				return null;
-			}
-		}
-	}
-
-	public static class Listener implements ChannelFutureListener {
-
-		@Override
-		public void operationComplete(ChannelFuture future) throws Exception {
-			logger.info("Inside Operation COImplete");
-			if(!future.isSuccess ()) {
-				logger.info("Sorry, I was not able to send the message");
 			}
 		}
 	}
