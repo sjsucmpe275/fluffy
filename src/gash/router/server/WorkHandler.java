@@ -63,11 +63,14 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 		
 		if (debug)
 			PrintUtil.printWork(msg);
-
-		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
+		
+		// I am believing every message will have header. And when destination
+		// is -1 message is for each receiving node.
+		int destination = msg.getHeader().getDestination();
+		
+		if (destination != -1 && destination != state.getConf().getNodeId()) {
 			
 			if (msg.getHeader().getMaxHops() == 0) {
-				//TODO This might be the detination.. Think before dropping..
 				System.out.println("MAX HOPS is Zero! Dropping message...");
 				return;
 			}
@@ -98,7 +101,7 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 				wm.setTime(System.currentTimeMillis());
 
 				WorkMessage.Builder wb = WorkMessage.newBuilder();
-				wb.setHeader(wm);
+				wb.setHeader(wm.build());
 				wb.setPing (true);
 				wb.setSecret(1);
 

@@ -107,7 +107,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 						
 						group = new NioEventLoopGroup();
 						try {
-							WorkInit wi = new WorkInit(null, false);
+							WorkInit wi = new WorkInit(this.state, false);
 							Bootstrap b = new Bootstrap();
 							b.group(group).channel(NioSocketChannel.class).handler(wi);
 							b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
