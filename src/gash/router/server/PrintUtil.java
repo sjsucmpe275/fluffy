@@ -48,8 +48,15 @@ public class PrintUtil {
 		else if (msg.hasMessage()) {
 			System.out.println("Message");
 			System.out.println(PrintUtil.gap + "Msg:  " + msg.getMessage());
-		} else
+		} else if (msg.hasQuery()) {
+			System.out.println("--------------------");
+			System.out.println(msg.getQuery().getAction().name());
+			System.out.println(msg.getQuery().getKey());
+			System.out.println(msg.getQuery().getData());
+			System.out.println("--------------------");
+		} else {
 			System.out.println("Unknown");
+		}
 	}
 
 	public static void printWork(WorkMessage msg) {

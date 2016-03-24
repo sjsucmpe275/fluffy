@@ -171,6 +171,24 @@ public final class Storage {
      * </pre>
      */
     com.google.protobuf.ByteString getData();
+
+    /**
+     * <code>optional int32 size = 8;</code>
+     */
+    boolean hasSize();
+    /**
+     * <code>optional int32 size = 8;</code>
+     */
+    int getSize();
+
+    /**
+     * <code>optional int32 sequence_no = 9;</code>
+     */
+    boolean hasSequenceNo();
+    /**
+     * <code>optional int32 sequence_no = 9;</code>
+     */
+    int getSequenceNo();
   }
   /**
    * Protobuf type {@code Query}
@@ -248,6 +266,16 @@ public final class Storage {
             case 58: {
               bitField0_ |= 0x00000004;
               data_ = input.readBytes();
+              break;
+            }
+            case 64: {
+              bitField0_ |= 0x00000008;
+              size_ = input.readInt32();
+              break;
+            }
+            case 72: {
+              bitField0_ |= 0x00000010;
+              sequenceNo_ = input.readInt32();
               break;
             }
           }
@@ -390,10 +418,42 @@ public final class Storage {
       return data_;
     }
 
+    public static final int SIZE_FIELD_NUMBER = 8;
+    private int size_;
+    /**
+     * <code>optional int32 size = 8;</code>
+     */
+    public boolean hasSize() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional int32 size = 8;</code>
+     */
+    public int getSize() {
+      return size_;
+    }
+
+    public static final int SEQUENCE_NO_FIELD_NUMBER = 9;
+    private int sequenceNo_;
+    /**
+     * <code>optional int32 sequence_no = 9;</code>
+     */
+    public boolean hasSequenceNo() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int32 sequence_no = 9;</code>
+     */
+    public int getSequenceNo() {
+      return sequenceNo_;
+    }
+
     private void initFields() {
       action_ = storage.Storage.Action.GET;
       key_ = "";
       data_ = com.google.protobuf.ByteString.EMPTY;
+      size_ = 0;
+      sequenceNo_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -421,6 +481,12 @@ public final class Storage {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(7, data_);
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(8, size_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(9, sequenceNo_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -441,6 +507,14 @@ public final class Storage {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(7, data_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, size_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(9, sequenceNo_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -569,6 +643,10 @@ public final class Storage {
         bitField0_ = (bitField0_ & ~0x00000002);
         data_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
+        size_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        sequenceNo_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
 
@@ -609,6 +687,14 @@ public final class Storage {
           to_bitField0_ |= 0x00000004;
         }
         result.data_ = data_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.size_ = size_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.sequenceNo_ = sequenceNo_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -635,6 +721,12 @@ public final class Storage {
         }
         if (other.hasData()) {
           setData(other.getData());
+        }
+        if (other.hasSize()) {
+          setSize(other.getSize());
+        }
+        if (other.hasSequenceNo()) {
+          setSequenceNo(other.getSequenceNo());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -869,6 +961,70 @@ public final class Storage {
         return this;
       }
 
+      private int size_ ;
+      /**
+       * <code>optional int32 size = 8;</code>
+       */
+      public boolean hasSize() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional int32 size = 8;</code>
+       */
+      public int getSize() {
+        return size_;
+      }
+      /**
+       * <code>optional int32 size = 8;</code>
+       */
+      public Builder setSize(int value) {
+        bitField0_ |= 0x00000008;
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 size = 8;</code>
+       */
+      public Builder clearSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        size_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int sequenceNo_ ;
+      /**
+       * <code>optional int32 sequence_no = 9;</code>
+       */
+      public boolean hasSequenceNo() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int32 sequence_no = 9;</code>
+       */
+      public int getSequenceNo() {
+        return sequenceNo_;
+      }
+      /**
+       * <code>optional int32 sequence_no = 9;</code>
+       */
+      public Builder setSequenceNo(int value) {
+        bitField0_ |= 0x00000010;
+        sequenceNo_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 sequence_no = 9;</code>
+       */
+      public Builder clearSequenceNo() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        sequenceNo_ = 0;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:Query)
     }
 
@@ -885,7 +1041,7 @@ public final class Storage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required .Action action = 8;</code>
+     * <code>required .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -893,7 +1049,7 @@ public final class Storage {
      */
     boolean hasAction();
     /**
-     * <code>required .Action action = 8;</code>
+     * <code>required .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -902,7 +1058,7 @@ public final class Storage {
     storage.Storage.Action getAction();
 
     /**
-     * <code>optional bool success = 9;</code>
+     * <code>optional bool success = 11;</code>
      *
      * <pre>
      * Was that action successful?
@@ -910,7 +1066,7 @@ public final class Storage {
      */
     boolean hasSuccess();
     /**
-     * <code>optional bool success = 9;</code>
+     * <code>optional bool success = 11;</code>
      *
      * <pre>
      * Was that action successful?
@@ -919,7 +1075,7 @@ public final class Storage {
     boolean getSuccess();
 
     /**
-     * <code>optional string key = 10;</code>
+     * <code>optional string key = 12;</code>
      *
      * <pre>
      * The key for which action was performed. If store action does not 
@@ -928,7 +1084,7 @@ public final class Storage {
      */
     boolean hasKey();
     /**
-     * <code>optional string key = 10;</code>
+     * <code>optional string key = 12;</code>
      *
      * <pre>
      * The key for which action was performed. If store action does not 
@@ -937,7 +1093,7 @@ public final class Storage {
      */
     java.lang.String getKey();
     /**
-     * <code>optional string key = 10;</code>
+     * <code>optional string key = 12;</code>
      *
      * <pre>
      * The key for which action was performed. If store action does not 
@@ -948,33 +1104,51 @@ public final class Storage {
         getKeyBytes();
 
     /**
-     * <code>optional string message = 11;</code>
+     * <code>optional int32 size = 13;</code>
+     */
+    boolean hasSize();
+    /**
+     * <code>optional int32 size = 13;</code>
+     */
+    int getSize();
+
+    /**
+     * <code>optional int32 sequence_no = 14;</code>
+     */
+    boolean hasSequenceNo();
+    /**
+     * <code>optional int32 sequence_no = 14;</code>
+     */
+    int getSequenceNo();
+
+    /**
+     * <code>optional string infomessage = 15;</code>
      *
      * <pre>
      * Message, if any, after successful operation
      * </pre>
      */
-    boolean hasMessage();
+    boolean hasInfomessage();
     /**
-     * <code>optional string message = 11;</code>
+     * <code>optional string infomessage = 15;</code>
      *
      * <pre>
      * Message, if any, after successful operation
      * </pre>
      */
-    java.lang.String getMessage();
+    java.lang.String getInfomessage();
     /**
-     * <code>optional string message = 11;</code>
+     * <code>optional string infomessage = 15;</code>
      *
      * <pre>
      * Message, if any, after successful operation
      * </pre>
      */
     com.google.protobuf.ByteString
-        getMessageBytes();
+        getInfomessageBytes();
 
     /**
-     * <code>optional .Failure failure = 12;</code>
+     * <code>optional .Failure failure = 16;</code>
      *
      * <pre>
      * Failure with reason 
@@ -982,7 +1156,7 @@ public final class Storage {
      */
     boolean hasFailure();
     /**
-     * <code>optional .Failure failure = 12;</code>
+     * <code>optional .Failure failure = 16;</code>
      *
      * <pre>
      * Failure with reason 
@@ -990,7 +1164,7 @@ public final class Storage {
      */
     pipe.common.Common.Failure getFailure();
     /**
-     * <code>optional .Failure failure = 12;</code>
+     * <code>optional .Failure failure = 16;</code>
      *
      * <pre>
      * Failure with reason 
@@ -999,7 +1173,7 @@ public final class Storage {
     pipe.common.Common.FailureOrBuilder getFailureOrBuilder();
 
     /**
-     * <code>optional bytes data = 13;</code>
+     * <code>optional bytes data = 17;</code>
      *
      * <pre>
      * Data in case of GET action
@@ -1007,7 +1181,7 @@ public final class Storage {
      */
     boolean hasData();
     /**
-     * <code>optional bytes data = 13;</code>
+     * <code>optional bytes data = 17;</code>
      *
      * <pre>
      * Data in case of GET action
@@ -1067,37 +1241,47 @@ public final class Storage {
               }
               break;
             }
-            case 64: {
+            case 80: {
               int rawValue = input.readEnum();
               storage.Storage.Action value = storage.Storage.Action.valueOf(rawValue);
               if (value == null) {
-                unknownFields.mergeVarintField(8, rawValue);
+                unknownFields.mergeVarintField(10, rawValue);
               } else {
                 bitField0_ |= 0x00000001;
                 action_ = value;
               }
               break;
             }
-            case 72: {
+            case 88: {
               bitField0_ |= 0x00000002;
               success_ = input.readBool();
               break;
             }
-            case 82: {
+            case 98: {
               com.google.protobuf.ByteString bs = input.readBytes();
               bitField0_ |= 0x00000004;
               key_ = bs;
               break;
             }
-            case 90: {
+            case 104: {
+              bitField0_ |= 0x00000008;
+              size_ = input.readInt32();
+              break;
+            }
+            case 112: {
+              bitField0_ |= 0x00000010;
+              sequenceNo_ = input.readInt32();
+              break;
+            }
+            case 122: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              payloadCase_ = 11;
+              payloadCase_ = 15;
               payload_ = bs;
               break;
             }
-            case 98: {
+            case 130: {
               pipe.common.Common.Failure.Builder subBuilder = null;
-              if (payloadCase_ == 12) {
+              if (payloadCase_ == 16) {
                 subBuilder = ((pipe.common.Common.Failure) payload_).toBuilder();
               }
               payload_ = input.readMessage(pipe.common.Common.Failure.PARSER, extensionRegistry);
@@ -1105,11 +1289,11 @@ public final class Storage {
                 subBuilder.mergeFrom((pipe.common.Common.Failure) payload_);
                 payload_ = subBuilder.buildPartial();
               }
-              payloadCase_ = 12;
+              payloadCase_ = 16;
               break;
             }
-            case 106: {
-              payloadCase_ = 13;
+            case 138: {
+              payloadCase_ = 17;
               payload_ = input.readBytes();
               break;
             }
@@ -1157,9 +1341,9 @@ public final class Storage {
     private java.lang.Object payload_;
     public enum PayloadCase
         implements com.google.protobuf.Internal.EnumLite {
-      MESSAGE(11),
-      FAILURE(12),
-      DATA(13),
+      INFOMESSAGE(15),
+      FAILURE(16),
+      DATA(17),
       PAYLOAD_NOT_SET(0);
       private int value = 0;
       private PayloadCase(int value) {
@@ -1167,9 +1351,9 @@ public final class Storage {
       }
       public static PayloadCase valueOf(int value) {
         switch (value) {
-          case 11: return MESSAGE;
-          case 12: return FAILURE;
-          case 13: return DATA;
+          case 15: return INFOMESSAGE;
+          case 16: return FAILURE;
+          case 17: return DATA;
           case 0: return PAYLOAD_NOT_SET;
           default: throw new java.lang.IllegalArgumentException(
             "Value is undefined for this oneof enum.");
@@ -1186,10 +1370,10 @@ public final class Storage {
           payloadCase_);
     }
 
-    public static final int ACTION_FIELD_NUMBER = 8;
+    public static final int ACTION_FIELD_NUMBER = 10;
     private storage.Storage.Action action_;
     /**
-     * <code>required .Action action = 8;</code>
+     * <code>required .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -1199,7 +1383,7 @@ public final class Storage {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .Action action = 8;</code>
+     * <code>required .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -1209,10 +1393,10 @@ public final class Storage {
       return action_;
     }
 
-    public static final int SUCCESS_FIELD_NUMBER = 9;
+    public static final int SUCCESS_FIELD_NUMBER = 11;
     private boolean success_;
     /**
-     * <code>optional bool success = 9;</code>
+     * <code>optional bool success = 11;</code>
      *
      * <pre>
      * Was that action successful?
@@ -1222,7 +1406,7 @@ public final class Storage {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional bool success = 9;</code>
+     * <code>optional bool success = 11;</code>
      *
      * <pre>
      * Was that action successful?
@@ -1232,10 +1416,10 @@ public final class Storage {
       return success_;
     }
 
-    public static final int KEY_FIELD_NUMBER = 10;
+    public static final int KEY_FIELD_NUMBER = 12;
     private java.lang.Object key_;
     /**
-     * <code>optional string key = 10;</code>
+     * <code>optional string key = 12;</code>
      *
      * <pre>
      * The key for which action was performed. If store action does not 
@@ -1246,7 +1430,7 @@ public final class Storage {
       return ((bitField0_ & 0x00000004) == 0x00000004);
     }
     /**
-     * <code>optional string key = 10;</code>
+     * <code>optional string key = 12;</code>
      *
      * <pre>
      * The key for which action was performed. If store action does not 
@@ -1268,7 +1452,7 @@ public final class Storage {
       }
     }
     /**
-     * <code>optional string key = 10;</code>
+     * <code>optional string key = 12;</code>
      *
      * <pre>
      * The key for which action was performed. If store action does not 
@@ -1289,27 +1473,57 @@ public final class Storage {
       }
     }
 
-    public static final int MESSAGE_FIELD_NUMBER = 11;
+    public static final int SIZE_FIELD_NUMBER = 13;
+    private int size_;
     /**
-     * <code>optional string message = 11;</code>
-     *
-     * <pre>
-     * Message, if any, after successful operation
-     * </pre>
+     * <code>optional int32 size = 13;</code>
      */
-    public boolean hasMessage() {
-      return payloadCase_ == 11;
+    public boolean hasSize() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
-     * <code>optional string message = 11;</code>
+     * <code>optional int32 size = 13;</code>
+     */
+    public int getSize() {
+      return size_;
+    }
+
+    public static final int SEQUENCE_NO_FIELD_NUMBER = 14;
+    private int sequenceNo_;
+    /**
+     * <code>optional int32 sequence_no = 14;</code>
+     */
+    public boolean hasSequenceNo() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int32 sequence_no = 14;</code>
+     */
+    public int getSequenceNo() {
+      return sequenceNo_;
+    }
+
+    public static final int INFOMESSAGE_FIELD_NUMBER = 15;
+    /**
+     * <code>optional string infomessage = 15;</code>
      *
      * <pre>
      * Message, if any, after successful operation
      * </pre>
      */
-    public java.lang.String getMessage() {
+    public boolean hasInfomessage() {
+      return payloadCase_ == 15;
+    }
+    /**
+     * <code>optional string infomessage = 15;</code>
+     *
+     * <pre>
+     * Message, if any, after successful operation
+     * </pre>
+     */
+    public java.lang.String getInfomessage() {
       java.lang.Object ref = "";
-      if (payloadCase_ == 11) {
+      if (payloadCase_ == 15) {
         ref = payload_;
       }
       if (ref instanceof java.lang.String) {
@@ -1318,30 +1532,30 @@ public final class Storage {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8() && (payloadCase_ == 11)) {
+        if (bs.isValidUtf8() && (payloadCase_ == 15)) {
           payload_ = s;
         }
         return s;
       }
     }
     /**
-     * <code>optional string message = 11;</code>
+     * <code>optional string infomessage = 15;</code>
      *
      * <pre>
      * Message, if any, after successful operation
      * </pre>
      */
     public com.google.protobuf.ByteString
-        getMessageBytes() {
+        getInfomessageBytes() {
       java.lang.Object ref = "";
-      if (payloadCase_ == 11) {
+      if (payloadCase_ == 15) {
         ref = payload_;
       }
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        if (payloadCase_ == 11) {
+        if (payloadCase_ == 15) {
           payload_ = b;
         }
         return b;
@@ -1350,64 +1564,64 @@ public final class Storage {
       }
     }
 
-    public static final int FAILURE_FIELD_NUMBER = 12;
+    public static final int FAILURE_FIELD_NUMBER = 16;
     /**
-     * <code>optional .Failure failure = 12;</code>
+     * <code>optional .Failure failure = 16;</code>
      *
      * <pre>
      * Failure with reason 
      * </pre>
      */
     public boolean hasFailure() {
-      return payloadCase_ == 12;
+      return payloadCase_ == 16;
     }
     /**
-     * <code>optional .Failure failure = 12;</code>
+     * <code>optional .Failure failure = 16;</code>
      *
      * <pre>
      * Failure with reason 
      * </pre>
      */
     public pipe.common.Common.Failure getFailure() {
-      if (payloadCase_ == 12) {
+      if (payloadCase_ == 16) {
          return (pipe.common.Common.Failure) payload_;
       }
       return pipe.common.Common.Failure.getDefaultInstance();
     }
     /**
-     * <code>optional .Failure failure = 12;</code>
+     * <code>optional .Failure failure = 16;</code>
      *
      * <pre>
      * Failure with reason 
      * </pre>
      */
     public pipe.common.Common.FailureOrBuilder getFailureOrBuilder() {
-      if (payloadCase_ == 12) {
+      if (payloadCase_ == 16) {
          return (pipe.common.Common.Failure) payload_;
       }
       return pipe.common.Common.Failure.getDefaultInstance();
     }
 
-    public static final int DATA_FIELD_NUMBER = 13;
+    public static final int DATA_FIELD_NUMBER = 17;
     /**
-     * <code>optional bytes data = 13;</code>
+     * <code>optional bytes data = 17;</code>
      *
      * <pre>
      * Data in case of GET action
      * </pre>
      */
     public boolean hasData() {
-      return payloadCase_ == 13;
+      return payloadCase_ == 17;
     }
     /**
-     * <code>optional bytes data = 13;</code>
+     * <code>optional bytes data = 17;</code>
      *
      * <pre>
      * Data in case of GET action
      * </pre>
      */
     public com.google.protobuf.ByteString getData() {
-      if (payloadCase_ == 13) {
+      if (payloadCase_ == 17) {
         return (com.google.protobuf.ByteString) payload_;
       }
       return com.google.protobuf.ByteString.EMPTY;
@@ -1417,6 +1631,8 @@ public final class Storage {
       action_ = storage.Storage.Action.GET;
       success_ = false;
       key_ = "";
+      size_ = 0;
+      sequenceNo_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1442,23 +1658,29 @@ public final class Storage {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeEnum(8, action_.getNumber());
+        output.writeEnum(10, action_.getNumber());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBool(9, success_);
+        output.writeBool(11, success_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
-        output.writeBytes(10, getKeyBytes());
+        output.writeBytes(12, getKeyBytes());
       }
-      if (payloadCase_ == 11) {
-        output.writeBytes(11, getMessageBytes());
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeInt32(13, size_);
       }
-      if (payloadCase_ == 12) {
-        output.writeMessage(12, (pipe.common.Common.Failure) payload_);
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(14, sequenceNo_);
       }
-      if (payloadCase_ == 13) {
+      if (payloadCase_ == 15) {
+        output.writeBytes(15, getInfomessageBytes());
+      }
+      if (payloadCase_ == 16) {
+        output.writeMessage(16, (pipe.common.Common.Failure) payload_);
+      }
+      if (payloadCase_ == 17) {
         output.writeBytes(
-            13, (com.google.protobuf.ByteString)((com.google.protobuf.ByteString) payload_));
+            17, (com.google.protobuf.ByteString)((com.google.protobuf.ByteString) payload_));
       }
       getUnknownFields().writeTo(output);
     }
@@ -1471,28 +1693,36 @@ public final class Storage {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(8, action_.getNumber());
+          .computeEnumSize(10, action_.getNumber());
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(9, success_);
+          .computeBoolSize(11, success_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(10, getKeyBytes());
+          .computeBytesSize(12, getKeyBytes());
       }
-      if (payloadCase_ == 11) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeBytesSize(11, getMessageBytes());
+          .computeInt32Size(13, size_);
       }
-      if (payloadCase_ == 12) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(12, (pipe.common.Common.Failure) payload_);
+          .computeInt32Size(14, sequenceNo_);
       }
-      if (payloadCase_ == 13) {
+      if (payloadCase_ == 15) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(15, getInfomessageBytes());
+      }
+      if (payloadCase_ == 16) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(16, (pipe.common.Common.Failure) payload_);
+      }
+      if (payloadCase_ == 17) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(
-              13, (com.google.protobuf.ByteString)((com.google.protobuf.ByteString) payload_));
+              17, (com.google.protobuf.ByteString)((com.google.protobuf.ByteString) payload_));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1617,6 +1847,10 @@ public final class Storage {
         bitField0_ = (bitField0_ & ~0x00000002);
         key_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
+        size_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        sequenceNo_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
         payloadCase_ = 0;
         payload_ = null;
         return this;
@@ -1659,17 +1893,25 @@ public final class Storage {
           to_bitField0_ |= 0x00000004;
         }
         result.key_ = key_;
-        if (payloadCase_ == 11) {
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.size_ = size_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.sequenceNo_ = sequenceNo_;
+        if (payloadCase_ == 15) {
           result.payload_ = payload_;
         }
-        if (payloadCase_ == 12) {
+        if (payloadCase_ == 16) {
           if (failureBuilder_ == null) {
             result.payload_ = payload_;
           } else {
             result.payload_ = failureBuilder_.build();
           }
         }
-        if (payloadCase_ == 13) {
+        if (payloadCase_ == 17) {
           result.payload_ = payload_;
         }
         result.bitField0_ = to_bitField0_;
@@ -1700,9 +1942,15 @@ public final class Storage {
           key_ = other.key_;
           onChanged();
         }
+        if (other.hasSize()) {
+          setSize(other.getSize());
+        }
+        if (other.hasSequenceNo()) {
+          setSequenceNo(other.getSequenceNo());
+        }
         switch (other.getPayloadCase()) {
-          case MESSAGE: {
-            payloadCase_ = 11;
+          case INFOMESSAGE: {
+            payloadCase_ = 15;
             payload_ = other.payload_;
             onChanged();
             break;
@@ -1773,7 +2021,7 @@ public final class Storage {
 
       private storage.Storage.Action action_ = storage.Storage.Action.GET;
       /**
-       * <code>required .Action action = 8;</code>
+       * <code>required .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -1783,7 +2031,7 @@ public final class Storage {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .Action action = 8;</code>
+       * <code>required .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -1793,7 +2041,7 @@ public final class Storage {
         return action_;
       }
       /**
-       * <code>required .Action action = 8;</code>
+       * <code>required .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -1809,7 +2057,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>required .Action action = 8;</code>
+       * <code>required .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -1824,7 +2072,7 @@ public final class Storage {
 
       private boolean success_ ;
       /**
-       * <code>optional bool success = 9;</code>
+       * <code>optional bool success = 11;</code>
        *
        * <pre>
        * Was that action successful?
@@ -1834,7 +2082,7 @@ public final class Storage {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional bool success = 9;</code>
+       * <code>optional bool success = 11;</code>
        *
        * <pre>
        * Was that action successful?
@@ -1844,7 +2092,7 @@ public final class Storage {
         return success_;
       }
       /**
-       * <code>optional bool success = 9;</code>
+       * <code>optional bool success = 11;</code>
        *
        * <pre>
        * Was that action successful?
@@ -1857,7 +2105,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>optional bool success = 9;</code>
+       * <code>optional bool success = 11;</code>
        *
        * <pre>
        * Was that action successful?
@@ -1872,7 +2120,7 @@ public final class Storage {
 
       private java.lang.Object key_ = "";
       /**
-       * <code>optional string key = 10;</code>
+       * <code>optional string key = 12;</code>
        *
        * <pre>
        * The key for which action was performed. If store action does not 
@@ -1883,7 +2131,7 @@ public final class Storage {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
       /**
-       * <code>optional string key = 10;</code>
+       * <code>optional string key = 12;</code>
        *
        * <pre>
        * The key for which action was performed. If store action does not 
@@ -1905,7 +2153,7 @@ public final class Storage {
         }
       }
       /**
-       * <code>optional string key = 10;</code>
+       * <code>optional string key = 12;</code>
        *
        * <pre>
        * The key for which action was performed. If store action does not 
@@ -1926,7 +2174,7 @@ public final class Storage {
         }
       }
       /**
-       * <code>optional string key = 10;</code>
+       * <code>optional string key = 12;</code>
        *
        * <pre>
        * The key for which action was performed. If store action does not 
@@ -1944,7 +2192,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>optional string key = 10;</code>
+       * <code>optional string key = 12;</code>
        *
        * <pre>
        * The key for which action was performed. If store action does not 
@@ -1958,7 +2206,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>optional string key = 10;</code>
+       * <code>optional string key = 12;</code>
        *
        * <pre>
        * The key for which action was performed. If store action does not 
@@ -1976,33 +2224,97 @@ public final class Storage {
         return this;
       }
 
+      private int size_ ;
       /**
-       * <code>optional string message = 11;</code>
-       *
-       * <pre>
-       * Message, if any, after successful operation
-       * </pre>
+       * <code>optional int32 size = 13;</code>
        */
-      public boolean hasMessage() {
-        return payloadCase_ == 11;
+      public boolean hasSize() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
-       * <code>optional string message = 11;</code>
+       * <code>optional int32 size = 13;</code>
+       */
+      public int getSize() {
+        return size_;
+      }
+      /**
+       * <code>optional int32 size = 13;</code>
+       */
+      public Builder setSize(int value) {
+        bitField0_ |= 0x00000008;
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 size = 13;</code>
+       */
+      public Builder clearSize() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        size_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int sequenceNo_ ;
+      /**
+       * <code>optional int32 sequence_no = 14;</code>
+       */
+      public boolean hasSequenceNo() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int32 sequence_no = 14;</code>
+       */
+      public int getSequenceNo() {
+        return sequenceNo_;
+      }
+      /**
+       * <code>optional int32 sequence_no = 14;</code>
+       */
+      public Builder setSequenceNo(int value) {
+        bitField0_ |= 0x00000010;
+        sequenceNo_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 sequence_no = 14;</code>
+       */
+      public Builder clearSequenceNo() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        sequenceNo_ = 0;
+        onChanged();
+        return this;
+      }
+
+      /**
+       * <code>optional string infomessage = 15;</code>
        *
        * <pre>
        * Message, if any, after successful operation
        * </pre>
        */
-      public java.lang.String getMessage() {
+      public boolean hasInfomessage() {
+        return payloadCase_ == 15;
+      }
+      /**
+       * <code>optional string infomessage = 15;</code>
+       *
+       * <pre>
+       * Message, if any, after successful operation
+       * </pre>
+       */
+      public java.lang.String getInfomessage() {
         java.lang.Object ref = "";
-        if (payloadCase_ == 11) {
+        if (payloadCase_ == 15) {
           ref = payload_;
         }
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          if (payloadCase_ == 11) {
+          if (payloadCase_ == 15) {
             if (bs.isValidUtf8()) {
               payload_ = s;
             }
@@ -2013,23 +2325,23 @@ public final class Storage {
         }
       }
       /**
-       * <code>optional string message = 11;</code>
+       * <code>optional string infomessage = 15;</code>
        *
        * <pre>
        * Message, if any, after successful operation
        * </pre>
        */
       public com.google.protobuf.ByteString
-          getMessageBytes() {
+          getInfomessageBytes() {
         java.lang.Object ref = "";
-        if (payloadCase_ == 11) {
+        if (payloadCase_ == 15) {
           ref = payload_;
         }
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          if (payloadCase_ == 11) {
+          if (payloadCase_ == 15) {
             payload_ = b;
           }
           return b;
@@ -2038,31 +2350,31 @@ public final class Storage {
         }
       }
       /**
-       * <code>optional string message = 11;</code>
+       * <code>optional string infomessage = 15;</code>
        *
        * <pre>
        * Message, if any, after successful operation
        * </pre>
        */
-      public Builder setMessage(
+      public Builder setInfomessage(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  payloadCase_ = 11;
+  payloadCase_ = 15;
         payload_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional string message = 11;</code>
+       * <code>optional string infomessage = 15;</code>
        *
        * <pre>
        * Message, if any, after successful operation
        * </pre>
        */
-      public Builder clearMessage() {
-        if (payloadCase_ == 11) {
+      public Builder clearInfomessage() {
+        if (payloadCase_ == 15) {
           payloadCase_ = 0;
           payload_ = null;
           onChanged();
@@ -2070,18 +2382,18 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>optional string message = 11;</code>
+       * <code>optional string infomessage = 15;</code>
        *
        * <pre>
        * Message, if any, after successful operation
        * </pre>
        */
-      public Builder setMessageBytes(
+      public Builder setInfomessageBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
-  payloadCase_ = 11;
+  payloadCase_ = 15;
         payload_ = value;
         onChanged();
         return this;
@@ -2090,17 +2402,17 @@ public final class Storage {
       private com.google.protobuf.SingleFieldBuilder<
           pipe.common.Common.Failure, pipe.common.Common.Failure.Builder, pipe.common.Common.FailureOrBuilder> failureBuilder_;
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
        * </pre>
        */
       public boolean hasFailure() {
-        return payloadCase_ == 12;
+        return payloadCase_ == 16;
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2108,19 +2420,19 @@ public final class Storage {
        */
       public pipe.common.Common.Failure getFailure() {
         if (failureBuilder_ == null) {
-          if (payloadCase_ == 12) {
+          if (payloadCase_ == 16) {
             return (pipe.common.Common.Failure) payload_;
           }
           return pipe.common.Common.Failure.getDefaultInstance();
         } else {
-          if (payloadCase_ == 12) {
+          if (payloadCase_ == 16) {
             return failureBuilder_.getMessage();
           }
           return pipe.common.Common.Failure.getDefaultInstance();
         }
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2136,11 +2448,11 @@ public final class Storage {
         } else {
           failureBuilder_.setMessage(value);
         }
-        payloadCase_ = 12;
+        payloadCase_ = 16;
         return this;
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2154,11 +2466,11 @@ public final class Storage {
         } else {
           failureBuilder_.setMessage(builderForValue.build());
         }
-        payloadCase_ = 12;
+        payloadCase_ = 16;
         return this;
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2166,7 +2478,7 @@ public final class Storage {
        */
       public Builder mergeFailure(pipe.common.Common.Failure value) {
         if (failureBuilder_ == null) {
-          if (payloadCase_ == 12 &&
+          if (payloadCase_ == 16 &&
               payload_ != pipe.common.Common.Failure.getDefaultInstance()) {
             payload_ = pipe.common.Common.Failure.newBuilder((pipe.common.Common.Failure) payload_)
                 .mergeFrom(value).buildPartial();
@@ -2175,16 +2487,16 @@ public final class Storage {
           }
           onChanged();
         } else {
-          if (payloadCase_ == 12) {
+          if (payloadCase_ == 16) {
             failureBuilder_.mergeFrom(value);
           }
           failureBuilder_.setMessage(value);
         }
-        payloadCase_ = 12;
+        payloadCase_ = 16;
         return this;
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2192,13 +2504,13 @@ public final class Storage {
        */
       public Builder clearFailure() {
         if (failureBuilder_ == null) {
-          if (payloadCase_ == 12) {
+          if (payloadCase_ == 16) {
             payloadCase_ = 0;
             payload_ = null;
             onChanged();
           }
         } else {
-          if (payloadCase_ == 12) {
+          if (payloadCase_ == 16) {
             payloadCase_ = 0;
             payload_ = null;
           }
@@ -2207,7 +2519,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2217,24 +2529,24 @@ public final class Storage {
         return getFailureFieldBuilder().getBuilder();
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
        * </pre>
        */
       public pipe.common.Common.FailureOrBuilder getFailureOrBuilder() {
-        if ((payloadCase_ == 12) && (failureBuilder_ != null)) {
+        if ((payloadCase_ == 16) && (failureBuilder_ != null)) {
           return failureBuilder_.getMessageOrBuilder();
         } else {
-          if (payloadCase_ == 12) {
+          if (payloadCase_ == 16) {
             return (pipe.common.Common.Failure) payload_;
           }
           return pipe.common.Common.Failure.getDefaultInstance();
         }
       }
       /**
-       * <code>optional .Failure failure = 12;</code>
+       * <code>optional .Failure failure = 16;</code>
        *
        * <pre>
        * Failure with reason 
@@ -2244,7 +2556,7 @@ public final class Storage {
           pipe.common.Common.Failure, pipe.common.Common.Failure.Builder, pipe.common.Common.FailureOrBuilder> 
           getFailureFieldBuilder() {
         if (failureBuilder_ == null) {
-          if (!(payloadCase_ == 12)) {
+          if (!(payloadCase_ == 16)) {
             payload_ = pipe.common.Common.Failure.getDefaultInstance();
           }
           failureBuilder_ = new com.google.protobuf.SingleFieldBuilder<
@@ -2254,35 +2566,35 @@ public final class Storage {
                   isClean());
           payload_ = null;
         }
-        payloadCase_ = 12;
+        payloadCase_ = 16;
         return failureBuilder_;
       }
 
       /**
-       * <code>optional bytes data = 13;</code>
+       * <code>optional bytes data = 17;</code>
        *
        * <pre>
        * Data in case of GET action
        * </pre>
        */
       public boolean hasData() {
-        return payloadCase_ == 13;
+        return payloadCase_ == 17;
       }
       /**
-       * <code>optional bytes data = 13;</code>
+       * <code>optional bytes data = 17;</code>
        *
        * <pre>
        * Data in case of GET action
        * </pre>
        */
       public com.google.protobuf.ByteString getData() {
-        if (payloadCase_ == 13) {
+        if (payloadCase_ == 17) {
           return (com.google.protobuf.ByteString) payload_;
         }
         return com.google.protobuf.ByteString.EMPTY;
       }
       /**
-       * <code>optional bytes data = 13;</code>
+       * <code>optional bytes data = 17;</code>
        *
        * <pre>
        * Data in case of GET action
@@ -2292,20 +2604,20 @@ public final class Storage {
         if (value == null) {
     throw new NullPointerException();
   }
-  payloadCase_ = 13;
+  payloadCase_ = 17;
         payload_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional bytes data = 13;</code>
+       * <code>optional bytes data = 17;</code>
        *
        * <pre>
        * Data in case of GET action
        * </pre>
        */
       public Builder clearData() {
-        if (payloadCase_ == 13) {
+        if (payloadCase_ == 17) {
           payloadCase_ = 0;
           payload_ = null;
           onChanged();
@@ -2343,14 +2655,16 @@ public final class Storage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rstorage.proto\032\014common.proto\";\n\005Query\022\027" +
+      "\n\rstorage.proto\032\014common.proto\"^\n\005Query\022\027" +
       "\n\006action\030\005 \002(\0162\007.Action\022\013\n\003key\030\006 \001(\t\022\014\n\004" +
-      "data\030\007 \001(\014\"\214\001\n\010Response\022\027\n\006action\030\010 \002(\0162" +
-      "\007.Action\022\017\n\007success\030\t \001(\010\022\013\n\003key\030\n \001(\t\022\021" +
-      "\n\007message\030\013 \001(\tH\000\022\033\n\007failure\030\014 \001(\0132\010.Fai" +
-      "lureH\000\022\016\n\004data\030\r \001(\014H\000B\t\n\007payload*4\n\006Act" +
-      "ion\022\007\n\003GET\020\001\022\t\n\005STORE\020\002\022\n\n\006UPDATE\020\003\022\n\n\006D" +
-      "ELETE\020\004B\013\n\007storageH\001"
+      "data\030\007 \001(\014\022\014\n\004size\030\010 \001(\005\022\023\n\013sequence_no\030" +
+      "\t \001(\005\"\263\001\n\010Response\022\027\n\006action\030\n \002(\0162\007.Act" +
+      "ion\022\017\n\007success\030\013 \001(\010\022\013\n\003key\030\014 \001(\t\022\014\n\004siz" +
+      "e\030\r \001(\005\022\023\n\013sequence_no\030\016 \001(\005\022\025\n\013infomess" +
+      "age\030\017 \001(\tH\000\022\033\n\007failure\030\020 \001(\0132\010.FailureH\000" +
+      "\022\016\n\004data\030\021 \001(\014H\000B\t\n\007payload*4\n\006Action\022\007\n" +
+      "\003GET\020\001\022\t\n\005STORE\020\002\022\n\n\006UPDATE\020\003\022\n\n\006DELETE\020" +
+      "\004B\013\n\007storageH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2370,13 +2684,13 @@ public final class Storage {
     internal_static_Query_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Query_descriptor,
-        new java.lang.String[] { "Action", "Key", "Data", });
+        new java.lang.String[] { "Action", "Key", "Data", "Size", "SequenceNo", });
     internal_static_Response_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_Response_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Response_descriptor,
-        new java.lang.String[] { "Action", "Success", "Key", "Message", "Failure", "Data", "Payload", });
+        new java.lang.String[] { "Action", "Success", "Key", "Size", "SequenceNo", "Infomessage", "Failure", "Data", "Payload", });
     pipe.common.Common.getDescriptor();
   }
 
