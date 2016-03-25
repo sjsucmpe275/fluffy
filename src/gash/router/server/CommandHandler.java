@@ -18,10 +18,8 @@ package gash.router.server;
 import gash.router.container.RoutingConf;
 import io.netty.channel.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +133,32 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 					break;
 
 				case DELETE:
+					data = dbhandler.remove(key);
+					if (data == null) {
+						Failure.Builder fb = Failure.newBuilder();
+						fb.setMessage("Key not present");
+						fb.setId(101);
+						
+						rb.setSuccess(false);
+						rb.setFailure(fb);
 
+						cb.setHeader(hb);
+						cb.setResponse(rb);
+						channel.writeAndFlush(cb.build());
+					}  else {
+						rb.setSuccess(true);
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						ObjectOutputStream os = new ObjectOutputStream(bos);
+						
+						os.writeObject(data);
+						rb.setData(ByteString.copyFrom(bos.toByteArray()));
+						rb.setInfomessage("Action completed successfully!");
+						rb.setKey(key);
+						
+						cb.setHeader(hb);
+						cb.setResponse(rb);
+						channel.writeAndFlush(cb.build());
+					}
 					break;
 
 				case STORE:
@@ -157,6 +180,15 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 					break;
 
 				case UPDATE:
+					key = dbhandler.put(query.getKey(), query.getData().toByteArray());
+					rb.setAction(query.getAction());
+					rb.setKey(key);
+					rb.setSuccess(true);
+					rb.setInfomessage("Data stored successfully at key: " + key);
+					
+					cb.setHeader(hb);
+					cb.setResponse(rb);
+					channel.writeAndFlush(cb.build());
 					break;
 
 				default:
@@ -167,13 +199,14 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 
 		} catch (Exception e) {
 			// TODO add logging
-			logger.info("Got an exception in command");
+			logger.error("Got an exception in command", e);
 			Failure.Builder eb = Failure.newBuilder();
 			eb.setId(conf.getNodeId());
 			eb.setRefId(msg.getHeader().getNodeId());
 			eb.setMessage(e.getMessage());
 			CommandMessage.Builder rb = CommandMessage.newBuilder(msg);
 			rb.setErr(eb);
+			rb.setHeader(buildHeader());
 			channel.write(rb.build());
 		}
 
