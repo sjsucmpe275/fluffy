@@ -22,29 +22,37 @@ message Query {
 	
 	// Data in bytes to store
 	optional bytes data = 7;
+
+	optional int32 size = 8;
+	
+	optional int32 sequence_no = 9;
 }
 
 message Response {
 
 	// Action for which response is being sent
-	required Action action = 8;
+	required Action action = 10;
 	
 	// Was that action successful?
-	optional bool success = 9;
+	optional bool success = 11;
 	
 	// The key for which action was performed. If store action does not 
 	// provide key, return newly generated key.
-	optional string key = 10;
+	optional string key = 12;
+
+	optional int32 size = 13;
+	
+	optional int32 sequence_no = 14;
 	
 	oneof payload {
 	
 		// Message, if any, after successful operation
-		string message = 11;
+		string infomessage = 15;
 
 		// Failure with reason 
-		Failure failure = 12;	
+		Failure failure = 16;	
 		
 		// Data in case of GET action
-		bytes data = 13;
+		bytes data = 17;
 	}
 }
