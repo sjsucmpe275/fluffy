@@ -2,6 +2,7 @@ option optimize_for = SPEED;
 option java_package = "routing";
 
 import "common.proto";
+import "storage.proto";
 
 message CommandMessage {
    required Header header = 1;
@@ -13,5 +14,10 @@ message CommandMessage {
       string message = 4;
       
       Failure err = 5;
+
+	  Query query = 6;
+	  
+	  Response response = 7;
+
    }
 }
