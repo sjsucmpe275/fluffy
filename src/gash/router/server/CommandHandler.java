@@ -15,15 +15,25 @@
  */
 package gash.router.server;
 
+import gash.router.container.RoutingConf;
+import io.netty.channel.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gash.router.container.RoutingConf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import com.google.protobuf.ByteString;
+
+import dbhandlers.IDBHandler;
+import dbhandlers.RedisDBHandler;
+import pipe.common.Common;
 import pipe.common.Common.Failure;
+import pipe.common.Common.Header;
 import routing.Pipe.CommandMessage;
+import storage.Storage.Query;
+import storage.Storage.Response;
 
 /**
  * The message handler processes json messages that are delimited by a 'newline'
@@ -36,11 +46,13 @@ import routing.Pipe.CommandMessage;
 public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> {
 	protected static Logger logger = LoggerFactory.getLogger("cmd");
 	protected RoutingConf conf;
+	protected IDBHandler dbhandler;
 
 	public CommandHandler(RoutingConf conf) {
 		if (conf != null) {
 			this.conf = conf;
 		}
+		dbhandler = new RedisDBHandler();
 	}
 
 	/**
@@ -63,23 +75,150 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 			// TODO How can you implement this without if-else statements?
 			if (msg.hasPing()) {
 				logger.info("ping from " + msg.getHeader().getNodeId());
+				// construct the message to send
+				Common.Header.Builder hb = Common.Header.newBuilder();
+				hb.setNodeId(888);
+				hb.setTime(System.currentTimeMillis());
+				hb.setDestination(-1);
+
+				CommandMessage.Builder rb = CommandMessage.newBuilder();
+				rb.setHeader(hb);
+				rb.setPing(true);
+
+				ChannelFuture cf = channel.writeAndFlush(rb.build());
+				if (!cf.isSuccess()) {
+					System.out.println("Reasion for failure : " + cf);
+				}
 			} else if (msg.hasMessage()) {
 				logger.info(msg.getMessage());
-			} else {
+			} else if (msg.hasQuery()) {
+				
+				Query query = msg.getQuery();
+				Header.Builder hb = buildHeader();
+				Response.Builder rb = Response.newBuilder();
+				CommandMessage.Builder cb = CommandMessage.newBuilder();
+				String key = query.getKey();
+				
+				switch (query.getAction()) {
+				case GET:
+					rb.setAction(query.getAction());
+					Object data = dbhandler.get(key);
+					if (data == null) {
+						
+						Failure.Builder fb = Failure.newBuilder();
+						fb.setMessage("Key not present");
+						fb.setId(101);
+						
+						rb.setSuccess(false);
+						rb.setFailure(fb);
+
+						cb.setHeader(hb);
+						cb.setResponse(rb);
+						channel.writeAndFlush(cb.build());
+					} else {
+						rb.setSuccess(true);
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						ObjectOutputStream os = new ObjectOutputStream(bos);
+						
+						os.writeObject(data);
+						rb.setData(ByteString.copyFrom(bos.toByteArray()));
+						rb.setInfomessage("Action completed successfully!");
+						rb.setKey(key);
+						
+						cb.setHeader(hb);
+						cb.setResponse(rb);
+						channel.writeAndFlush(cb.build());
+						
+					}
+					break;
+
+				case DELETE:
+					data = dbhandler.remove(key);
+					if (data == null) {
+						Failure.Builder fb = Failure.newBuilder();
+						fb.setMessage("Key not present");
+						fb.setId(101);
+						
+						rb.setSuccess(false);
+						rb.setFailure(fb);
+
+						cb.setHeader(hb);
+						cb.setResponse(rb);
+						channel.writeAndFlush(cb.build());
+					}  else {
+						rb.setSuccess(true);
+						ByteArrayOutputStream bos = new ByteArrayOutputStream();
+						ObjectOutputStream os = new ObjectOutputStream(bos);
+						
+						os.writeObject(data);
+						rb.setData(ByteString.copyFrom(bos.toByteArray()));
+						rb.setInfomessage("Action completed successfully!");
+						rb.setKey(key);
+						
+						cb.setHeader(hb);
+						cb.setResponse(rb);
+						channel.writeAndFlush(cb.build());
+					}
+					break;
+
+				case STORE:
+					
+					if (query.hasKey()) {
+						key = dbhandler.put(query.getKey(), query.getData().toByteArray());
+					} else {
+						key = dbhandler.store(query.getData().toByteArray());
+					}
+
+					rb.setAction(query.getAction());
+					rb.setKey(key);
+					rb.setSuccess(true);
+					rb.setInfomessage("Data stored successfully at key: " + key);
+					
+					cb.setHeader(hb);
+					cb.setResponse(rb);
+					channel.writeAndFlush(cb.build());
+					break;
+
+				case UPDATE:
+					key = dbhandler.put(query.getKey(), query.getData().toByteArray());
+					rb.setAction(query.getAction());
+					rb.setKey(key);
+					rb.setSuccess(true);
+					rb.setInfomessage("Data stored successfully at key: " + key);
+					
+					cb.setHeader(hb);
+					cb.setResponse(rb);
+					channel.writeAndFlush(cb.build());
+					break;
+
+				default:
+					logger.info("Default case!");
+					break;
+				}
 			}
 
 		} catch (Exception e) {
 			// TODO add logging
+			logger.error("Got an exception in command", e);
 			Failure.Builder eb = Failure.newBuilder();
 			eb.setId(conf.getNodeId());
 			eb.setRefId(msg.getHeader().getNodeId());
 			eb.setMessage(e.getMessage());
 			CommandMessage.Builder rb = CommandMessage.newBuilder(msg);
 			rb.setErr(eb);
+			rb.setHeader(buildHeader());
 			channel.write(rb.build());
 		}
 
 		System.out.flush();
+	}
+
+	private Header.Builder buildHeader() {
+		Header.Builder hb = Header.newBuilder();
+		hb.setNodeId(conf.getNodeId());
+		hb.setTime(System.currentTimeMillis());
+		hb.setDestination(-1);
+		return hb;
 	}
 
 	/**
@@ -102,5 +241,4 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
 	}
-
 }

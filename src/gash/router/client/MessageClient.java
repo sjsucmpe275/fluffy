@@ -15,8 +15,12 @@
  */
 package gash.router.client;
 
+import com.google.protobuf.ByteString;
+
 import pipe.common.Common.Header;
 import routing.Pipe.CommandMessage;
+import storage.Storage.Action;
+import storage.Storage.Query;
 
 /**
  * front-end (proxy) to our service - functional-based
@@ -43,7 +47,7 @@ public class MessageClient {
 	public void ping() {
 		// construct the message to send
 		Header.Builder hb = Header.newBuilder();
-		hb.setNodeId(999);
+		hb.setNodeId(-1);
 		hb.setTime(System.currentTimeMillis());
 		hb.setDestination(-1);
 
@@ -62,6 +66,29 @@ public class MessageClient {
 		}
 	}
 
+	public void store() {
+		Header.Builder hb = Header.newBuilder();
+		hb.setDestination(6);
+		hb.setMaxHops(5);
+		hb.setTime(System.currentTimeMillis());
+		hb.setNodeId(-1);
+
+		CommandMessage.Builder cb = CommandMessage.newBuilder();
+		cb.setHeader(hb);
+
+		Query.Builder qb = Query.newBuilder();
+		qb.setAction(Action.STORE);
+		qb.setData(ByteString.copyFrom("test_data".getBytes()));
+		cb.setQuery(qb);
+		
+		try {
+			CommConnection.getInstance().enqueue(cb.build());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	public void release() {
 		CommConnection.getInstance().release();
 	}
@@ -74,5 +101,28 @@ public class MessageClient {
 	 */
 	private synchronized long nextId() {
 		return ++curID;
+	}
+
+	public void get(String key) {
+		Header.Builder hb = Header.newBuilder();
+		hb.setDestination(6);
+		hb.setMaxHops(5);
+		hb.setTime(System.currentTimeMillis());
+		hb.setNodeId(-1);
+
+		CommandMessage.Builder cb = CommandMessage.newBuilder();
+		cb.setHeader(hb);
+
+		Query.Builder qb = Query.newBuilder();
+		qb.setAction(Action.GET);
+		qb.setKey(key);
+		
+		cb.setQuery(qb);
+
+		try {
+			CommConnection.getInstance().enqueue(cb.build());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

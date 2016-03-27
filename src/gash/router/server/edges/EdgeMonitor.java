@@ -78,9 +78,10 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 
 		Header.Builder hb = Header.newBuilder();
 		hb.setNodeId(state.getConf().getNodeId());
-		hb.setDestination(-1);
+		hb.setDestination(6);
 		hb.setTime(System.currentTimeMillis());
-
+		hb.setMaxHops(1);
+		
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		wb.setHeader(hb);
 		wb.setBeat(bb);
@@ -106,7 +107,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 						
 						group = new NioEventLoopGroup();
 						try {
-							WorkInit wi = new WorkInit(null, false);
+							WorkInit wi = new WorkInit(this.state, false);
 							Bootstrap b = new Bootstrap();
 							b.group(group).channel(NioSocketChannel.class).handler(wi);
 							b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -126,8 +127,8 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 									+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 						} catch (Throwable ex) {
-							logger.error("failed to initialize the client connection", ex);
-							ex.printStackTrace();
+							logger.error("failed to initialize the client connection");//, ex);
+//							ex.printStackTrace();
 						}
 						logger.info("trying to connect to node " + ei.getRef());
 					}
@@ -149,5 +150,11 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	@Override
 	public synchronized void onRemove(EdgeInfo ei) {
 		// TODO ?
+	}
+	
+	public void broadcastMessage(WorkMessage msg) {
+		for (EdgeInfo edge : outboundEdges.map.values()) {
+			edge.getChannel().writeAndFlush(msg);
+		}
 	}
 }
