@@ -11,6 +11,12 @@ enum Action {
 	DELETE = 4;
 }
 
+message Metadata {
+	required int32 seq_size = 19;
+	optional int32 size = 20;
+	optional int64 time = 21;
+}
+
 // Storage Query from client to cluster
 message Query {
 	
@@ -22,6 +28,8 @@ message Query {
 	
 	// Data in bytes to store
 	optional bytes data = 7;
+	
+	optional Metadata metadata = 22;
 
 	optional int32 size = 8;
 	
@@ -54,5 +62,7 @@ message Response {
 		
 		// Data in case of GET action
 		bytes data = 17;
+		
+		Metadata metaData = 18;
 	}
 }

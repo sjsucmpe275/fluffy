@@ -20,6 +20,7 @@ import com.google.protobuf.ByteString;
 import pipe.common.Common.Header;
 import routing.Pipe.CommandMessage;
 import storage.Storage.Action;
+import storage.Storage.Metadata;
 import storage.Storage.Query;
 
 /**
@@ -66,19 +67,19 @@ public class MessageClient {
 		}
 	}
 
-	public void store() {
+	public void store(ByteString data) {
 		Header.Builder hb = Header.newBuilder();
 		hb.setDestination(6);
 		hb.setMaxHops(5);
 		hb.setTime(System.currentTimeMillis());
 		hb.setNodeId(-1);
-
+	
 		CommandMessage.Builder cb = CommandMessage.newBuilder();
 		cb.setHeader(hb);
 
 		Query.Builder qb = Query.newBuilder();
 		qb.setAction(Action.STORE);
-		qb.setData(ByteString.copyFrom("test_data".getBytes()));
+		qb.setData(data);
 		cb.setQuery(qb);
 		
 		try {
@@ -86,7 +87,29 @@ public class MessageClient {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void storeMetadata(Metadata metadata) {
 
+		Header.Builder hb = Header.newBuilder();
+		hb.setDestination(-1);
+		hb.setMaxHops(5);
+		hb.setTime(System.currentTimeMillis());
+		hb.setNodeId(-1);
+	
+		CommandMessage.Builder cb = CommandMessage.newBuilder();
+		cb.setHeader(hb);
+
+		Query.Builder qb = Query.newBuilder();
+		qb.setAction(Action.STORE);
+		qb.setMetadata(metadata);
+		cb.setQuery(qb);
+		
+		try {
+			CommConnection.getInstance().enqueue(cb.build());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void release() {

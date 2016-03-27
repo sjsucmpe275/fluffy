@@ -119,10 +119,13 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 						rb.setSuccess(true);
 						ByteArrayOutputStream bos = new ByteArrayOutputStream();
 						ObjectOutputStream os = new ObjectOutputStream(bos);
+						os.flush();
+						bos.flush();
+						bos.reset();
 						
 						os.writeObject(data);
+						
 						rb.setData(ByteString.copyFrom(bos.toByteArray()));
-						rb.setInfomessage("Action completed successfully!");
 						rb.setKey(key);
 						
 						cb.setHeader(hb);
@@ -168,7 +171,8 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 					} else {
 						key = dbhandler.store(query.getData().toByteArray());
 					}
-
+					
+					System.out.println(dbhandler.get(key));
 					rb.setAction(query.getAction());
 					rb.setKey(key);
 					rb.setSuccess(true);

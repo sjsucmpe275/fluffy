@@ -108,6 +108,567 @@ public final class Storage {
     // @@protoc_insertion_point(enum_scope:Action)
   }
 
+  public interface MetadataOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:Metadata)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>required int32 seq_size = 19;</code>
+     */
+    boolean hasSeqSize();
+    /**
+     * <code>required int32 seq_size = 19;</code>
+     */
+    int getSeqSize();
+
+    /**
+     * <code>optional int32 size = 20;</code>
+     */
+    boolean hasSize();
+    /**
+     * <code>optional int32 size = 20;</code>
+     */
+    int getSize();
+
+    /**
+     * <code>optional int64 time = 21;</code>
+     */
+    boolean hasTime();
+    /**
+     * <code>optional int64 time = 21;</code>
+     */
+    long getTime();
+  }
+  /**
+   * Protobuf type {@code Metadata}
+   */
+  public static final class Metadata extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:Metadata)
+      MetadataOrBuilder {
+    // Use Metadata.newBuilder() to construct.
+    private Metadata(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private Metadata(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final Metadata defaultInstance;
+    public static Metadata getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public Metadata getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Metadata(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 152: {
+              bitField0_ |= 0x00000001;
+              seqSize_ = input.readInt32();
+              break;
+            }
+            case 160: {
+              bitField0_ |= 0x00000002;
+              size_ = input.readInt32();
+              break;
+            }
+            case 168: {
+              bitField0_ |= 0x00000004;
+              time_ = input.readInt64();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return storage.Storage.internal_static_Metadata_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return storage.Storage.internal_static_Metadata_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              storage.Storage.Metadata.class, storage.Storage.Metadata.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<Metadata> PARSER =
+        new com.google.protobuf.AbstractParser<Metadata>() {
+      public Metadata parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Metadata(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Metadata> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    public static final int SEQ_SIZE_FIELD_NUMBER = 19;
+    private int seqSize_;
+    /**
+     * <code>required int32 seq_size = 19;</code>
+     */
+    public boolean hasSeqSize() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>required int32 seq_size = 19;</code>
+     */
+    public int getSeqSize() {
+      return seqSize_;
+    }
+
+    public static final int SIZE_FIELD_NUMBER = 20;
+    private int size_;
+    /**
+     * <code>optional int32 size = 20;</code>
+     */
+    public boolean hasSize() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional int32 size = 20;</code>
+     */
+    public int getSize() {
+      return size_;
+    }
+
+    public static final int TIME_FIELD_NUMBER = 21;
+    private long time_;
+    /**
+     * <code>optional int64 time = 21;</code>
+     */
+    public boolean hasTime() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int64 time = 21;</code>
+     */
+    public long getTime() {
+      return time_;
+    }
+
+    private void initFields() {
+      seqSize_ = 0;
+      size_ = 0;
+      time_ = 0L;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      if (!hasSeqSize()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeInt32(19, seqSize_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeInt32(20, size_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt64(21, time_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(19, seqSize_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(20, size_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt64Size(21, time_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static storage.Storage.Metadata parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static storage.Storage.Metadata parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static storage.Storage.Metadata parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static storage.Storage.Metadata parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static storage.Storage.Metadata parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static storage.Storage.Metadata parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static storage.Storage.Metadata parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static storage.Storage.Metadata parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static storage.Storage.Metadata parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static storage.Storage.Metadata parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(storage.Storage.Metadata prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code Metadata}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:Metadata)
+        storage.Storage.MetadataOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return storage.Storage.internal_static_Metadata_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return storage.Storage.internal_static_Metadata_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                storage.Storage.Metadata.class, storage.Storage.Metadata.Builder.class);
+      }
+
+      // Construct using storage.Storage.Metadata.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        seqSize_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        size_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        time_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return storage.Storage.internal_static_Metadata_descriptor;
+      }
+
+      public storage.Storage.Metadata getDefaultInstanceForType() {
+        return storage.Storage.Metadata.getDefaultInstance();
+      }
+
+      public storage.Storage.Metadata build() {
+        storage.Storage.Metadata result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public storage.Storage.Metadata buildPartial() {
+        storage.Storage.Metadata result = new storage.Storage.Metadata(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.seqSize_ = seqSize_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.size_ = size_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.time_ = time_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof storage.Storage.Metadata) {
+          return mergeFrom((storage.Storage.Metadata)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(storage.Storage.Metadata other) {
+        if (other == storage.Storage.Metadata.getDefaultInstance()) return this;
+        if (other.hasSeqSize()) {
+          setSeqSize(other.getSeqSize());
+        }
+        if (other.hasSize()) {
+          setSize(other.getSize());
+        }
+        if (other.hasTime()) {
+          setTime(other.getTime());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        if (!hasSeqSize()) {
+          
+          return false;
+        }
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        storage.Storage.Metadata parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (storage.Storage.Metadata) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private int seqSize_ ;
+      /**
+       * <code>required int32 seq_size = 19;</code>
+       */
+      public boolean hasSeqSize() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 seq_size = 19;</code>
+       */
+      public int getSeqSize() {
+        return seqSize_;
+      }
+      /**
+       * <code>required int32 seq_size = 19;</code>
+       */
+      public Builder setSeqSize(int value) {
+        bitField0_ |= 0x00000001;
+        seqSize_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 seq_size = 19;</code>
+       */
+      public Builder clearSeqSize() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        seqSize_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int size_ ;
+      /**
+       * <code>optional int32 size = 20;</code>
+       */
+      public boolean hasSize() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional int32 size = 20;</code>
+       */
+      public int getSize() {
+        return size_;
+      }
+      /**
+       * <code>optional int32 size = 20;</code>
+       */
+      public Builder setSize(int value) {
+        bitField0_ |= 0x00000002;
+        size_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 size = 20;</code>
+       */
+      public Builder clearSize() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        size_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long time_ ;
+      /**
+       * <code>optional int64 time = 21;</code>
+       */
+      public boolean hasTime() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int64 time = 21;</code>
+       */
+      public long getTime() {
+        return time_;
+      }
+      /**
+       * <code>optional int64 time = 21;</code>
+       */
+      public Builder setTime(long value) {
+        bitField0_ |= 0x00000004;
+        time_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int64 time = 21;</code>
+       */
+      public Builder clearTime() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        time_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:Metadata)
+    }
+
+    static {
+      defaultInstance = new Metadata(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:Metadata)
+  }
+
   public interface QueryOrBuilder extends
       // @@protoc_insertion_point(interface_extends:Query)
       com.google.protobuf.MessageOrBuilder {
@@ -171,6 +732,19 @@ public final class Storage {
      * </pre>
      */
     com.google.protobuf.ByteString getData();
+
+    /**
+     * <code>optional .Metadata metadata = 22;</code>
+     */
+    boolean hasMetadata();
+    /**
+     * <code>optional .Metadata metadata = 22;</code>
+     */
+    storage.Storage.Metadata getMetadata();
+    /**
+     * <code>optional .Metadata metadata = 22;</code>
+     */
+    storage.Storage.MetadataOrBuilder getMetadataOrBuilder();
 
     /**
      * <code>optional int32 size = 8;</code>
@@ -269,13 +843,26 @@ public final class Storage {
               break;
             }
             case 64: {
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000010;
               size_ = input.readInt32();
               break;
             }
             case 72: {
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000020;
               sequenceNo_ = input.readInt32();
+              break;
+            }
+            case 178: {
+              storage.Storage.Metadata.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+                subBuilder = metadata_.toBuilder();
+              }
+              metadata_ = input.readMessage(storage.Storage.Metadata.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(metadata_);
+                metadata_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000008;
               break;
             }
           }
@@ -418,13 +1005,34 @@ public final class Storage {
       return data_;
     }
 
+    public static final int METADATA_FIELD_NUMBER = 22;
+    private storage.Storage.Metadata metadata_;
+    /**
+     * <code>optional .Metadata metadata = 22;</code>
+     */
+    public boolean hasMetadata() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional .Metadata metadata = 22;</code>
+     */
+    public storage.Storage.Metadata getMetadata() {
+      return metadata_;
+    }
+    /**
+     * <code>optional .Metadata metadata = 22;</code>
+     */
+    public storage.Storage.MetadataOrBuilder getMetadataOrBuilder() {
+      return metadata_;
+    }
+
     public static final int SIZE_FIELD_NUMBER = 8;
     private int size_;
     /**
      * <code>optional int32 size = 8;</code>
      */
     public boolean hasSize() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional int32 size = 8;</code>
@@ -439,7 +1047,7 @@ public final class Storage {
      * <code>optional int32 sequence_no = 9;</code>
      */
     public boolean hasSequenceNo() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000020) == 0x00000020);
     }
     /**
      * <code>optional int32 sequence_no = 9;</code>
@@ -452,6 +1060,7 @@ public final class Storage {
       action_ = storage.Storage.Action.GET;
       key_ = "";
       data_ = com.google.protobuf.ByteString.EMPTY;
+      metadata_ = storage.Storage.Metadata.getDefaultInstance();
       size_ = 0;
       sequenceNo_ = 0;
     }
@@ -464,6 +1073,12 @@ public final class Storage {
       if (!hasAction()) {
         memoizedIsInitialized = 0;
         return false;
+      }
+      if (hasMetadata()) {
+        if (!getMetadata().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
       }
       memoizedIsInitialized = 1;
       return true;
@@ -481,11 +1096,14 @@ public final class Storage {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeBytes(7, data_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeInt32(8, size_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeInt32(9, sequenceNo_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeMessage(22, metadata_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -508,13 +1126,17 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(7, data_);
       }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(8, size_);
       }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(9, sequenceNo_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(22, metadata_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -629,6 +1251,7 @@ public final class Storage {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getMetadataFieldBuilder();
         }
       }
       private static Builder create() {
@@ -643,10 +1266,16 @@ public final class Storage {
         bitField0_ = (bitField0_ & ~0x00000002);
         data_ = com.google.protobuf.ByteString.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000004);
-        size_ = 0;
+        if (metadataBuilder_ == null) {
+          metadata_ = storage.Storage.Metadata.getDefaultInstance();
+        } else {
+          metadataBuilder_.clear();
+        }
         bitField0_ = (bitField0_ & ~0x00000008);
-        sequenceNo_ = 0;
+        size_ = 0;
         bitField0_ = (bitField0_ & ~0x00000010);
+        sequenceNo_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -690,9 +1319,17 @@ public final class Storage {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.size_ = size_;
+        if (metadataBuilder_ == null) {
+          result.metadata_ = metadata_;
+        } else {
+          result.metadata_ = metadataBuilder_.build();
+        }
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
+        }
+        result.size_ = size_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
         }
         result.sequenceNo_ = sequenceNo_;
         result.bitField0_ = to_bitField0_;
@@ -722,6 +1359,9 @@ public final class Storage {
         if (other.hasData()) {
           setData(other.getData());
         }
+        if (other.hasMetadata()) {
+          mergeMetadata(other.getMetadata());
+        }
         if (other.hasSize()) {
           setSize(other.getSize());
         }
@@ -736,6 +1376,12 @@ public final class Storage {
         if (!hasAction()) {
           
           return false;
+        }
+        if (hasMetadata()) {
+          if (!getMetadata().isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -961,12 +1607,128 @@ public final class Storage {
         return this;
       }
 
+      private storage.Storage.Metadata metadata_ = storage.Storage.Metadata.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Metadata, storage.Storage.Metadata.Builder, storage.Storage.MetadataOrBuilder> metadataBuilder_;
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public boolean hasMetadata() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public storage.Storage.Metadata getMetadata() {
+        if (metadataBuilder_ == null) {
+          return metadata_;
+        } else {
+          return metadataBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public Builder setMetadata(storage.Storage.Metadata value) {
+        if (metadataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          metadata_ = value;
+          onChanged();
+        } else {
+          metadataBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public Builder setMetadata(
+          storage.Storage.Metadata.Builder builderForValue) {
+        if (metadataBuilder_ == null) {
+          metadata_ = builderForValue.build();
+          onChanged();
+        } else {
+          metadataBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public Builder mergeMetadata(storage.Storage.Metadata value) {
+        if (metadataBuilder_ == null) {
+          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+              metadata_ != storage.Storage.Metadata.getDefaultInstance()) {
+            metadata_ =
+              storage.Storage.Metadata.newBuilder(metadata_).mergeFrom(value).buildPartial();
+          } else {
+            metadata_ = value;
+          }
+          onChanged();
+        } else {
+          metadataBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000008;
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public Builder clearMetadata() {
+        if (metadataBuilder_ == null) {
+          metadata_ = storage.Storage.Metadata.getDefaultInstance();
+          onChanged();
+        } else {
+          metadataBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public storage.Storage.Metadata.Builder getMetadataBuilder() {
+        bitField0_ |= 0x00000008;
+        onChanged();
+        return getMetadataFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      public storage.Storage.MetadataOrBuilder getMetadataOrBuilder() {
+        if (metadataBuilder_ != null) {
+          return metadataBuilder_.getMessageOrBuilder();
+        } else {
+          return metadata_;
+        }
+      }
+      /**
+       * <code>optional .Metadata metadata = 22;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Metadata, storage.Storage.Metadata.Builder, storage.Storage.MetadataOrBuilder> 
+          getMetadataFieldBuilder() {
+        if (metadataBuilder_ == null) {
+          metadataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              storage.Storage.Metadata, storage.Storage.Metadata.Builder, storage.Storage.MetadataOrBuilder>(
+                  getMetadata(),
+                  getParentForChildren(),
+                  isClean());
+          metadata_ = null;
+        }
+        return metadataBuilder_;
+      }
+
       private int size_ ;
       /**
        * <code>optional int32 size = 8;</code>
        */
       public boolean hasSize() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>optional int32 size = 8;</code>
@@ -978,7 +1740,7 @@ public final class Storage {
        * <code>optional int32 size = 8;</code>
        */
       public Builder setSize(int value) {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         size_ = value;
         onChanged();
         return this;
@@ -987,7 +1749,7 @@ public final class Storage {
        * <code>optional int32 size = 8;</code>
        */
       public Builder clearSize() {
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         size_ = 0;
         onChanged();
         return this;
@@ -998,7 +1760,7 @@ public final class Storage {
        * <code>optional int32 sequence_no = 9;</code>
        */
       public boolean hasSequenceNo() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000020) == 0x00000020);
       }
       /**
        * <code>optional int32 sequence_no = 9;</code>
@@ -1010,7 +1772,7 @@ public final class Storage {
        * <code>optional int32 sequence_no = 9;</code>
        */
       public Builder setSequenceNo(int value) {
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000020;
         sequenceNo_ = value;
         onChanged();
         return this;
@@ -1019,7 +1781,7 @@ public final class Storage {
        * <code>optional int32 sequence_no = 9;</code>
        */
       public Builder clearSequenceNo() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000020);
         sequenceNo_ = 0;
         onChanged();
         return this;
@@ -1188,6 +1950,19 @@ public final class Storage {
      * </pre>
      */
     com.google.protobuf.ByteString getData();
+
+    /**
+     * <code>optional .Metadata metaData = 18;</code>
+     */
+    boolean hasMetaData();
+    /**
+     * <code>optional .Metadata metaData = 18;</code>
+     */
+    storage.Storage.Metadata getMetaData();
+    /**
+     * <code>optional .Metadata metaData = 18;</code>
+     */
+    storage.Storage.MetadataOrBuilder getMetaDataOrBuilder();
   }
   /**
    * Protobuf type {@code Response}
@@ -1297,6 +2072,19 @@ public final class Storage {
               payload_ = input.readBytes();
               break;
             }
+            case 146: {
+              storage.Storage.Metadata.Builder subBuilder = null;
+              if (payloadCase_ == 18) {
+                subBuilder = ((storage.Storage.Metadata) payload_).toBuilder();
+              }
+              payload_ = input.readMessage(storage.Storage.Metadata.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((storage.Storage.Metadata) payload_);
+                payload_ = subBuilder.buildPartial();
+              }
+              payloadCase_ = 18;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -1344,6 +2132,7 @@ public final class Storage {
       INFOMESSAGE(15),
       FAILURE(16),
       DATA(17),
+      METADATA(18),
       PAYLOAD_NOT_SET(0);
       private int value = 0;
       private PayloadCase(int value) {
@@ -1354,6 +2143,7 @@ public final class Storage {
           case 15: return INFOMESSAGE;
           case 16: return FAILURE;
           case 17: return DATA;
+          case 18: return METADATA;
           case 0: return PAYLOAD_NOT_SET;
           default: throw new java.lang.IllegalArgumentException(
             "Value is undefined for this oneof enum.");
@@ -1627,6 +2417,32 @@ public final class Storage {
       return com.google.protobuf.ByteString.EMPTY;
     }
 
+    public static final int METADATA_FIELD_NUMBER = 18;
+    /**
+     * <code>optional .Metadata metaData = 18;</code>
+     */
+    public boolean hasMetaData() {
+      return payloadCase_ == 18;
+    }
+    /**
+     * <code>optional .Metadata metaData = 18;</code>
+     */
+    public storage.Storage.Metadata getMetaData() {
+      if (payloadCase_ == 18) {
+         return (storage.Storage.Metadata) payload_;
+      }
+      return storage.Storage.Metadata.getDefaultInstance();
+    }
+    /**
+     * <code>optional .Metadata metaData = 18;</code>
+     */
+    public storage.Storage.MetadataOrBuilder getMetaDataOrBuilder() {
+      if (payloadCase_ == 18) {
+         return (storage.Storage.Metadata) payload_;
+      }
+      return storage.Storage.Metadata.getDefaultInstance();
+    }
+
     private void initFields() {
       action_ = storage.Storage.Action.GET;
       success_ = false;
@@ -1646,6 +2462,12 @@ public final class Storage {
       }
       if (hasFailure()) {
         if (!getFailure().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasMetaData()) {
+        if (!getMetaData().isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -1681,6 +2503,9 @@ public final class Storage {
       if (payloadCase_ == 17) {
         output.writeBytes(
             17, (com.google.protobuf.ByteString)((com.google.protobuf.ByteString) payload_));
+      }
+      if (payloadCase_ == 18) {
+        output.writeMessage(18, (storage.Storage.Metadata) payload_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1723,6 +2548,10 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(
               17, (com.google.protobuf.ByteString)((com.google.protobuf.ByteString) payload_));
+      }
+      if (payloadCase_ == 18) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(18, (storage.Storage.Metadata) payload_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1914,6 +2743,13 @@ public final class Storage {
         if (payloadCase_ == 17) {
           result.payload_ = payload_;
         }
+        if (payloadCase_ == 18) {
+          if (metaDataBuilder_ == null) {
+            result.payload_ = payload_;
+          } else {
+            result.payload_ = metaDataBuilder_.build();
+          }
+        }
         result.bitField0_ = to_bitField0_;
         result.payloadCase_ = payloadCase_;
         onBuilt();
@@ -1963,6 +2799,10 @@ public final class Storage {
             setData(other.getData());
             break;
           }
+          case METADATA: {
+            mergeMetaData(other.getMetaData());
+            break;
+          }
           case PAYLOAD_NOT_SET: {
             break;
           }
@@ -1978,6 +2818,12 @@ public final class Storage {
         }
         if (hasFailure()) {
           if (!getFailure().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasMetaData()) {
+          if (!getMetaData().isInitialized()) {
             
             return false;
           }
@@ -2625,6 +3471,141 @@ public final class Storage {
         return this;
       }
 
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Metadata, storage.Storage.Metadata.Builder, storage.Storage.MetadataOrBuilder> metaDataBuilder_;
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public boolean hasMetaData() {
+        return payloadCase_ == 18;
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public storage.Storage.Metadata getMetaData() {
+        if (metaDataBuilder_ == null) {
+          if (payloadCase_ == 18) {
+            return (storage.Storage.Metadata) payload_;
+          }
+          return storage.Storage.Metadata.getDefaultInstance();
+        } else {
+          if (payloadCase_ == 18) {
+            return metaDataBuilder_.getMessage();
+          }
+          return storage.Storage.Metadata.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public Builder setMetaData(storage.Storage.Metadata value) {
+        if (metaDataBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          payload_ = value;
+          onChanged();
+        } else {
+          metaDataBuilder_.setMessage(value);
+        }
+        payloadCase_ = 18;
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public Builder setMetaData(
+          storage.Storage.Metadata.Builder builderForValue) {
+        if (metaDataBuilder_ == null) {
+          payload_ = builderForValue.build();
+          onChanged();
+        } else {
+          metaDataBuilder_.setMessage(builderForValue.build());
+        }
+        payloadCase_ = 18;
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public Builder mergeMetaData(storage.Storage.Metadata value) {
+        if (metaDataBuilder_ == null) {
+          if (payloadCase_ == 18 &&
+              payload_ != storage.Storage.Metadata.getDefaultInstance()) {
+            payload_ = storage.Storage.Metadata.newBuilder((storage.Storage.Metadata) payload_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            payload_ = value;
+          }
+          onChanged();
+        } else {
+          if (payloadCase_ == 18) {
+            metaDataBuilder_.mergeFrom(value);
+          }
+          metaDataBuilder_.setMessage(value);
+        }
+        payloadCase_ = 18;
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public Builder clearMetaData() {
+        if (metaDataBuilder_ == null) {
+          if (payloadCase_ == 18) {
+            payloadCase_ = 0;
+            payload_ = null;
+            onChanged();
+          }
+        } else {
+          if (payloadCase_ == 18) {
+            payloadCase_ = 0;
+            payload_ = null;
+          }
+          metaDataBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public storage.Storage.Metadata.Builder getMetaDataBuilder() {
+        return getMetaDataFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      public storage.Storage.MetadataOrBuilder getMetaDataOrBuilder() {
+        if ((payloadCase_ == 18) && (metaDataBuilder_ != null)) {
+          return metaDataBuilder_.getMessageOrBuilder();
+        } else {
+          if (payloadCase_ == 18) {
+            return (storage.Storage.Metadata) payload_;
+          }
+          return storage.Storage.Metadata.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .Metadata metaData = 18;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Metadata, storage.Storage.Metadata.Builder, storage.Storage.MetadataOrBuilder> 
+          getMetaDataFieldBuilder() {
+        if (metaDataBuilder_ == null) {
+          if (!(payloadCase_ == 18)) {
+            payload_ = storage.Storage.Metadata.getDefaultInstance();
+          }
+          metaDataBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              storage.Storage.Metadata, storage.Storage.Metadata.Builder, storage.Storage.MetadataOrBuilder>(
+                  (storage.Storage.Metadata) payload_,
+                  getParentForChildren(),
+                  isClean());
+          payload_ = null;
+        }
+        payloadCase_ = 18;
+        return metaDataBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:Response)
     }
 
@@ -2636,6 +3617,11 @@ public final class Storage {
     // @@protoc_insertion_point(class_scope:Response)
   }
 
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_Metadata_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_Metadata_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_Query_descriptor;
   private static
@@ -2655,16 +3641,19 @@ public final class Storage {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\rstorage.proto\032\014common.proto\"^\n\005Query\022\027" +
-      "\n\006action\030\005 \002(\0162\007.Action\022\013\n\003key\030\006 \001(\t\022\014\n\004" +
-      "data\030\007 \001(\014\022\014\n\004size\030\010 \001(\005\022\023\n\013sequence_no\030" +
-      "\t \001(\005\"\263\001\n\010Response\022\027\n\006action\030\n \002(\0162\007.Act" +
-      "ion\022\017\n\007success\030\013 \001(\010\022\013\n\003key\030\014 \001(\t\022\014\n\004siz" +
-      "e\030\r \001(\005\022\023\n\013sequence_no\030\016 \001(\005\022\025\n\013infomess" +
-      "age\030\017 \001(\tH\000\022\033\n\007failure\030\020 \001(\0132\010.FailureH\000" +
-      "\022\016\n\004data\030\021 \001(\014H\000B\t\n\007payload*4\n\006Action\022\007\n" +
-      "\003GET\020\001\022\t\n\005STORE\020\002\022\n\n\006UPDATE\020\003\022\n\n\006DELETE\020" +
-      "\004B\013\n\007storageH\001"
+      "\n\rstorage.proto\032\014common.proto\"8\n\010Metadat" +
+      "a\022\020\n\010seq_size\030\023 \002(\005\022\014\n\004size\030\024 \001(\005\022\014\n\004tim" +
+      "e\030\025 \001(\003\"{\n\005Query\022\027\n\006action\030\005 \002(\0162\007.Actio" +
+      "n\022\013\n\003key\030\006 \001(\t\022\014\n\004data\030\007 \001(\014\022\033\n\010metadata" +
+      "\030\026 \001(\0132\t.Metadata\022\014\n\004size\030\010 \001(\005\022\023\n\013seque" +
+      "nce_no\030\t \001(\005\"\322\001\n\010Response\022\027\n\006action\030\n \002(" +
+      "\0162\007.Action\022\017\n\007success\030\013 \001(\010\022\013\n\003key\030\014 \001(\t" +
+      "\022\014\n\004size\030\r \001(\005\022\023\n\013sequence_no\030\016 \001(\005\022\025\n\013i" +
+      "nfomessage\030\017 \001(\tH\000\022\033\n\007failure\030\020 \001(\0132\010.Fa" +
+      "ilureH\000\022\016\n\004data\030\021 \001(\014H\000\022\035\n\010metaData\030\022 \001(",
+      "\0132\t.MetadataH\000B\t\n\007payload*4\n\006Action\022\007\n\003G" +
+      "ET\020\001\022\t\n\005STORE\020\002\022\n\n\006UPDATE\020\003\022\n\n\006DELETE\020\004B" +
+      "\013\n\007storageH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2679,18 +3668,24 @@ public final class Storage {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           pipe.common.Common.getDescriptor(),
         }, assigner);
-    internal_static_Query_descriptor =
+    internal_static_Metadata_descriptor =
       getDescriptor().getMessageTypes().get(0);
+    internal_static_Metadata_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_Metadata_descriptor,
+        new java.lang.String[] { "SeqSize", "Size", "Time", });
+    internal_static_Query_descriptor =
+      getDescriptor().getMessageTypes().get(1);
     internal_static_Query_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Query_descriptor,
-        new java.lang.String[] { "Action", "Key", "Data", "Size", "SequenceNo", });
+        new java.lang.String[] { "Action", "Key", "Data", "Metadata", "Size", "SequenceNo", });
     internal_static_Response_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(2);
     internal_static_Response_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Response_descriptor,
-        new java.lang.String[] { "Action", "Success", "Key", "Size", "SequenceNo", "Infomessage", "Failure", "Data", "Payload", });
+        new java.lang.String[] { "Action", "Success", "Key", "Size", "SequenceNo", "Infomessage", "Failure", "Data", "MetaData", "Payload", });
     pipe.common.Common.getDescriptor();
   }
 

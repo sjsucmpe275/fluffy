@@ -15,6 +15,8 @@
  */
 package gash.router.app;
 
+import com.google.protobuf.ByteString;
+
 import gash.router.client.CommConnection;
 import gash.router.client.CommListener;
 import gash.router.client.MessageClient;
@@ -55,12 +57,12 @@ public class DemoApp implements CommListener {
 	 * calls store N times.
 	 * @param N
 	 */
-	private void store(int N) {
+	public void store(int N) {
 		// test round-trip overhead (note overhead for initial connection)
 		long[] dt = new long[N];
 		long st = System.currentTimeMillis(), ft = 0;
 		for (int n = 0; n < N; n++) {
-			mc.store();
+			mc.store(ByteString.copyFromUtf8("Test data"));
 			ft = System.currentTimeMillis();
 			dt[n] = ft - st;
 			st = ft;
@@ -98,8 +100,12 @@ public class DemoApp implements CommListener {
 				
 				// This will not find data at the key.
 				get(msg.getResponse().getKey() + "1");
+			} else if (msg.getResponse().getAction() == Action.GET) {
+				System.out.println("***Data***");
+				System.out.println(new String(msg.getResponse().getData().toByteArray()));
 			}
 		}
+		
 	}
 
 	/**
