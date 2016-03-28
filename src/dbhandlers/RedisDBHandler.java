@@ -4,6 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import redis.clients.jedis.Jedis;
@@ -15,6 +20,19 @@ public class RedisDBHandler implements IDBHandler {
 		redis=new Jedis("localhost");
 	}
 
+	@Override
+	public String getDatabaseVendor() {
+		return "RedisDB";
+	}
+
+	public byte[] serialize(Object obj) throws IOException {
+		try(ByteArrayOutputStream b = new ByteArrayOutputStream()){
+			try(ObjectOutputStream o = new ObjectOutputStream(b)){
+				o.writeObject(obj);
+			}
+			return b.toByteArray();
+		}
+	}
 
 	public Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
 		try(ByteArrayInputStream b = new ByteArrayInputStream(bytes)){
@@ -22,28 +40,6 @@ public class RedisDBHandler implements IDBHandler {
 				return o.readObject();
 			}
 		}
-	}
-
-	@Override
-	public Object get(String key) {
-		byte[] byteArray=null;
-		Object returnObj=null;
-		try {
-			if(redis.exists(serialize(key))){
-				byteArray = redis.get(serialize(key));
-				returnObj = deserialize(byteArray);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return returnObj;
-	}
-
-	@Override
-	public String getDatabaseVendor() {
-		return "RedisDB";
 	}
 
 	@Override
@@ -60,13 +56,13 @@ public class RedisDBHandler implements IDBHandler {
 	}
 
 	@Override
-	public String put(String key, Object value) {
+	public String put(String key, int sequenceId, byte[] value) {
 		// TODO Auto-generated method stub
-		if (key == null || value == null) {
+		if(key==null || value==null){
 			return null;
 		}
 		try {
-			redis.set(serialize(key), serialize(value));
+			redis.hset(serialize(key), serialize(sequenceId), serialize(value));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -74,63 +70,92 @@ public class RedisDBHandler implements IDBHandler {
 	}
 
 	@Override
-	public Object remove(String key) {
-		Object returnObj=null;
-		byte[] b=null;
+	public Map<Integer, byte[]> get(String key) {
+		Map<Integer, byte[]> sequenceIdValue=new HashMap<Integer,byte[]>();
 		try {
-			if(redis.exists(serialize(key))){
-				b = redis.get(serialize(key));
-				redis.del(serialize(key));
-				returnObj=deserialize(b);
+			if(hasKey(key)){
+				byte[] serializedKey=serialize(key);
+				Set<byte[]> byteSequencIds= redis.hkeys(serializedKey);
+				for (byte[] bs : byteSequencIds) {
+					sequenceIdValue.put((Integer) deserialize(bs), redis.hget(serializedKey, bs));
+				}	
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-		return returnObj;
-	}
-
-	public byte[] serialize(Object obj) throws IOException {
-		try(ByteArrayOutputStream b = new ByteArrayOutputStream()){
-			try(ObjectOutputStream o = new ObjectOutputStream(b)){
-				o.writeObject(obj);
-			}
-			return b.toByteArray();
-		}
+		return sequenceIdValue;
 	}
 
 	@Override
-	public String store(Object value) {
-		if (value == null) {
+	public List<Integer> getSequenceIds(String key) {
+		List<Integer> listSequenceIds=new ArrayList<Integer>();
+		try {
+			if(hasKey(key)){
+				byte[] serializedKey=serialize(key);
+				Set<byte[]> byteSequencIds= redis.hkeys(serializedKey);
+				for (byte[] bs : byteSequencIds) {
+					listSequenceIds.add((Integer)deserialize(bs));
+				}	
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		return listSequenceIds;
+	}
+
+	@Override
+	public boolean update(String key, int sequenceId, byte[] value) {
+		boolean isUpdated=false;
+		try {
+			if(hasKey(key)){
+				byte[] serializedKey=serialize(key);
+				byte[] serializedSequenceId=serialize(sequenceId);
+				if(redis.hexists(serializedKey, serializedSequenceId)){
+					redis.hset(serializedKey, serializedSequenceId, value);
+					isUpdated=true;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return isUpdated;
+	}
+
+	@Override
+	public String store(byte[] value) {
+		if(value==null){
 			return null;
 		}
-
-		String uuid = UUID.randomUUID().toString();
-		try {
-			redis.set(serialize(uuid), serialize(value));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return uuid;
-
+		String uuid=UUID.randomUUID().toString();
+		String key= put(uuid, 0, value);
+		return key;
 	}
+
 
 	@Override
-	public boolean update(String key, Object value) {
-		boolean returnVal=false;
-		try {
-			if (redis.exists(serialize(key))){
-				redis.set(serialize(key),serialize(value));
-				returnVal=true;
-			}else{
-				returnVal=false;
+	public Map<Integer, byte[]> remove(String key) {
+		// TODO Auto-generated method stub
+		Map<Integer,byte[]> removedMap=new HashMap<Integer, byte[]>();
+		try{
+			if(hasKey(key)){
+				byte[] serializedKey=serialize(key);
+				Set<byte[]> byteSequencIds= redis.hkeys(serializedKey);
+				for (byte[] bs : byteSequencIds) {
+					removedMap.put((Integer) deserialize(bs), redis.hget(serializedKey, bs) );
+					redis.hdel(serializedKey, bs);
+				}
 			}
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return returnVal;
+		return removedMap;
 	}
-
-
 }
