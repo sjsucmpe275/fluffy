@@ -15,19 +15,17 @@
  */
 package gash.router.server;
 
+import gash.router.server.wrk_messages.handlers.*;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.common.Common;
 import pipe.common.Common.Failure;
 import pipe.common.Common.Header;
-import pipe.work.Work.Heartbeat;
-import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
-import pipe.work.Work.WorkState;
+
+import java.net.InetSocketAddress;
 
 /**
  * The message handler processes json messages that are delimited by a 'newline'
@@ -37,32 +35,60 @@ import pipe.work.Work.WorkState;
  * @author gash
  * 
  */
-public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
-	protected static Logger logger = LoggerFactory.getLogger("work");
-	protected ServerState state;
-	protected boolean debug = true;
+public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage> {
+	private static Logger logger = LoggerFactory.getLogger("work");
+	private ServerState state;
+	private boolean debug = true;
+	private IWrkMessageHandler wrkMessageHandler;
 
-	public WorkHandler(ServerState state) {
+	public WorkChannelHandler(ServerState state) {
 		if (state != null) {
 			this.state = state;
 		}
+		initializeMessageHandlers();
+	}
+
+	public Logger getLogger() {
+		return logger;
+	}
+
+	private void initializeMessageHandlers() {
+		//Define Handlers
+		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (this);
+		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (this);
+		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (this);
+		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (this);
+		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (this);
+
+		//Chain all the handlers
+		beatMessageHandler.setNextHandler (failureMessageHandler);
+		failureMessageHandler.setNextHandler (pingMessageHandler);
+		pingMessageHandler.setNextHandler (stateMessageHandler);
+		stateMessageHandler.setNextHandler (taskMessageHandler);
+
+		//Define the start of Chain
+		wrkMessageHandler = beatMessageHandler;
 	}
 
 	/**
 	 * override this method to provide processing behavior. T
-	 * 
+	 *
 	 * @param msg
 	 */
 	public void handleMessage(WorkMessage msg, Channel channel) {
-		
+
 		if (msg == null) {
-			// TODO add logging
-			System.out.println("ERROR: Unexpected content - " + msg);
+			logger.info ("ERROR: Null message is received");
 			return;
 		}
-		
+
 		if (debug)
 			PrintUtil.printWork(msg);
+
+/*
+		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
+		logger.info ("Destination is: " + msg.getHeader ().getDestination ());
+*/
 
 		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
 			
@@ -88,6 +114,21 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 
 		// TODO How can you implement this without if-else statements?
 		try {
+			wrkMessageHandler.handleMessage (msg, channel);
+
+			/*
+			* Create in-bound edge's if it is not created/if it was removed when connection was down.
+			* */
+			InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress ();
+			logger.info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
+			logger.info ("Remote Port I rec msg from: " + socketAddress.getPort ());
+
+			getServerState ().getEmon ().createInboundIfNew (msg.getHeader ().getNodeId (),
+					socketAddress.getHostName (),
+					socketAddress.getPort (),
+					channel);
+
+/*
 			if (msg.hasBeat()) {
 				Heartbeat hb = msg.getBeat();
 				logger.info("heartbeat from " + msg.getHeader().getNodeId());
@@ -110,10 +151,12 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 			} else if (msg.hasPing()) {
 				logger.info("ping from " + msg.getHeader().getNodeId());
 				//Todo: I commented this code to avoid infinite loop. Will update later
-				/*boolean p = msg.getPing();
+				*/
+/*boolean p = msg.getPing();
 				WorkMessage.Builder rb = WorkMessage.newBuilder();
 				rb.setPing(true);
-				channel.write(rb.build());*/
+				channel.write(rb.build());*//*
+
 			} else if (msg.hasErr()) {
 				Failure err = msg.getErr();
 				logger.error("failure from " + msg.getHeader().getNodeId());
@@ -123,6 +166,7 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 			} else if (msg.hasState()) {
 				WorkState s = msg.getState();
 			}
+*/
 		} catch (Exception e) {
 			// TODO add logging
 			logger.info ("Got an exception in work");
@@ -160,4 +204,7 @@ public class WorkHandler extends SimpleChannelInboundHandler<WorkMessage> {
 		ctx.close();
 	}
 
+	public ServerState getServerState() {
+		return state;
+	}
 }

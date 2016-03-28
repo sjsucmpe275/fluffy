@@ -16,10 +16,15 @@
 package gash.router.server;
 
 import gash.router.container.RoutingConf;
-import io.netty.channel.*;
+import gash.router.server.cmd_messages.CmdFailureMessage;
+import gash.router.server.cmd_messages.CmdMsgHandler;
+import gash.router.server.cmd_messages.CmdPingMessage;
+import gash.router.server.cmd_messages.ICmdMessageHandler;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.common.Common;
 import pipe.common.Common.Failure;
 import routing.Pipe.CommandMessage;
 
@@ -31,14 +36,35 @@ import routing.Pipe.CommandMessage;
  * @author gash
  * 
  */
-public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> {
-	protected static Logger logger = LoggerFactory.getLogger("cmd");
-	protected RoutingConf conf;
+public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMessage> {
+	private static Logger logger = LoggerFactory.getLogger("cmd");
+	private RoutingConf conf;
+	private ICmdMessageHandler cmdMessageHandler;
 
-	public CommandHandler(RoutingConf conf) {
+	public CommandChannelHandler(RoutingConf conf) {
 		if (conf != null) {
 			this.conf = conf;
 		}
+
+		initializeMessageHandlers();
+	}
+
+	private void initializeMessageHandlers() {
+		//Define Handlers
+		ICmdMessageHandler failureMsgHandler = new CmdFailureMessage (this);
+		ICmdMessageHandler pingMsgHandler = new CmdPingMessage (this);
+		ICmdMessageHandler msgHandler = new CmdMsgHandler (this);
+
+		//Chain all the handlers
+		failureMsgHandler.nextHandler (pingMsgHandler);
+		pingMsgHandler.nextHandler (msgHandler);
+
+		//Define the start of Chain
+		cmdMessageHandler = failureMsgHandler;
+	}
+
+	public Logger getLogger() {
+		return logger;
 	}
 
 	/**
@@ -58,6 +84,8 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 		PrintUtil.printCommand(msg);
 
 		try {
+			cmdMessageHandler.handleMessage (msg, channel);
+/*
 			// TODO How can you implement this without if-else statements?
 			if (msg.hasPing()) {
 				logger.info("ping from " + msg.getHeader().getNodeId());
@@ -80,6 +108,7 @@ public class CommandHandler extends SimpleChannelInboundHandler<CommandMessage> 
 			} else {
 			}
 
+*/
 		} catch (Exception e) {
 			// TODO add logging
 			logger.info ("Got an exception in command");

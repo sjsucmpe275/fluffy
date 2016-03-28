@@ -78,5 +78,4 @@ public class EdgeInfo {
 	public void setChannel(Channel channel) {
 		this.channel = channel;
 	}
-
 }

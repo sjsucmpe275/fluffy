@@ -60,6 +60,8 @@ public class PrintUtil {
 			System.out.println("Failure");
 		else if (msg.hasPing())
 			System.out.println("Ping");
+		else if(msg.hasBeat ())
+			System.out.println("Beat");
 		else
 			System.out.println("Unknown");
 
