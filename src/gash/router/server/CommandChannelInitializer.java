@@ -17,11 +17,11 @@ import routing.Pipe.CommandMessage;
  * @author gash
  *
  */
-public class CommandInit extends ChannelInitializer<SocketChannel> {
+public class CommandChannelInitializer extends ChannelInitializer<SocketChannel> {
 	boolean compress = false;
 	RoutingConf conf;
 
-	public CommandInit(RoutingConf conf, boolean enableCompression) {
+	public CommandChannelInitializer(RoutingConf conf, boolean enableCompression) {
 		super();
 		compress = enableCompression;
 		this.conf = conf;
@@ -53,6 +53,6 @@ public class CommandInit extends ChannelInitializer<SocketChannel> {
 
 
 		// our server processor (new instance for each connection)
-		pipeline.addLast("handler", new CommandHandler(conf));
+		pipeline.addLast("handler", new CommandChannelHandler (conf));
 	}
 }
