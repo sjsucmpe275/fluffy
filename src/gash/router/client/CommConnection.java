@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import gash.router.server.CommandInit;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -96,8 +95,7 @@ public class CommConnection {
 	 * 
 	 * @param req
 	 *            The request
-	 * @exception An
-	 *                exception is raised if the message cannot be enqueued.
+	 * @exception An exception is raised if the message cannot be enqueued.
 	 */
 	public void enqueue(CommandMessage req) throws Exception {
 		// enqueue message

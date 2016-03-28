@@ -150,7 +150,7 @@ public class MessageServer {
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
 				boolean compressComm = false;
-				b.childHandler(new CommandInit(conf, compressComm));
+				b.childHandler(new CommandChannelInitializer (conf, compressComm));
 
 				// Start the server.
 				logger.info("Starting command server (" + conf.getNodeId() + "), listening on port = "
@@ -215,8 +215,7 @@ public class MessageServer {
 
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
-				boolean compressComm = false;
-				b.childHandler(new WorkInit(state, compressComm));
+				b.childHandler(new WorkChannelInitializer (state, false));
 
 				// Start the server.
 				logger.info("Starting work server (" + state.getConf().getNodeId() + "), listening on port = "

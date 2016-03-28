@@ -1,3 +1,4 @@
+/*
 package dbhandlers;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -159,3 +160,4 @@ public class RedisDBHandler implements IDBHandler {
 		return removedMap;
 	}
 }
+*/

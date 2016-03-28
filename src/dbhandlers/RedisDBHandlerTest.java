@@ -1,3 +1,4 @@
+/*
 package dbhandlers;
 
 import static org.junit.Assert.*;
@@ -115,3 +116,4 @@ public class RedisDBHandlerTest {
 	}
 
 }
+*/
