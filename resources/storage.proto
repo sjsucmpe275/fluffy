@@ -1,0 +1,58 @@
+option optimize_for = SPEED;
+option java_package = "storage";
+
+import "common.proto";
+
+
+enum Action {
+	GET = 1;
+	STORE = 2; 
+	UPDATE = 3;
+	DELETE = 4;
+}
+
+// Storage Query from client to cluster
+message Query {
+	
+	// Action to be performed
+	required Action action = 5;
+	
+	// Key to store; optional 
+	optional string key = 6;
+	
+	// Data in bytes to store
+	optional bytes data = 7;
+
+	optional int32 size = 8;
+	
+	optional int32 sequence_no = 9;
+}
+
+message Response {
+
+	// Action for which response is being sent
+	required Action action = 10;
+	
+	// Was that action successful?
+	optional bool success = 11;
+	
+	// The key for which action was performed. If store action does not 
+	// provide key, return newly generated key.
+	optional string key = 12;
+
+	optional int32 size = 13;
+	
+	optional int32 sequence_no = 14;
+	
+	oneof payload {
+	
+		// Message, if any, after successful operation
+		string infomessage = 15;
+
+		// Failure with reason 
+		Failure failure = 16;	
+		
+		// Data in case of GET action
+		bytes data = 17;
+	}
+}

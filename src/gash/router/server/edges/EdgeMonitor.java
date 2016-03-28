@@ -15,6 +15,10 @@
  */
 package gash.router.server.edges;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gash.router.client.CommConnection.ClientClosedListener;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
 import gash.router.server.ServerState;
@@ -27,8 +31,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import pipe.common.Common.Header;
+import pipe.work.Work.Heartbeat;
 import pipe.work.Work.WorkMessage;
 
 import java.util.Timer;
@@ -63,6 +67,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 		// cannot go below 2 sec
 		if (state.getConf().getHeartbeatDt() > this.dt)
 			this.dt = state.getConf().getHeartbeatDt();
+	}
 
 		edgeHealthMonitorTask = new EdgeHealthMonitorTask (this);
 
@@ -106,6 +111,10 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 							// Make the connection attempt.
 							ChannelFuture channel = b.connect(ei.getHost(), ei.getPort()).syncUninterruptibly();
 
+							// want to monitor the connection to the server s.t. if we loose the
+							// connection, we can try to re-establish it.
+//							channel.channel().closeFuture();
+
 							ei.setChannel(channel.channel());
 							ei.setActive(channel.channel().isActive());
 							System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
@@ -115,10 +124,11 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 							logger.error("failed to initialize the client connection");//, ex);
 //							ex.printStackTrace();
 						}
+						logger.info("trying to connect to node " + ei.getRef());
 					}
 				}
 
-				Thread.sleep(2000);
+				Thread.sleep(dt);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

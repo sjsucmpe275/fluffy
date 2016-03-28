@@ -19,6 +19,7 @@ import gash.router.client.CommConnection;
 import gash.router.client.CommListener;
 import gash.router.client.MessageClient;
 import routing.Pipe.CommandMessage;
+import storage.Storage.Action;
 
 public class DemoApp implements CommListener {
 	private MessageClient mc;
@@ -50,6 +51,36 @@ public class DemoApp implements CommListener {
 		System.out.println("");
 	}
 
+	/**
+	 * calls store N times.
+	 * @param N
+	 */
+	private void store(int N) {
+		// test round-trip overhead (note overhead for initial connection)
+		long[] dt = new long[N];
+		long st = System.currentTimeMillis(), ft = 0;
+		for (int n = 0; n < N; n++) {
+			mc.store();
+			ft = System.currentTimeMillis();
+			dt[n] = ft - st;
+			st = ft;
+		}
+
+		System.out.println("Round-trip ping times (msec)");
+		for (int n = 0; n < N; n++)
+			System.out.print(dt[n] + " ");
+		System.out.println("");
+	}
+	
+	/**
+	 * Calls get with the key
+	 * 
+	 * @param key
+	 */
+	private void get(String key) {
+		mc.get(key);
+	}
+
 	@Override
 	public String getListenerID() {
 		return "demo";
@@ -58,6 +89,17 @@ public class DemoApp implements CommListener {
 	@Override
 	public void onMessage(CommandMessage msg) {
 		System.out.println("---> " + msg);
+		
+		if (msg.hasResponse()) {
+			
+			// If action is stored. Try to get back the data using key. 
+			if (msg.getResponse().getAction() == Action.STORE) {
+				get(msg.getResponse().getKey());
+				
+				// This will not find data at the key.
+				get(msg.getResponse().getKey() + "1");
+			}
+		}
 	}
 
 	/**
@@ -74,11 +116,11 @@ public class DemoApp implements CommListener {
 			DemoApp da = new DemoApp(mc);
 
 			// do stuff w/ the connection
-			da.ping(2);
-
+//			da.ping(2);
+			da.store(2);
 			System.out.println("\n** exiting in 10 seconds. **");
 			System.out.flush();
-			//Thread.sleep(10 * 1000);
+		    Thread.sleep(10 * 1000);
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {

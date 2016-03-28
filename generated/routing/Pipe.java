@@ -68,6 +68,32 @@ public final class Pipe {
      * <code>optional .Failure err = 5;</code>
      */
     pipe.common.Common.FailureOrBuilder getErrOrBuilder();
+
+    /**
+     * <code>optional .Query query = 6;</code>
+     */
+    boolean hasQuery();
+    /**
+     * <code>optional .Query query = 6;</code>
+     */
+    storage.Storage.Query getQuery();
+    /**
+     * <code>optional .Query query = 6;</code>
+     */
+    storage.Storage.QueryOrBuilder getQueryOrBuilder();
+
+    /**
+     * <code>optional .Response response = 7;</code>
+     */
+    boolean hasResponse();
+    /**
+     * <code>optional .Response response = 7;</code>
+     */
+    storage.Storage.Response getResponse();
+    /**
+     * <code>optional .Response response = 7;</code>
+     */
+    storage.Storage.ResponseOrBuilder getResponseOrBuilder();
   }
   /**
    * Protobuf type {@code CommandMessage}
@@ -158,6 +184,32 @@ public final class Pipe {
               payloadCase_ = 5;
               break;
             }
+            case 50: {
+              storage.Storage.Query.Builder subBuilder = null;
+              if (payloadCase_ == 6) {
+                subBuilder = ((storage.Storage.Query) payload_).toBuilder();
+              }
+              payload_ = input.readMessage(storage.Storage.Query.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((storage.Storage.Query) payload_);
+                payload_ = subBuilder.buildPartial();
+              }
+              payloadCase_ = 6;
+              break;
+            }
+            case 58: {
+              storage.Storage.Response.Builder subBuilder = null;
+              if (payloadCase_ == 7) {
+                subBuilder = ((storage.Storage.Response) payload_).toBuilder();
+              }
+              payload_ = input.readMessage(storage.Storage.Response.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((storage.Storage.Response) payload_);
+                payload_ = subBuilder.buildPartial();
+              }
+              payloadCase_ = 7;
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -205,6 +257,8 @@ public final class Pipe {
       PING(3),
       MESSAGE(4),
       ERR(5),
+      QUERY(6),
+      RESPONSE(7),
       PAYLOAD_NOT_SET(0);
       private int value = 0;
       private PayloadCase(int value) {
@@ -215,6 +269,8 @@ public final class Pipe {
           case 3: return PING;
           case 4: return MESSAGE;
           case 5: return ERR;
+          case 6: return QUERY;
+          case 7: return RESPONSE;
           case 0: return PAYLOAD_NOT_SET;
           default: throw new java.lang.IllegalArgumentException(
             "Value is undefined for this oneof enum.");
@@ -352,6 +408,58 @@ public final class Pipe {
       return pipe.common.Common.Failure.getDefaultInstance();
     }
 
+    public static final int QUERY_FIELD_NUMBER = 6;
+    /**
+     * <code>optional .Query query = 6;</code>
+     */
+    public boolean hasQuery() {
+      return payloadCase_ == 6;
+    }
+    /**
+     * <code>optional .Query query = 6;</code>
+     */
+    public storage.Storage.Query getQuery() {
+      if (payloadCase_ == 6) {
+         return (storage.Storage.Query) payload_;
+      }
+      return storage.Storage.Query.getDefaultInstance();
+    }
+    /**
+     * <code>optional .Query query = 6;</code>
+     */
+    public storage.Storage.QueryOrBuilder getQueryOrBuilder() {
+      if (payloadCase_ == 6) {
+         return (storage.Storage.Query) payload_;
+      }
+      return storage.Storage.Query.getDefaultInstance();
+    }
+
+    public static final int RESPONSE_FIELD_NUMBER = 7;
+    /**
+     * <code>optional .Response response = 7;</code>
+     */
+    public boolean hasResponse() {
+      return payloadCase_ == 7;
+    }
+    /**
+     * <code>optional .Response response = 7;</code>
+     */
+    public storage.Storage.Response getResponse() {
+      if (payloadCase_ == 7) {
+         return (storage.Storage.Response) payload_;
+      }
+      return storage.Storage.Response.getDefaultInstance();
+    }
+    /**
+     * <code>optional .Response response = 7;</code>
+     */
+    public storage.Storage.ResponseOrBuilder getResponseOrBuilder() {
+      if (payloadCase_ == 7) {
+         return (storage.Storage.Response) payload_;
+      }
+      return storage.Storage.Response.getDefaultInstance();
+    }
+
     private void initFields() {
       header_ = pipe.common.Common.Header.getDefaultInstance();
     }
@@ -375,6 +483,18 @@ public final class Pipe {
           return false;
         }
       }
+      if (hasQuery()) {
+        if (!getQuery().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasResponse()) {
+        if (!getResponse().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -394,6 +514,12 @@ public final class Pipe {
       }
       if (payloadCase_ == 5) {
         output.writeMessage(5, (pipe.common.Common.Failure) payload_);
+      }
+      if (payloadCase_ == 6) {
+        output.writeMessage(6, (storage.Storage.Query) payload_);
+      }
+      if (payloadCase_ == 7) {
+        output.writeMessage(7, (storage.Storage.Response) payload_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -420,6 +546,14 @@ public final class Pipe {
       if (payloadCase_ == 5) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, (pipe.common.Common.Failure) payload_);
+      }
+      if (payloadCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (storage.Storage.Query) payload_);
+      }
+      if (payloadCase_ == 7) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, (storage.Storage.Response) payload_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -596,6 +730,20 @@ public final class Pipe {
             result.payload_ = errBuilder_.build();
           }
         }
+        if (payloadCase_ == 6) {
+          if (queryBuilder_ == null) {
+            result.payload_ = payload_;
+          } else {
+            result.payload_ = queryBuilder_.build();
+          }
+        }
+        if (payloadCase_ == 7) {
+          if (responseBuilder_ == null) {
+            result.payload_ = payload_;
+          } else {
+            result.payload_ = responseBuilder_.build();
+          }
+        }
         result.bitField0_ = to_bitField0_;
         result.payloadCase_ = payloadCase_;
         onBuilt();
@@ -631,6 +779,14 @@ public final class Pipe {
             mergeErr(other.getErr());
             break;
           }
+          case QUERY: {
+            mergeQuery(other.getQuery());
+            break;
+          }
+          case RESPONSE: {
+            mergeResponse(other.getResponse());
+            break;
+          }
           case PAYLOAD_NOT_SET: {
             break;
           }
@@ -650,6 +806,18 @@ public final class Pipe {
         }
         if (hasErr()) {
           if (!getErr().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasQuery()) {
+          if (!getQuery().isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasResponse()) {
+          if (!getResponse().isInitialized()) {
             
             return false;
           }
@@ -1081,6 +1249,276 @@ public final class Pipe {
         return errBuilder_;
       }
 
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Query, storage.Storage.Query.Builder, storage.Storage.QueryOrBuilder> queryBuilder_;
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public boolean hasQuery() {
+        return payloadCase_ == 6;
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public storage.Storage.Query getQuery() {
+        if (queryBuilder_ == null) {
+          if (payloadCase_ == 6) {
+            return (storage.Storage.Query) payload_;
+          }
+          return storage.Storage.Query.getDefaultInstance();
+        } else {
+          if (payloadCase_ == 6) {
+            return queryBuilder_.getMessage();
+          }
+          return storage.Storage.Query.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public Builder setQuery(storage.Storage.Query value) {
+        if (queryBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          payload_ = value;
+          onChanged();
+        } else {
+          queryBuilder_.setMessage(value);
+        }
+        payloadCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public Builder setQuery(
+          storage.Storage.Query.Builder builderForValue) {
+        if (queryBuilder_ == null) {
+          payload_ = builderForValue.build();
+          onChanged();
+        } else {
+          queryBuilder_.setMessage(builderForValue.build());
+        }
+        payloadCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public Builder mergeQuery(storage.Storage.Query value) {
+        if (queryBuilder_ == null) {
+          if (payloadCase_ == 6 &&
+              payload_ != storage.Storage.Query.getDefaultInstance()) {
+            payload_ = storage.Storage.Query.newBuilder((storage.Storage.Query) payload_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            payload_ = value;
+          }
+          onChanged();
+        } else {
+          if (payloadCase_ == 6) {
+            queryBuilder_.mergeFrom(value);
+          }
+          queryBuilder_.setMessage(value);
+        }
+        payloadCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public Builder clearQuery() {
+        if (queryBuilder_ == null) {
+          if (payloadCase_ == 6) {
+            payloadCase_ = 0;
+            payload_ = null;
+            onChanged();
+          }
+        } else {
+          if (payloadCase_ == 6) {
+            payloadCase_ = 0;
+            payload_ = null;
+          }
+          queryBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public storage.Storage.Query.Builder getQueryBuilder() {
+        return getQueryFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      public storage.Storage.QueryOrBuilder getQueryOrBuilder() {
+        if ((payloadCase_ == 6) && (queryBuilder_ != null)) {
+          return queryBuilder_.getMessageOrBuilder();
+        } else {
+          if (payloadCase_ == 6) {
+            return (storage.Storage.Query) payload_;
+          }
+          return storage.Storage.Query.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .Query query = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Query, storage.Storage.Query.Builder, storage.Storage.QueryOrBuilder> 
+          getQueryFieldBuilder() {
+        if (queryBuilder_ == null) {
+          if (!(payloadCase_ == 6)) {
+            payload_ = storage.Storage.Query.getDefaultInstance();
+          }
+          queryBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              storage.Storage.Query, storage.Storage.Query.Builder, storage.Storage.QueryOrBuilder>(
+                  (storage.Storage.Query) payload_,
+                  getParentForChildren(),
+                  isClean());
+          payload_ = null;
+        }
+        payloadCase_ = 6;
+        return queryBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Response, storage.Storage.Response.Builder, storage.Storage.ResponseOrBuilder> responseBuilder_;
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public boolean hasResponse() {
+        return payloadCase_ == 7;
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public storage.Storage.Response getResponse() {
+        if (responseBuilder_ == null) {
+          if (payloadCase_ == 7) {
+            return (storage.Storage.Response) payload_;
+          }
+          return storage.Storage.Response.getDefaultInstance();
+        } else {
+          if (payloadCase_ == 7) {
+            return responseBuilder_.getMessage();
+          }
+          return storage.Storage.Response.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public Builder setResponse(storage.Storage.Response value) {
+        if (responseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          payload_ = value;
+          onChanged();
+        } else {
+          responseBuilder_.setMessage(value);
+        }
+        payloadCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public Builder setResponse(
+          storage.Storage.Response.Builder builderForValue) {
+        if (responseBuilder_ == null) {
+          payload_ = builderForValue.build();
+          onChanged();
+        } else {
+          responseBuilder_.setMessage(builderForValue.build());
+        }
+        payloadCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public Builder mergeResponse(storage.Storage.Response value) {
+        if (responseBuilder_ == null) {
+          if (payloadCase_ == 7 &&
+              payload_ != storage.Storage.Response.getDefaultInstance()) {
+            payload_ = storage.Storage.Response.newBuilder((storage.Storage.Response) payload_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            payload_ = value;
+          }
+          onChanged();
+        } else {
+          if (payloadCase_ == 7) {
+            responseBuilder_.mergeFrom(value);
+          }
+          responseBuilder_.setMessage(value);
+        }
+        payloadCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public Builder clearResponse() {
+        if (responseBuilder_ == null) {
+          if (payloadCase_ == 7) {
+            payloadCase_ = 0;
+            payload_ = null;
+            onChanged();
+          }
+        } else {
+          if (payloadCase_ == 7) {
+            payloadCase_ = 0;
+            payload_ = null;
+          }
+          responseBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public storage.Storage.Response.Builder getResponseBuilder() {
+        return getResponseFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      public storage.Storage.ResponseOrBuilder getResponseOrBuilder() {
+        if ((payloadCase_ == 7) && (responseBuilder_ != null)) {
+          return responseBuilder_.getMessageOrBuilder();
+        } else {
+          if (payloadCase_ == 7) {
+            return (storage.Storage.Response) payload_;
+          }
+          return storage.Storage.Response.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>optional .Response response = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          storage.Storage.Response, storage.Storage.Response.Builder, storage.Storage.ResponseOrBuilder> 
+          getResponseFieldBuilder() {
+        if (responseBuilder_ == null) {
+          if (!(payloadCase_ == 7)) {
+            payload_ = storage.Storage.Response.getDefaultInstance();
+          }
+          responseBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              storage.Storage.Response, storage.Storage.Response.Builder, storage.Storage.ResponseOrBuilder>(
+                  (storage.Storage.Response) payload_,
+                  getParentForChildren(),
+                  isClean());
+          payload_ = null;
+        }
+        payloadCase_ = 7;
+        return responseBuilder_;
+      }
+
       // @@protoc_insertion_point(builder_scope:CommandMessage)
     }
 
@@ -1106,10 +1544,12 @@ public final class Pipe {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\npipe.proto\032\014common.proto\"p\n\016CommandMes" +
-      "sage\022\027\n\006header\030\001 \002(\0132\007.Header\022\016\n\004ping\030\003 " +
-      "\001(\010H\000\022\021\n\007message\030\004 \001(\tH\000\022\027\n\003err\030\005 \001(\0132\010." +
-      "FailureH\000B\t\n\007payloadB\013\n\007routingH\001"
+      "\n\npipe.proto\032\014common.proto\032\rstorage.prot" +
+      "o\"\250\001\n\016CommandMessage\022\027\n\006header\030\001 \002(\0132\007.H" +
+      "eader\022\016\n\004ping\030\003 \001(\010H\000\022\021\n\007message\030\004 \001(\tH\000" +
+      "\022\027\n\003err\030\005 \001(\0132\010.FailureH\000\022\027\n\005query\030\006 \001(\013" +
+      "2\006.QueryH\000\022\035\n\010response\030\007 \001(\0132\t.ResponseH" +
+      "\000B\t\n\007payloadB\013\n\007routingH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1123,14 +1563,16 @@ public final class Pipe {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           pipe.common.Common.getDescriptor(),
+          storage.Storage.getDescriptor(),
         }, assigner);
     internal_static_CommandMessage_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_CommandMessage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_CommandMessage_descriptor,
-        new java.lang.String[] { "Header", "Ping", "Message", "Err", "Payload", });
+        new java.lang.String[] { "Header", "Ping", "Message", "Err", "Query", "Response", "Payload", });
     pipe.common.Common.getDescriptor();
+    storage.Storage.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
