@@ -15,20 +15,16 @@
  */
 package gash.router.server;
 
-import gash.router.server.wrk_messages.handlers.*;
+import gash.router.server.messages.FailureMessage;
+import gash.router.server.messages.wrk_messages.handlers.*;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.common.Common;
-import pipe.common.Common.Failure;
 import pipe.common.Common.Header;
-import pipe.work.Work.Heartbeat;
-import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
-import pipe.work.Work.WorkState;
+
 import java.net.InetSocketAddress;
 
 /**
@@ -98,16 +94,16 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			
 			if (msg.getHeader().getMaxHops() == 0) {
 				//TODO This might be the detination.. Think before dropping..
-				System.out.println("MAX HOPS is Zero! Dropping message...");
+				getLogger ().info ("MAX HOPS is Zero! Dropping message...");
 				return;
 			}
 			
 			if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-				System.out.println("Same message received by source! Dropping message...");
+				getLogger ().info ("Same message received by source! Dropping message...");
 				return;
 			}
-			
-			System.out.println("Forwarding message...");
+
+			getLogger ().info ("Forwarding message...");
 			WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
 			Header.Builder hb = Header.newBuilder(wb.getHeader());
 			hb.setMaxHops(hb.getMaxHops() - 1);
@@ -116,7 +112,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			return;
 		}
 
-		// TODO How can you implement this without if-else statements?
+		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
 
@@ -124,67 +120,22 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			* Create in-bound edge's if it is not created/if it was removed when connection was down.
 			* */
 			InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress ();
-			logger.info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
-			logger.info ("Remote Port I rec msg from: " + socketAddress.getPort ());
+			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
+			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
 
 			getServerState ().getEmon ().createInboundIfNew (msg.getHeader ().getNodeId (),
 					socketAddress.getHostName (),
 					socketAddress.getPort (),
 					channel);
-
-/*
-			if (msg.hasBeat()) {
-				Heartbeat hb = msg.getBeat();
-				logger.info("heartbeat from " + msg.getHeader().getNodeId());
-				// construct the message to send
-				Common.Header.Builder wm = Common.Header.newBuilder();
-				wm.setNodeId(state.getConf().getNodeId());
-				wm.setDestination(-1);
-				wm.setTime(System.currentTimeMillis());
-
-				WorkMessage.Builder wb = WorkMessage.newBuilder();
-				wb.setHeader(wm);
-				wb.setPing (true);
-				wb.setSecret(1);
-
-				ChannelFuture cf = channel.writeAndFlush (wb.build ());
-				if(!cf.isSuccess ())    {
-					System.out.println (cf.cause ());
-				}
-
-			} else if (msg.hasPing()) {
-				logger.info("ping from " + msg.getHeader().getNodeId());
-				//Todo: I commented this code to avoid infinite loop. Will update later
-				*/
-/*boolean p = msg.getPing();
-				WorkMessage.Builder rb = WorkMessage.newBuilder();
-				rb.setPing(true);
-				channel.write(rb.build());*//*
-
-			} else if (msg.hasErr()) {
-				Failure err = msg.getErr();
-				logger.error("failure from " + msg.getHeader().getNodeId());
-				// PrintUtil.printFailure(err);
-			} else if (msg.hasTask()) {
-				Task t = msg.getTask();
-			} else if (msg.hasState()) {
-				WorkState s = msg.getState();
-			}
-*/
 		} catch (Exception e) {
 			// TODO add logging
-			logger.info ("Got an exception in work");
-			Failure.Builder eb = Failure.newBuilder();
-			eb.setId(state.getConf().getNodeId());
-			eb.setRefId(msg.getHeader().getNodeId());
-			eb.setMessage(e.getMessage());
-			WorkMessage.Builder rb = WorkMessage.newBuilder(msg);
-			rb.setErr(eb);
-			channel.write(rb.build());
+			getLogger ().info ("Got an exception in work");
+			FailureMessage failureMessage = new FailureMessage (msg, e);
+			failureMessage.setNodeId (state.getConf ().getNodeId ());
+			channel.write(failureMessage.getWorkMessage ());
 		}
 
 		System.out.flush();
-
 	}
 
 	/**

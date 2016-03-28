@@ -16,28 +16,14 @@
 package gash.router.server;
 
 import gash.router.container.RoutingConf;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-
-import gash.router.server.cmd_messages.CmdFailureMessage;
-import gash.router.server.cmd_messages.CmdMsgHandler;
-import gash.router.server.cmd_messages.CmdPingMessage;
-import gash.router.server.cmd_messages.ICmdMessageHandler;
+import gash.router.server.messages.cmd_messages.handlers.*;
+import gash.router.server.messages.FailureMessage;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-
-import com.google.protobuf.ByteString;
-
-import dbhandlers.IDBHandler;
-import dbhandlers.RedisDBHandler;import org.slf4j.Logger;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.common.Common;
-import pipe.common.Common.Failure;
-import pipe.common.Common.Header;
 import routing.Pipe.CommandMessage;
-import storage.Storage.Query;
-import storage.Storage.Response;
 /**
  * The message handler processes json messages that are delimited by a 'newline'
  * 
@@ -50,26 +36,28 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	private static Logger logger = LoggerFactory.getLogger("cmd");
 	private RoutingConf conf;
 	private ICmdMessageHandler cmdMessageHandler;
-	protected IDBHandler dbhandler;
+	//protected IDBHandler dbhandler;
 
-	public CommandChannelHandler(RoutingConf conf) {
+	public CommandChannelHandler(RoutingConf conf) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
 		}
-		dbhandler = new RedisDBHandler();
+		//dbhandler = new RedisDBHandler();
 
 		initializeMessageHandlers();
 	}
 
-	private void initializeMessageHandlers() {
+	private void initializeMessageHandlers() throws Exception {
 		//Define Handlers
-		ICmdMessageHandler failureMsgHandler = new CmdFailureMessage (this);
-		ICmdMessageHandler pingMsgHandler = new CmdPingMessage (this);
+		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler (this);
+		ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler (this);
 		ICmdMessageHandler msgHandler = new CmdMsgHandler (this);
+		ICmdMessageHandler queryHandler = new CmdQueryMsgHandler (this);
 
 		//Chain all the handlers
-		failureMsgHandler.nextHandler (pingMsgHandler);
-		pingMsgHandler.nextHandler (msgHandler);
+		failureMsgHandler.setNextHandler (pingMsgHandler);
+		pingMsgHandler.setNextHandler (msgHandler);
+		msgHandler.setNextHandler (queryHandler);
 
 		//Define the start of Chain
 		cmdMessageHandler = failureMsgHandler;
@@ -95,156 +83,19 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 		PrintUtil.printCommand(msg);
 
+		// TODO How can you implement this without if-else statements? - With COR
 		try {
 			cmdMessageHandler.handleMessage (msg, channel);
-/*
-			// TODO How can you implement this without if-else statements?
-			if (msg.hasPing()) {
-				logger.info("ping from " + msg.getHeader().getNodeId());
-				// construct the message to send
-				Common.Header.Builder hb = Common.Header.newBuilder();
-				hb.setNodeId(888);
-				hb.setTime(System.currentTimeMillis());
-				hb.setDestination(-1);
-
-				CommandMessage.Builder rb = CommandMessage.newBuilder();
-				rb.setHeader(hb);
-				rb.setPing(true);
-
-				ChannelFuture cf = channel.writeAndFlush(rb.build());
-				if (!cf.isSuccess()) {
-					System.out.println("Reasion for failure : " + cf);
-				}
-			} else if (msg.hasMessage()) {
-				logger.info(msg.getMessage());
-			} else if (msg.hasQuery()) {
-				
-				Query query = msg.getQuery();
-				Header.Builder hb = buildHeader();
-				Response.Builder rb = Response.newBuilder();
-				CommandMessage.Builder cb = CommandMessage.newBuilder();
-				String key = query.getKey();
-				
-				switch (query.getAction()) {
-				case GET:
-					rb.setAction(query.getAction());
-					Object data = dbhandler.get(key);
-					if (data == null) {
-						
-						Failure.Builder fb = Failure.newBuilder();
-						fb.setMessage("Key not present");
-						fb.setId(101);
-						
-						rb.setSuccess(false);
-						rb.setFailure(fb);
-
-						cb.setHeader(hb);
-						cb.setResponse(rb);
-						channel.writeAndFlush(cb.build());
-					} else {
-						rb.setSuccess(true);
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						ObjectOutputStream os = new ObjectOutputStream(bos);
-						
-						os.writeObject(data);
-						rb.setData(ByteString.copyFrom(bos.toByteArray()));
-						rb.setInfomessage("Action completed successfully!");
-						rb.setKey(key);
-						
-						cb.setHeader(hb);
-						cb.setResponse(rb);
-						channel.writeAndFlush(cb.build());
-						
-					}
-					break;
-
-				case DELETE:
-					data = dbhandler.remove(key);
-					if (data == null) {
-						Failure.Builder fb = Failure.newBuilder();
-						fb.setMessage("Key not present");
-						fb.setId(101);
-						
-						rb.setSuccess(false);
-						rb.setFailure(fb);
-
-						cb.setHeader(hb);
-						cb.setResponse(rb);
-						channel.writeAndFlush(cb.build());
-					}  else {
-						rb.setSuccess(true);
-						ByteArrayOutputStream bos = new ByteArrayOutputStream();
-						ObjectOutputStream os = new ObjectOutputStream(bos);
-						
-						os.writeObject(data);
-						rb.setData(ByteString.copyFrom(bos.toByteArray()));
-						rb.setInfomessage("Action completed successfully!");
-						rb.setKey(key);
-						
-						cb.setHeader(hb);
-						cb.setResponse(rb);
-						channel.writeAndFlush(cb.build());
-					}
-					break;
-
-				case STORE:
-					
-					if (query.hasKey()) {
-						key = dbhandler.put(query.getKey(), query.getData().toByteArray());
-					} else {
-						key = dbhandler.store(query.getData().toByteArray());
-					}
-
-					rb.setAction(query.getAction());
-					rb.setKey(key);
-					rb.setSuccess(true);
-					rb.setInfomessage("Data stored successfully at key: " + key);
-					
-					cb.setHeader(hb);
-					cb.setResponse(rb);
-					channel.writeAndFlush(cb.build());
-					break;
-
-				case UPDATE:
-					key = dbhandler.put(query.getKey(), query.getData().toByteArray());
-					rb.setAction(query.getAction());
-					rb.setKey(key);
-					rb.setSuccess(true);
-					rb.setInfomessage("Data stored successfully at key: " + key);
-					
-					cb.setHeader(hb);
-					cb.setResponse(rb);
-					channel.writeAndFlush(cb.build());
-					break;
-
-				default:
-					logger.info("Default case!");
-					break;
-				}
-			}
-
 		} catch (Exception e) {
 			// TODO add logging
 			logger.error("Got an exception in command", e);
-			Failure.Builder eb = Failure.newBuilder();
-			eb.setId(conf.getNodeId());
-			eb.setRefId(msg.getHeader().getNodeId());
-			eb.setMessage(e.getMessage());
-			CommandMessage.Builder rb = CommandMessage.newBuilder(msg);
-			rb.setErr(eb);
-			rb.setHeader(buildHeader());
-			channel.write(rb.build());
+			FailureMessage failureMessage = new FailureMessage (msg, e);
+			failureMessage.setNodeId (getConf ().getNodeId ());
+			failureMessage.setDestination (-1);
+			channel.write(failureMessage.getCommandMessage ());
 		}
 
 		System.out.flush();
-	}
-
-	private Header.Builder buildHeader() {
-		Header.Builder hb = Header.newBuilder();
-		hb.setNodeId(conf.getNodeId());
-		hb.setTime(System.currentTimeMillis());
-		hb.setDestination(-1);
-		return hb;
 	}
 
 	/**
@@ -266,5 +117,9 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
+	}
+
+	public RoutingConf getConf()    {
+		return conf;
 	}
 }

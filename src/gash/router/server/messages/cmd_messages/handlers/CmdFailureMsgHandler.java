@@ -1,18 +1,18 @@
-package gash.router.server.cmd_messages;
+package gash.router.server.messages.cmd_messages.handlers;
 
 import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
-import routing.Pipe.*;
+import routing.Pipe.CommandMessage;
 
 /**
  * Created by codepenman on 3/27/16.
  */
-public class CmdMsgHandler implements ICmdMessageHandler {
+public class CmdFailureMsgHandler implements ICmdMessageHandler {
 
 	private final CommandChannelHandler cmdChannelHandler;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdMsgHandler(CommandChannelHandler cmdChannelHandler)   {
+	public CmdFailureMsgHandler(CommandChannelHandler cmdChannelHandler)  {
 		this.cmdChannelHandler = cmdChannelHandler;
 	}
 
@@ -28,11 +28,11 @@ public class CmdMsgHandler implements ICmdMessageHandler {
 			return;
 		}
 
-		cmdChannelHandler.getLogger ().info(cmdMessage.getMessage());
+
 	}
 
 	@Override
-	public void nextHandler(ICmdMessageHandler nextHandler) {
+	public void setNextHandler(ICmdMessageHandler nextHandler) {
 		this.nextHandler = nextHandler;
 	}
 }

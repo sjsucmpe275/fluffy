@@ -1,9 +1,9 @@
-package gash.router.server.wrk_messages.handlers;
+package gash.router.server.messages.wrk_messages.handlers;
 
 import gash.router.server.WorkChannelHandler;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeList;
-import gash.router.server.wrk_messages.BeatMessage;
+import gash.router.server.messages.wrk_messages.BeatMessage;
 import io.netty.channel.Channel;
 import pipe.work.Work.WorkMessage;
 

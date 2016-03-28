@@ -1,4 +1,4 @@
-package gash.router.server.wrk_messages;
+package gash.router.server.messages.wrk_messages;
 
 import pipe.common.Common;
 import pipe.work.Work.Heartbeat;
@@ -44,7 +44,6 @@ public class BeatMessage {
 		workMessage.setHeader (header);
 		workMessage.setBeat (beat);
 		workMessage.setSecret (secret);
-
 		return workMessage.build ();
 	}
 

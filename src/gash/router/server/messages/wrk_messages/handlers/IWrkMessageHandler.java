@@ -1,4 +1,4 @@
-package gash.router.server.wrk_messages.handlers;
+package gash.router.server.messages.wrk_messages.handlers;
 
 import io.netty.channel.Channel;
 import pipe.work.Work.*;

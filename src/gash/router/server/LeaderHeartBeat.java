@@ -1,6 +1,6 @@
 package gash.router.server;
 
-import gash.router.server.wrk_messages.BeatMessage;
+import gash.router.server.messages.wrk_messages.BeatMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

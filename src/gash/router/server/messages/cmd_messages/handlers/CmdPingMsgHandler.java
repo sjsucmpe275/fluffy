@@ -1,4 +1,4 @@
-package gash.router.server.cmd_messages;
+package gash.router.server.messages.cmd_messages.handlers;
 
 import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
@@ -9,18 +9,18 @@ import routing.Pipe.CommandMessage;
 /**
  * Created by codepenman on 3/27/16.
  */
-public class CmdPingMessage implements ICmdMessageHandler {
+public class CmdPingMsgHandler implements ICmdMessageHandler {
 
 	private final CommandChannelHandler cmdChannelHandler;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdPingMessage(CommandChannelHandler cmdChannelHandler) {
+	public CmdPingMsgHandler(CommandChannelHandler cmdChannelHandler) {
 		this.cmdChannelHandler = cmdChannelHandler;
 	}
 
 	@Override
 	public void handleMessage(CommandMessage cmdMessage, Channel channel) throws Exception{
-		if(! cmdMessage.hasErr () && nextHandler != null)  {
+		if(! cmdMessage.hasPing () && nextHandler != null)  {
 			nextHandler.handleMessage (cmdMessage, channel);
 			return;
 		}
@@ -48,7 +48,7 @@ public class CmdPingMessage implements ICmdMessageHandler {
 	}
 
 	@Override
-	public void nextHandler(ICmdMessageHandler nextHandler) {
+	public void setNextHandler(ICmdMessageHandler nextHandler) {
 		this.nextHandler = nextHandler;
 	}
 }

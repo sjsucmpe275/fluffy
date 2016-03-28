@@ -15,15 +15,11 @@
  */
 package gash.router.server.edges;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gash.router.client.CommConnection.ClientClosedListener;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
 import gash.router.server.ServerState;
 import gash.router.server.WorkChannelInitializer;
-import gash.router.server.wrk_messages.BeatMessage;
+import gash.router.server.messages.wrk_messages.BeatMessage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -31,8 +27,8 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import pipe.common.Common.Header;
-import pipe.work.Work.Heartbeat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
 
 import java.util.Timer;
@@ -67,7 +63,6 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 		// cannot go below 2 sec
 		if (state.getConf().getHeartbeatDt() > this.dt)
 			this.dt = state.getConf().getHeartbeatDt();
-	}
 
 		edgeHealthMonitorTask = new EdgeHealthMonitorTask (this);
 
@@ -89,6 +84,8 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	@Override
 	public void run() {
 		while (forever) {
+			logger.info ("Database being used: " + state.getConf ().getDatabase ());
+
 			try {
 				for (EdgeInfo ei : outboundEdges.getEdgesMap ().values()) {
 					if (ei.isActive() && ei.getChannel() != null) {
@@ -121,8 +118,8 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 									+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 						} catch (Throwable ex) {
-							logger.error("failed to initialize the client connection");//, ex);
-//							ex.printStackTrace();
+							logger.error("failed to initialize the client connection");
+							ex.printStackTrace();
 						}
 						logger.info("trying to connect to node " + ei.getRef());
 					}
