@@ -15,10 +15,10 @@
  */
 package gash.router.server.edges;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EdgeList {
-	protected HashMap<Integer, EdgeInfo> map = new HashMap<Integer, EdgeInfo>();
+	private ConcurrentHashMap<Integer, EdgeInfo> map = new ConcurrentHashMap<> ();
 
 	public EdgeList() {
 	}
@@ -45,10 +45,7 @@ public class EdgeList {
 	}
 
 	private boolean verify(int ref, String host, int port) {
-		if (ref < 0 || host == null || port < 1024)
-			return false;
-		else
-			return true;
+		return !(ref < 0 || host == null || port < 1024);
 	}
 
 	public boolean hasNode(int ref) {
@@ -66,5 +63,9 @@ public class EdgeList {
 
 	public void clear() {
 		map.clear();
+	}
+
+	public ConcurrentHashMap<Integer, EdgeInfo> getEdgesMap()  {
+		return map;
 	}
 }
