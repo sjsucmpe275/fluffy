@@ -17,11 +17,11 @@ import pipe.work.Work.WorkMessage;
  * @author gash
  *
  */
-public class WorkInit extends ChannelInitializer<SocketChannel> {
+public class WorkChannelInitializer extends ChannelInitializer<SocketChannel> {
 	boolean compress = false;
 	ServerState state;
 
-	public WorkInit(ServerState state, boolean enableCompression) {
+	public WorkChannelInitializer(ServerState state, boolean enableCompression) {
 		super();
 		compress = enableCompression;
 		this.state = state;
@@ -52,6 +52,6 @@ public class WorkInit extends ChannelInitializer<SocketChannel> {
 		pipeline.addLast("protobufEncoder", new ProtobufEncoder());
 
 		// our server processor (new instance for each connection)
-		pipeline.addLast("handler", new WorkHandler(state));
+		pipeline.addLast("handler", new WorkChannelHandler (state));
 	}
 }

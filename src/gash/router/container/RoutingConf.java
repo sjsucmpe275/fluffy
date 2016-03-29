@@ -15,13 +15,12 @@
  */
 package gash.router.container;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * Routing information for the server - internal use only
@@ -37,6 +36,7 @@ public class RoutingConf {
 	private int workPort;
 	private boolean internalNode = true;
 	private int heartbeatDt = 2000;
+	private String database;
 	private List<RoutingEntry> routing;
 
 	public HashMap<String, Integer> asHashMap() {
@@ -105,6 +105,14 @@ public class RoutingConf {
 
 	public void setRouting(List<RoutingEntry> conf) {
 		this.routing = conf;
+	}
+
+	public String getDatabase() {
+		return database;
+	}
+
+	public void setDatabase(String database) {
+		this.database = database;
 	}
 
 	@XmlRootElement(name = "entry")
