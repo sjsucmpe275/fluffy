@@ -62,7 +62,7 @@ public class RedisDBHandler implements IDBHandler {
 			return null;
 		}
 		try {
-			redis.hset(serialize(key), serialize(sequenceId), serialize(value));
+			redis.hset(serialize(key), serialize(sequenceId), value);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

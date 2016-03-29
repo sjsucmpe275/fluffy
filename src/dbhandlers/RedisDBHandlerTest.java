@@ -102,18 +102,15 @@ public class RedisDBHandlerTest {
 
 	@Test
 	public void testRemove() {
-
-		String key="prasanna";
-		Map<Integer, byte[]> mapGiven= new HashMap<Integer, byte[]>();
+		Map<Integer, byte[]> expectedMap= new HashMap<Integer, byte[]>();
 		String obtainedKey="";
 		try {
-			mapGiven.put(0, serialize("data1"));
-			obtainedKey = dbHandler.store("data1".getBytes());
-			assertEquals(key, obtainedKey);
+			expectedMap.put(0, serialize("data1"));
+			obtainedKey = dbHandler.store(serialize("data1"));
 			Map<Integer, byte[]> map= new HashMap<Integer, byte[]>();
 			map=dbHandler.remove(obtainedKey);
 			for(Integer i: map.keySet()){
-				assertTrue(Arrays.equals(mapGiven.get(i), map.get(i)));
+				assertTrue(Arrays.equals(expectedMap.get(i), map.get(i)));
 			}
 
 			assertFalse(dbHandler.hasKey(obtainedKey));
