@@ -59,7 +59,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (this);
 		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (this);
 		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (this);
-
+		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(this);
 		//Chain all the handlers
 		beatMessageHandler.setNextHandler (failureMessageHandler);
 		failureMessageHandler.setNextHandler (pingMessageHandler);
