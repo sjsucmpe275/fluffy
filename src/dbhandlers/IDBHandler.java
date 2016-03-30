@@ -13,16 +13,6 @@ import java.util.Map;
 public interface IDBHandler {
 
 	/**
-	 * Method to store object in database.
-	 * 
-	 * @deprecated
-	 * @param key - Key as a string. We can consider this as object as well.
-	 * @param value - Object to store
-	 * @return Key at which object is stored
-	 */
-	public String put(String key, Object value);
-
-	/**
 	 * Method to store data in database with sequence id. 
 	 * 
 	 * Two tables should be maintained. One to store key to sequence id pair.
@@ -46,13 +36,6 @@ public interface IDBHandler {
 	 */
 	public String store(byte[] value);
 
-	/**
-	 * Method to retrieve the object stored at the key.
-	 * @deprecated
-	 * @param key
-	 * @return Object if present; otherwise null.
-	 */
-	public Object get_old(String key);
 
 	/**
 	 * Method to retrieve data stored at the key.
@@ -65,18 +48,8 @@ public interface IDBHandler {
 	 * @param key
 	 * @return
 	 */
-	public Map<Integer, Object> get(String key);
+	public Map<Integer, byte[]> get(String key);
 	
-	/**
-	 * Method to update/overwrite previously stored object.
-	 * @deprecated
-	 * @param key
-	 * @param value
-	 * @return boolean to indicate if object is updated successfully. We can
-	 *         return key here instead.
-	 */
-	public boolean update(String key, Object value);
-
 	/**
 	 * Update chunk of data stored at sequenceId.
 	 * 
@@ -85,15 +58,8 @@ public interface IDBHandler {
 	 * @param value
 	 * @return
 	 */
-	public boolean update(String key, int sequenceId, Object value);
+	public boolean update(String key, int sequenceId, byte[] value);
 	
-	/**
-	 * Method to remove object at the key.
-	 * @deprecated
-	 * @param key
-	 * @return removed object. If key not present return null.
-	 */
-	public Object remove_old(String key);
 
 	/**
 	 * Method to remove all data chunks at the key.
