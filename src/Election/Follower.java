@@ -2,13 +2,13 @@ package Election;
 
 import pipe.work.Work.WorkMessage;
 
-public class Follower implements NodeState {
+public class Follower implements INodeState {
 
 	int lastHeartBeatValue;
 	ElectionTimer timer;
 	
-	public Follower(ElectionTimer t){
-		this.timer=t;
+	public Follower(){
+		//this.timer=;
 	}
 
 	@Override

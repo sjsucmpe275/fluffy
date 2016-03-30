@@ -2,7 +2,7 @@ package Election;
 
 import pipe.work.Work.WorkMessage;
 
-public class Leader implements NodeState{
+public class Leader implements INodeState{
 
 	
 	public void sendHeartBeat(){}

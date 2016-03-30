@@ -2,7 +2,7 @@ package Election;
 
 import pipe.work.Work.WorkMessage;
 
-public class Candidate implements NodeState {
+public class Candidate implements INodeState {
 	int VoteCount;
 	int sizeOfCluster;
 	
