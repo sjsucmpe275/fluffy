@@ -25,16 +25,16 @@ public class LeaderHeartBeat extends TimerTask {
 	@Override
 	public void run() {
 		BeatMessage beatMessage = new BeatMessage (state.getConf ().getNodeId ());
-		HashMap<Integer, Follower> followers = state.getFollowers();
+		//HashMap<Integer, Follower> followers = state.getFollowers();
 
-		followers.entrySet ()
+		/*followers.entrySet ()
 				.stream ()
 				.filter (follower -> !follower.getValue ().getIsAlive ())
 				.forEach (follower -> {
 			logger.info ("Follower " + follower.getValue ().getFollowerId () + " is down");
-		});
+		});*/
 
-		state.resetFollowersState();
+		//state.resetFollowersState();
 
 		state.getEmon ().broadcastMessage (beatMessage.getMessage ());
 	}
