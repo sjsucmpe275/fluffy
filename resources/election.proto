@@ -7,6 +7,9 @@ message LeaderStatus {
    optional LeaderState state = 2;
    optional string leader_host= 3;
    optional int32 leader_id = 4;
+   optional int32 election_id = 5;
+   optional int32 votedFor = 6;
+   optional bool voteGranted = 7;
    
    enum LeaderState {
       LEADERUNKNOWN = 1;
@@ -16,6 +19,22 @@ message LeaderStatus {
 
    enum LeaderQuery {
       WHOISTHELEADER = 1;
-      THELEADERIS = 2;
+      THELEADERIS = 2;   
+      GETCLUSTERSIZE = 3;
+      SIZEIS = 4;
+      VOTEREQUEST = 5;
+      VOTERESPONSE = 6;
+      
    }
+   
+   // Request: WHOISTHELEADER
+   // Response: leaderid,electionid
+   
+   //Request: get cluster size
+   //Response: nodeid
+   
+   //request: vote request(candidate id, election id)
+   //response: (election id,vote granted, candidate id)
+   
 }
+

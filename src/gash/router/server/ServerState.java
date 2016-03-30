@@ -6,11 +6,14 @@ import gash.router.server.tasks.TaskList;
 
 import java.util.HashMap;
 
+import Election.NodeState;
+
 public class ServerState {
 	private RoutingConf conf;
 	private EdgeMonitor emon;
 	private TaskList tasks;
 	private HashMap<Integer, Follower> followers;
+	private NodeState state;
 
 	public RoutingConf getConf() {
 		return conf;
@@ -32,12 +35,20 @@ public class ServerState {
 		return tasks;
 	}
 
+	public NodeState getState() {
+		return state;
+	}
+
+	public void setState(NodeState state) {
+		this.state = state;
+	}
+
 	public void setTasks(TaskList tasks) {
 		this.tasks = tasks;
 	}
 
-	public void addFollower(Follower follower)    {
-		followers.put (follower.getFollowerId (), follower);
+	public void addFollower(Follower follower) {
+		followers.put(follower.getFollowerId(), follower);
 	}
 
 	public HashMap<Integer, Follower> getFollowers() {
@@ -45,6 +56,6 @@ public class ServerState {
 	}
 
 	public void resetFollowersState() {
-		followers.forEach ((key, follower) -> follower.setIsAlive (false));
+		followers.forEach((key, follower) -> follower.setIsAlive(false));
 	}
 }
