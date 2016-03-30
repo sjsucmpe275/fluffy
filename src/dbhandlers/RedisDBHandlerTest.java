@@ -1,7 +1,10 @@
-/*
 package dbhandlers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -10,7 +13,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import org.junit.Before;
@@ -44,9 +46,9 @@ public class RedisDBHandlerTest {
 
 	@Test
 	public void testGet() {
-		String key="prasanna";
-		Map<Integer, byte[]> mapGiven= new HashMap<Integer, byte[]>();
-		String obtainedKey="";
+		String key = "prasanna";
+		Map<Integer, byte[]> mapGiven = new HashMap<Integer, byte[]>();
+		String obtainedKey = "";
 		try {
 			mapGiven.put(0, serialize("data1"));
 			mapGiven.put(2, serialize("data2"));
@@ -54,15 +56,15 @@ public class RedisDBHandlerTest {
 			assertEquals(key, obtainedKey);
 			obtainedKey = dbHandler.put(key, 2, serialize("data2"));
 			assertEquals(key, obtainedKey);
-			Map<Integer, byte[]> map= dbHandler.get(key);
-			for(Integer i:map.keySet()){
+			Map<Integer, byte[]> map = dbHandler.get(key);
+			for (Integer i : map.keySet()) {
 				assertTrue(Arrays.equals(map.get(i), mapGiven.get(i)));
 			}
 
-			byte[] serializeValue=serialize("data3");
+			byte[] serializeValue = serialize("data3");
 			key = dbHandler.store(serializeValue);
-			Map<Integer, byte[]> mapObtained= dbHandler.get(key);
-			byte[] obtainedVal= mapObtained.get(0);
+			Map<Integer, byte[]> mapObtained = dbHandler.get(key);
+			byte[] obtainedVal = mapObtained.get(0);
 			assertTrue(Arrays.equals(serializeValue, obtainedVal));
 
 		} catch (IOException e) {
@@ -74,24 +76,24 @@ public class RedisDBHandlerTest {
 
 	@Test
 	public void testPut() {
-		String key="prasanna";
-		Map<Integer, byte[]> mapGiven= new HashMap<Integer, byte[]>();
-		String obtainedKey="";
+		String key = "prasanna";
+		Map<Integer, byte[]> mapGiven = new HashMap<Integer, byte[]>();
+		String obtainedKey = "";
 		try {
 			mapGiven.put(0, serialize("data1"));
 			mapGiven.put(2, serialize("data2"));
 			obtainedKey = dbHandler.put(key, 0, serialize("data1"));
 			assertEquals(key, obtainedKey);
-			obtainedKey="";
+			obtainedKey = "";
 			obtainedKey = dbHandler.put(key, 2, serialize("data2"));
 			assertEquals(key, obtainedKey);
 
-			obtainedKey="";
-			obtainedKey=dbHandler.put(null, 0, "bar".getBytes());
+			obtainedKey = "";
+			obtainedKey = dbHandler.put(null, 0, "bar".getBytes());
 			assertNull(obtainedKey);
 
-			obtainedKey="";
-			obtainedKey=dbHandler.put(key, 0, null);
+			obtainedKey = "";
+			obtainedKey = dbHandler.put(key, 0, null);
 			assertNull(obtainedKey);
 
 		} catch (IOException e) {
@@ -100,17 +102,16 @@ public class RedisDBHandlerTest {
 		}
 	}
 
-
 	@Test
 	public void testRemove() {
-		Map<Integer, byte[]> expectedMap= new HashMap<Integer, byte[]>();
-		String obtainedKey="";
+		Map<Integer, byte[]> expectedMap = new HashMap<Integer, byte[]>();
+		String obtainedKey = "";
 		try {
 			expectedMap.put(0, serialize("data1"));
 			obtainedKey = dbHandler.store(serialize("data1"));
-			Map<Integer, byte[]> map= new HashMap<Integer, byte[]>();
-			map=dbHandler.remove(obtainedKey);
-			for(Integer i: map.keySet()){
+			Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
+			map = dbHandler.remove(obtainedKey);
+			for (Integer i : map.keySet()) {
 				assertTrue(Arrays.equals(expectedMap.get(i), map.get(i)));
 			}
 
@@ -124,7 +125,7 @@ public class RedisDBHandlerTest {
 
 	@Test
 	public void testStore() {
-		byte[] serializedValue="foo".getBytes();
+		byte[] serializedValue = "foo".getBytes();
 		String key = dbHandler.store(serializedValue);
 		assertNotNull(key);
 
@@ -134,15 +135,15 @@ public class RedisDBHandlerTest {
 
 	@Test
 	public void testUpdate() {
-		byte[] serializedValue="foo".getBytes();
+		byte[] serializedValue = "foo".getBytes();
 		String key = dbHandler.store(serializedValue);
 		boolean b = dbHandler.update(key, 0, "foobar".getBytes());
 		assertTrue(b);
 	}
 
 	public byte[] serialize(Object obj) throws IOException {
-		try(ByteArrayOutputStream b = new ByteArrayOutputStream()){
-			try(ObjectOutputStream o = new ObjectOutputStream(b)){
+		try (ByteArrayOutputStream b = new ByteArrayOutputStream()) {
+			try (ObjectOutputStream o = new ObjectOutputStream(b)) {
 				o.writeObject(obj);
 			}
 			return b.toByteArray();
@@ -150,12 +151,11 @@ public class RedisDBHandlerTest {
 	}
 
 	public Object deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-		try(ByteArrayInputStream b = new ByteArrayInputStream(bytes)){
-			try(ObjectInputStream o = new ObjectInputStream(b)){
+		try (ByteArrayInputStream b = new ByteArrayInputStream(bytes)) {
+			try (ObjectInputStream o = new ObjectInputStream(b)) {
 				return o.readObject();
 			}
 		}
 	}
 
 }
-*/
