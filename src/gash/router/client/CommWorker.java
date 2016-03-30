@@ -25,8 +25,15 @@ public class CommWorker extends Thread {
 	public void run() {
 		System.out.println("--> starting worker thread");
 		System.out.flush();
-
-		Channel ch = conn.connect();
+		Channel ch = null;
+		
+		try {
+			ch = conn.connect();
+		} catch(Exception e) {
+			System.out.println("Client is not available! Try again later...");
+			System.exit(0);;
+		}
+		
 		if (ch == null || !ch.isOpen() || !ch.isActive()) {
 			CommConnection.logger.error("connection missing, no outbound communication");
 			return;
