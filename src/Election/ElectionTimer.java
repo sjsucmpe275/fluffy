@@ -3,16 +3,18 @@ package Election;
 import java.util.TimerTask;
 
 public class ElectionTimer extends TimerTask{
-
+	private Follower follower;
+	public ElectionTimer(Follower follower) {
+		this.follower=follower;
+	}
+	
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
+		long currentTime = System.currentTimeMillis ();
+		long diff=currentTime - follower.getLastHeartbeat();
 		
-	}
-	public int getrandTimeOut(){
-		return 0;
-	}
-	public static int initElectionTimer(){
-		return 0;
-	}
+		if(diff>follower.getDelay()){
+			follower.isElectionNeeded(true);
+		}
+	}	
 }

@@ -19,12 +19,16 @@ public class ServerState {
 	private INodeState candidate;
 	private INodeState follower;
 	private INodeState currentState;
+	private int leaderId;
+	private int electionId;//termId
 
 	public ServerState()	{
-		leader = new Leader();
-		candidate = new Candidate();
-		follower = new Follower();
+		leader = new Leader(this);
+		candidate = new Candidate(this);
+		follower = new Follower(this);
 		currentState = follower;
+		leaderId = -1;
+		electionId=0;
 	}
 	
 	public RoutingConf getConf() {
@@ -47,6 +51,10 @@ public class ServerState {
 		return tasks;
 	}
 
+	public INodeState getCurrentState()	{
+		return currentState;
+	}
+	
 	public void setState(NodeStateEnum state) {
 		if(state == NodeStateEnum.CANDIDATE)	{
 			currentState = candidate;
@@ -57,9 +65,26 @@ public class ServerState {
 		if(state == NodeStateEnum.LEADER)	{
 			currentState = leader;
 		}
+		currentState.stateChanged();
 	}
 
 	public void setTasks(TaskList tasks) {
 		this.tasks = tasks;
+	}
+
+	public int getLeaderId() {
+		return leaderId;
+	}
+
+	public void setLeaderId(int leaderId) {
+		this.leaderId = leaderId;
+	}
+
+	public int getElectionId() {
+		return electionId;
+	}
+
+	public void setElectionId(int electionId) {
+		this.electionId = electionId;
 	}
 }
