@@ -10,6 +10,12 @@ public final class Storage {
   }
   /**
    * Protobuf enum {@code Action}
+   *
+   * <pre>
+   * ============Data Operations============
+   * There are 4 types of operations which can be performed on data. They are 
+   * analogous to CRUD operations in databases.
+   * </pre>
    */
   public enum Action
       implements com.google.protobuf.ProtocolMessageEnum {
@@ -141,6 +147,23 @@ public final class Storage {
   }
   /**
    * Protobuf type {@code Metadata}
+   *
+   * <pre>
+   * ============Metadata============ 
+   * This class is for storing metadata. We
+   * should store sequence size so that we can successfully reconstruct
+   * complete file/data from chunks. (Basically, we should know when we should
+   * write chunks to the file and so we should know what is the sequence
+   * size).
+   * So, for example, if a file has 8 chunks of data. seq_size should be 8 +
+   * 1. (1 for metadata chunk).
+   * size attribute is for storing file size in bytes. (optional) time will
+   * store creation time. (optional)
+   * Metadata chunk should be created by client program. To create it, client
+   * should first identify file size and how many chunks will be created from
+   * the file.
+   * Metadata should be stored as sequenceNo 0.
+   * </pre>
    */
   public static final class Metadata extends
       com.google.protobuf.GeneratedMessage implements
@@ -423,6 +446,23 @@ public final class Storage {
     }
     /**
      * Protobuf type {@code Metadata}
+     *
+     * <pre>
+     * ============Metadata============ 
+     * This class is for storing metadata. We
+     * should store sequence size so that we can successfully reconstruct
+     * complete file/data from chunks. (Basically, we should know when we should
+     * write chunks to the file and so we should know what is the sequence
+     * size).
+     * So, for example, if a file has 8 chunks of data. seq_size should be 8 +
+     * 1. (1 for metadata chunk).
+     * size attribute is for storing file size in bytes. (optional) time will
+     * store creation time. (optional)
+     * Metadata chunk should be created by client program. To create it, client
+     * should first identify file size and how many chunks will be created from
+     * the file.
+     * Metadata should be stored as sequenceNo 0.
+     * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
@@ -717,6 +757,15 @@ public final class Storage {
         getKeyBytes();
 
     /**
+     * <code>optional int32 sequence_no = 8;</code>
+     */
+    boolean hasSequenceNo();
+    /**
+     * <code>optional int32 sequence_no = 8;</code>
+     */
+    int getSequenceNo();
+
+    /**
      * <code>optional bytes data = 7;</code>
      *
      * <pre>
@@ -745,30 +794,18 @@ public final class Storage {
      * <code>optional .Metadata metadata = 22;</code>
      */
     storage.Storage.MetadataOrBuilder getMetadataOrBuilder();
-
-    /**
-     * <code>optional int32 size = 8;</code>
-     */
-    boolean hasSize();
-    /**
-     * <code>optional int32 size = 8;</code>
-     */
-    int getSize();
-
-    /**
-     * <code>optional int32 sequence_no = 9;</code>
-     */
-    boolean hasSequenceNo();
-    /**
-     * <code>optional int32 sequence_no = 9;</code>
-     */
-    int getSequenceNo();
   }
   /**
    * Protobuf type {@code Query}
    *
    * <pre>
-   * Storage Query from client to cluster
+   * ============Query============
+   * 
+   * Query is command for the cluster. It should contain 
+   * - Action to be performed 
+   * - Key for the data 
+   * - Sequence number (for metadata chunk -&gt; 0)
+   * - Data or Metadata   
    * </pre>
    */
   public static final class Query extends
@@ -838,23 +875,18 @@ public final class Storage {
               break;
             }
             case 58: {
-              bitField0_ |= 0x00000004;
+              bitField0_ |= 0x00000008;
               data_ = input.readBytes();
               break;
             }
             case 64: {
-              bitField0_ |= 0x00000010;
-              size_ = input.readInt32();
-              break;
-            }
-            case 72: {
-              bitField0_ |= 0x00000020;
+              bitField0_ |= 0x00000004;
               sequenceNo_ = input.readInt32();
               break;
             }
             case 178: {
               storage.Storage.Metadata.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000008) == 0x00000008)) {
+              if (((bitField0_ & 0x00000010) == 0x00000010)) {
                 subBuilder = metadata_.toBuilder();
               }
               metadata_ = input.readMessage(storage.Storage.Metadata.PARSER, extensionRegistry);
@@ -862,7 +894,7 @@ public final class Storage {
                 subBuilder.mergeFrom(metadata_);
                 metadata_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000008;
+              bitField0_ |= 0x00000010;
               break;
             }
           }
@@ -982,6 +1014,21 @@ public final class Storage {
       }
     }
 
+    public static final int SEQUENCE_NO_FIELD_NUMBER = 8;
+    private int sequenceNo_;
+    /**
+     * <code>optional int32 sequence_no = 8;</code>
+     */
+    public boolean hasSequenceNo() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional int32 sequence_no = 8;</code>
+     */
+    public int getSequenceNo() {
+      return sequenceNo_;
+    }
+
     public static final int DATA_FIELD_NUMBER = 7;
     private com.google.protobuf.ByteString data_;
     /**
@@ -992,7 +1039,7 @@ public final class Storage {
      * </pre>
      */
     public boolean hasData() {
-      return ((bitField0_ & 0x00000004) == 0x00000004);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional bytes data = 7;</code>
@@ -1011,7 +1058,7 @@ public final class Storage {
      * <code>optional .Metadata metadata = 22;</code>
      */
     public boolean hasMetadata() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional .Metadata metadata = 22;</code>
@@ -1026,43 +1073,12 @@ public final class Storage {
       return metadata_;
     }
 
-    public static final int SIZE_FIELD_NUMBER = 8;
-    private int size_;
-    /**
-     * <code>optional int32 size = 8;</code>
-     */
-    public boolean hasSize() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional int32 size = 8;</code>
-     */
-    public int getSize() {
-      return size_;
-    }
-
-    public static final int SEQUENCE_NO_FIELD_NUMBER = 9;
-    private int sequenceNo_;
-    /**
-     * <code>optional int32 sequence_no = 9;</code>
-     */
-    public boolean hasSequenceNo() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
-    }
-    /**
-     * <code>optional int32 sequence_no = 9;</code>
-     */
-    public int getSequenceNo() {
-      return sequenceNo_;
-    }
-
     private void initFields() {
       action_ = storage.Storage.Action.GET;
       key_ = "";
+      sequenceNo_ = 0;
       data_ = com.google.protobuf.ByteString.EMPTY;
       metadata_ = storage.Storage.Metadata.getDefaultInstance();
-      size_ = 0;
-      sequenceNo_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1093,16 +1109,13 @@ public final class Storage {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeBytes(6, getKeyBytes());
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeBytes(7, data_);
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeInt32(8, sequenceNo_);
+      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeInt32(8, size_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        output.writeInt32(9, sequenceNo_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeMessage(22, metadata_);
       }
       getUnknownFields().writeTo(output);
@@ -1122,19 +1135,15 @@ public final class Storage {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(6, getKeyBytes());
       }
-      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(7, data_);
       }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(8, sequenceNo_);
+      }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(8, size_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(9, sequenceNo_);
-      }
-      if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(22, metadata_);
       }
@@ -1220,7 +1229,13 @@ public final class Storage {
      * Protobuf type {@code Query}
      *
      * <pre>
-     * Storage Query from client to cluster
+     * ============Query============
+     * 
+     * Query is command for the cluster. It should contain 
+     * - Action to be performed 
+     * - Key for the data 
+     * - Sequence number (for metadata chunk -&gt; 0)
+     * - Data or Metadata   
      * </pre>
      */
     public static final class Builder extends
@@ -1264,18 +1279,16 @@ public final class Storage {
         bitField0_ = (bitField0_ & ~0x00000001);
         key_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        data_ = com.google.protobuf.ByteString.EMPTY;
+        sequenceNo_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        data_ = com.google.protobuf.ByteString.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000008);
         if (metadataBuilder_ == null) {
           metadata_ = storage.Storage.Metadata.getDefaultInstance();
         } else {
           metadataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
-        size_ = 0;
         bitField0_ = (bitField0_ & ~0x00000010);
-        sequenceNo_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -1315,23 +1328,19 @@ public final class Storage {
         if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
           to_bitField0_ |= 0x00000004;
         }
-        result.data_ = data_;
+        result.sequenceNo_ = sequenceNo_;
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
+        }
+        result.data_ = data_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
         }
         if (metadataBuilder_ == null) {
           result.metadata_ = metadata_;
         } else {
           result.metadata_ = metadataBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
-          to_bitField0_ |= 0x00000010;
-        }
-        result.size_ = size_;
-        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
-          to_bitField0_ |= 0x00000020;
-        }
-        result.sequenceNo_ = sequenceNo_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1356,17 +1365,14 @@ public final class Storage {
           key_ = other.key_;
           onChanged();
         }
+        if (other.hasSequenceNo()) {
+          setSequenceNo(other.getSequenceNo());
+        }
         if (other.hasData()) {
           setData(other.getData());
         }
         if (other.hasMetadata()) {
           mergeMetadata(other.getMetadata());
-        }
-        if (other.hasSize()) {
-          setSize(other.getSize());
-        }
-        if (other.hasSequenceNo()) {
-          setSequenceNo(other.getSequenceNo());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1556,6 +1562,38 @@ public final class Storage {
         return this;
       }
 
+      private int sequenceNo_ ;
+      /**
+       * <code>optional int32 sequence_no = 8;</code>
+       */
+      public boolean hasSequenceNo() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional int32 sequence_no = 8;</code>
+       */
+      public int getSequenceNo() {
+        return sequenceNo_;
+      }
+      /**
+       * <code>optional int32 sequence_no = 8;</code>
+       */
+      public Builder setSequenceNo(int value) {
+        bitField0_ |= 0x00000004;
+        sequenceNo_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 sequence_no = 8;</code>
+       */
+      public Builder clearSequenceNo() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        sequenceNo_ = 0;
+        onChanged();
+        return this;
+      }
+
       private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>optional bytes data = 7;</code>
@@ -1565,7 +1603,7 @@ public final class Storage {
        * </pre>
        */
       public boolean hasData() {
-        return ((bitField0_ & 0x00000004) == 0x00000004);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional bytes data = 7;</code>
@@ -1588,7 +1626,7 @@ public final class Storage {
         if (value == null) {
     throw new NullPointerException();
   }
-  bitField0_ |= 0x00000004;
+  bitField0_ |= 0x00000008;
         data_ = value;
         onChanged();
         return this;
@@ -1601,7 +1639,7 @@ public final class Storage {
        * </pre>
        */
       public Builder clearData() {
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000008);
         data_ = getDefaultInstance().getData();
         onChanged();
         return this;
@@ -1614,7 +1652,7 @@ public final class Storage {
        * <code>optional .Metadata metadata = 22;</code>
        */
       public boolean hasMetadata() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>optional .Metadata metadata = 22;</code>
@@ -1639,7 +1677,7 @@ public final class Storage {
         } else {
           metadataBuilder_.setMessage(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
@@ -1653,7 +1691,7 @@ public final class Storage {
         } else {
           metadataBuilder_.setMessage(builderForValue.build());
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
@@ -1661,7 +1699,7 @@ public final class Storage {
        */
       public Builder mergeMetadata(storage.Storage.Metadata value) {
         if (metadataBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008) &&
+          if (((bitField0_ & 0x00000010) == 0x00000010) &&
               metadata_ != storage.Storage.Metadata.getDefaultInstance()) {
             metadata_ =
               storage.Storage.Metadata.newBuilder(metadata_).mergeFrom(value).buildPartial();
@@ -1672,7 +1710,7 @@ public final class Storage {
         } else {
           metadataBuilder_.mergeFrom(value);
         }
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         return this;
       }
       /**
@@ -1685,14 +1723,14 @@ public final class Storage {
         } else {
           metadataBuilder_.clear();
         }
-        bitField0_ = (bitField0_ & ~0x00000008);
+        bitField0_ = (bitField0_ & ~0x00000010);
         return this;
       }
       /**
        * <code>optional .Metadata metadata = 22;</code>
        */
       public storage.Storage.Metadata.Builder getMetadataBuilder() {
-        bitField0_ |= 0x00000008;
+        bitField0_ |= 0x00000010;
         onChanged();
         return getMetadataFieldBuilder().getBuilder();
       }
@@ -1721,70 +1759,6 @@ public final class Storage {
           metadata_ = null;
         }
         return metadataBuilder_;
-      }
-
-      private int size_ ;
-      /**
-       * <code>optional int32 size = 8;</code>
-       */
-      public boolean hasSize() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
-      }
-      /**
-       * <code>optional int32 size = 8;</code>
-       */
-      public int getSize() {
-        return size_;
-      }
-      /**
-       * <code>optional int32 size = 8;</code>
-       */
-      public Builder setSize(int value) {
-        bitField0_ |= 0x00000010;
-        size_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 size = 8;</code>
-       */
-      public Builder clearSize() {
-        bitField0_ = (bitField0_ & ~0x00000010);
-        size_ = 0;
-        onChanged();
-        return this;
-      }
-
-      private int sequenceNo_ ;
-      /**
-       * <code>optional int32 sequence_no = 9;</code>
-       */
-      public boolean hasSequenceNo() {
-        return ((bitField0_ & 0x00000020) == 0x00000020);
-      }
-      /**
-       * <code>optional int32 sequence_no = 9;</code>
-       */
-      public int getSequenceNo() {
-        return sequenceNo_;
-      }
-      /**
-       * <code>optional int32 sequence_no = 9;</code>
-       */
-      public Builder setSequenceNo(int value) {
-        bitField0_ |= 0x00000020;
-        sequenceNo_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 sequence_no = 9;</code>
-       */
-      public Builder clearSequenceNo() {
-        bitField0_ = (bitField0_ & ~0x00000020);
-        sequenceNo_ = 0;
-        onChanged();
-        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:Query)
@@ -1864,15 +1838,6 @@ public final class Storage {
      */
     com.google.protobuf.ByteString
         getKeyBytes();
-
-    /**
-     * <code>optional int32 size = 13;</code>
-     */
-    boolean hasSize();
-    /**
-     * <code>optional int32 size = 13;</code>
-     */
-    int getSize();
 
     /**
      * <code>optional int32 sequence_no = 14;</code>
@@ -1966,6 +1931,17 @@ public final class Storage {
   }
   /**
    * Protobuf type {@code Response}
+   *
+   * <pre>
+   * ============Response============
+   * Response to the Query. It should contain:
+   * - action for which response is given
+   * - success status
+   * - key for which action is performed
+   * - sequence no of the response chunk
+   * - information message to be displayed (optional)
+   * - Payload as failure, data or metadata.
+   * </pre>
    */
   public static final class Response extends
       com.google.protobuf.GeneratedMessage implements
@@ -2038,20 +2014,15 @@ public final class Storage {
               key_ = bs;
               break;
             }
-            case 104: {
-              bitField0_ |= 0x00000008;
-              size_ = input.readInt32();
-              break;
-            }
             case 112: {
-              bitField0_ |= 0x00000010;
+              bitField0_ |= 0x00000008;
               sequenceNo_ = input.readInt32();
               break;
             }
             case 122: {
               com.google.protobuf.ByteString bs = input.readBytes();
-              payloadCase_ = 15;
-              payload_ = bs;
+              bitField0_ |= 0x00000010;
+              infomessage_ = bs;
               break;
             }
             case 130: {
@@ -2129,7 +2100,6 @@ public final class Storage {
     private java.lang.Object payload_;
     public enum PayloadCase
         implements com.google.protobuf.Internal.EnumLite {
-      INFOMESSAGE(15),
       FAILURE(16),
       DATA(17),
       METADATA(18),
@@ -2140,7 +2110,6 @@ public final class Storage {
       }
       public static PayloadCase valueOf(int value) {
         switch (value) {
-          case 15: return INFOMESSAGE;
           case 16: return FAILURE;
           case 17: return DATA;
           case 18: return METADATA;
@@ -2263,28 +2232,13 @@ public final class Storage {
       }
     }
 
-    public static final int SIZE_FIELD_NUMBER = 13;
-    private int size_;
-    /**
-     * <code>optional int32 size = 13;</code>
-     */
-    public boolean hasSize() {
-      return ((bitField0_ & 0x00000008) == 0x00000008);
-    }
-    /**
-     * <code>optional int32 size = 13;</code>
-     */
-    public int getSize() {
-      return size_;
-    }
-
     public static final int SEQUENCE_NO_FIELD_NUMBER = 14;
     private int sequenceNo_;
     /**
      * <code>optional int32 sequence_no = 14;</code>
      */
     public boolean hasSequenceNo() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
+      return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional int32 sequence_no = 14;</code>
@@ -2294,6 +2248,7 @@ public final class Storage {
     }
 
     public static final int INFOMESSAGE_FIELD_NUMBER = 15;
+    private java.lang.Object infomessage_;
     /**
      * <code>optional string infomessage = 15;</code>
      *
@@ -2302,7 +2257,7 @@ public final class Storage {
      * </pre>
      */
     public boolean hasInfomessage() {
-      return payloadCase_ == 15;
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional string infomessage = 15;</code>
@@ -2312,18 +2267,15 @@ public final class Storage {
      * </pre>
      */
     public java.lang.String getInfomessage() {
-      java.lang.Object ref = "";
-      if (payloadCase_ == 15) {
-        ref = payload_;
-      }
+      java.lang.Object ref = infomessage_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        if (bs.isValidUtf8() && (payloadCase_ == 15)) {
-          payload_ = s;
+        if (bs.isValidUtf8()) {
+          infomessage_ = s;
         }
         return s;
       }
@@ -2337,17 +2289,12 @@ public final class Storage {
      */
     public com.google.protobuf.ByteString
         getInfomessageBytes() {
-      java.lang.Object ref = "";
-      if (payloadCase_ == 15) {
-        ref = payload_;
-      }
+      java.lang.Object ref = infomessage_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        if (payloadCase_ == 15) {
-          payload_ = b;
-        }
+        infomessage_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -2447,8 +2394,8 @@ public final class Storage {
       action_ = storage.Storage.Action.GET;
       success_ = false;
       key_ = "";
-      size_ = 0;
       sequenceNo_ = 0;
+      infomessage_ = "";
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2489,12 +2436,9 @@ public final class Storage {
         output.writeBytes(12, getKeyBytes());
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
-        output.writeInt32(13, size_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeInt32(14, sequenceNo_);
       }
-      if (payloadCase_ == 15) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeBytes(15, getInfomessageBytes());
       }
       if (payloadCase_ == 16) {
@@ -2530,13 +2474,9 @@ public final class Storage {
       }
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(13, size_);
-      }
-      if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(14, sequenceNo_);
       }
-      if (payloadCase_ == 15) {
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(15, getInfomessageBytes());
       }
@@ -2633,6 +2573,17 @@ public final class Storage {
     }
     /**
      * Protobuf type {@code Response}
+     *
+     * <pre>
+     * ============Response============
+     * Response to the Query. It should contain:
+     * - action for which response is given
+     * - success status
+     * - key for which action is performed
+     * - sequence no of the response chunk
+     * - information message to be displayed (optional)
+     * - Payload as failure, data or metadata.
+     * </pre>
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
@@ -2676,9 +2627,9 @@ public final class Storage {
         bitField0_ = (bitField0_ & ~0x00000002);
         key_ = "";
         bitField0_ = (bitField0_ & ~0x00000004);
-        size_ = 0;
-        bitField0_ = (bitField0_ & ~0x00000008);
         sequenceNo_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        infomessage_ = "";
         bitField0_ = (bitField0_ & ~0x00000010);
         payloadCase_ = 0;
         payload_ = null;
@@ -2725,14 +2676,11 @@ public final class Storage {
         if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
           to_bitField0_ |= 0x00000008;
         }
-        result.size_ = size_;
+        result.sequenceNo_ = sequenceNo_;
         if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.sequenceNo_ = sequenceNo_;
-        if (payloadCase_ == 15) {
-          result.payload_ = payload_;
-        }
+        result.infomessage_ = infomessage_;
         if (payloadCase_ == 16) {
           if (failureBuilder_ == null) {
             result.payload_ = payload_;
@@ -2778,19 +2726,15 @@ public final class Storage {
           key_ = other.key_;
           onChanged();
         }
-        if (other.hasSize()) {
-          setSize(other.getSize());
-        }
         if (other.hasSequenceNo()) {
           setSequenceNo(other.getSequenceNo());
         }
+        if (other.hasInfomessage()) {
+          bitField0_ |= 0x00000010;
+          infomessage_ = other.infomessage_;
+          onChanged();
+        }
         switch (other.getPayloadCase()) {
-          case INFOMESSAGE: {
-            payloadCase_ = 15;
-            payload_ = other.payload_;
-            onChanged();
-            break;
-          }
           case FAILURE: {
             mergeFailure(other.getFailure());
             break;
@@ -3070,44 +3014,12 @@ public final class Storage {
         return this;
       }
 
-      private int size_ ;
-      /**
-       * <code>optional int32 size = 13;</code>
-       */
-      public boolean hasSize() {
-        return ((bitField0_ & 0x00000008) == 0x00000008);
-      }
-      /**
-       * <code>optional int32 size = 13;</code>
-       */
-      public int getSize() {
-        return size_;
-      }
-      /**
-       * <code>optional int32 size = 13;</code>
-       */
-      public Builder setSize(int value) {
-        bitField0_ |= 0x00000008;
-        size_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional int32 size = 13;</code>
-       */
-      public Builder clearSize() {
-        bitField0_ = (bitField0_ & ~0x00000008);
-        size_ = 0;
-        onChanged();
-        return this;
-      }
-
       private int sequenceNo_ ;
       /**
        * <code>optional int32 sequence_no = 14;</code>
        */
       public boolean hasSequenceNo() {
-        return ((bitField0_ & 0x00000010) == 0x00000010);
+        return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional int32 sequence_no = 14;</code>
@@ -3119,7 +3031,7 @@ public final class Storage {
        * <code>optional int32 sequence_no = 14;</code>
        */
       public Builder setSequenceNo(int value) {
-        bitField0_ |= 0x00000010;
+        bitField0_ |= 0x00000008;
         sequenceNo_ = value;
         onChanged();
         return this;
@@ -3128,12 +3040,13 @@ public final class Storage {
        * <code>optional int32 sequence_no = 14;</code>
        */
       public Builder clearSequenceNo() {
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000008);
         sequenceNo_ = 0;
         onChanged();
         return this;
       }
 
+      private java.lang.Object infomessage_ = "";
       /**
        * <code>optional string infomessage = 15;</code>
        *
@@ -3142,7 +3055,7 @@ public final class Storage {
        * </pre>
        */
       public boolean hasInfomessage() {
-        return payloadCase_ == 15;
+        return ((bitField0_ & 0x00000010) == 0x00000010);
       }
       /**
        * <code>optional string infomessage = 15;</code>
@@ -3152,18 +3065,13 @@ public final class Storage {
        * </pre>
        */
       public java.lang.String getInfomessage() {
-        java.lang.Object ref = "";
-        if (payloadCase_ == 15) {
-          ref = payload_;
-        }
+        java.lang.Object ref = infomessage_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          if (payloadCase_ == 15) {
-            if (bs.isValidUtf8()) {
-              payload_ = s;
-            }
+          if (bs.isValidUtf8()) {
+            infomessage_ = s;
           }
           return s;
         } else {
@@ -3179,17 +3087,12 @@ public final class Storage {
        */
       public com.google.protobuf.ByteString
           getInfomessageBytes() {
-        java.lang.Object ref = "";
-        if (payloadCase_ == 15) {
-          ref = payload_;
-        }
+        java.lang.Object ref = infomessage_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          if (payloadCase_ == 15) {
-            payload_ = b;
-          }
+          infomessage_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -3207,8 +3110,8 @@ public final class Storage {
         if (value == null) {
     throw new NullPointerException();
   }
-  payloadCase_ = 15;
-        payload_ = value;
+  bitField0_ |= 0x00000010;
+        infomessage_ = value;
         onChanged();
         return this;
       }
@@ -3220,11 +3123,9 @@ public final class Storage {
        * </pre>
        */
       public Builder clearInfomessage() {
-        if (payloadCase_ == 15) {
-          payloadCase_ = 0;
-          payload_ = null;
-          onChanged();
-        }
+        bitField0_ = (bitField0_ & ~0x00000010);
+        infomessage_ = getDefaultInstance().getInfomessage();
+        onChanged();
         return this;
       }
       /**
@@ -3239,8 +3140,8 @@ public final class Storage {
         if (value == null) {
     throw new NullPointerException();
   }
-  payloadCase_ = 15;
-        payload_ = value;
+  bitField0_ |= 0x00000010;
+        infomessage_ = value;
         onChanged();
         return this;
       }
@@ -3643,17 +3544,16 @@ public final class Storage {
     java.lang.String[] descriptorData = {
       "\n\rstorage.proto\032\014common.proto\"8\n\010Metadat" +
       "a\022\020\n\010seq_size\030\023 \002(\005\022\014\n\004size\030\024 \001(\005\022\014\n\004tim" +
-      "e\030\025 \001(\003\"{\n\005Query\022\027\n\006action\030\005 \002(\0162\007.Actio" +
-      "n\022\013\n\003key\030\006 \001(\t\022\014\n\004data\030\007 \001(\014\022\033\n\010metadata" +
-      "\030\026 \001(\0132\t.Metadata\022\014\n\004size\030\010 \001(\005\022\023\n\013seque" +
-      "nce_no\030\t \001(\005\"\322\001\n\010Response\022\027\n\006action\030\n \002(" +
-      "\0162\007.Action\022\017\n\007success\030\013 \001(\010\022\013\n\003key\030\014 \001(\t" +
-      "\022\014\n\004size\030\r \001(\005\022\023\n\013sequence_no\030\016 \001(\005\022\025\n\013i" +
-      "nfomessage\030\017 \001(\tH\000\022\033\n\007failure\030\020 \001(\0132\010.Fa" +
-      "ilureH\000\022\016\n\004data\030\021 \001(\014H\000\022\035\n\010metaData\030\022 \001(",
-      "\0132\t.MetadataH\000B\t\n\007payload*4\n\006Action\022\007\n\003G" +
-      "ET\020\001\022\t\n\005STORE\020\002\022\n\n\006UPDATE\020\003\022\n\n\006DELETE\020\004B" +
-      "\013\n\007storageH\001"
+      "e\030\025 \001(\003\"m\n\005Query\022\027\n\006action\030\005 \002(\0162\007.Actio" +
+      "n\022\013\n\003key\030\006 \001(\t\022\023\n\013sequence_no\030\010 \001(\005\022\014\n\004d" +
+      "ata\030\007 \001(\014\022\033\n\010metadata\030\026 \001(\0132\t.Metadata\"\302" +
+      "\001\n\010Response\022\027\n\006action\030\n \002(\0162\007.Action\022\017\n\007" +
+      "success\030\013 \001(\010\022\013\n\003key\030\014 \001(\t\022\023\n\013sequence_n" +
+      "o\030\016 \001(\005\022\023\n\013infomessage\030\017 \001(\t\022\033\n\007failure\030" +
+      "\020 \001(\0132\010.FailureH\000\022\016\n\004data\030\021 \001(\014H\000\022\035\n\010met" +
+      "aData\030\022 \001(\0132\t.MetadataH\000B\t\n\007payload*4\n\006A",
+      "ction\022\007\n\003GET\020\001\022\t\n\005STORE\020\002\022\n\n\006UPDATE\020\003\022\n\n" +
+      "\006DELETE\020\004B\013\n\007storageH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -3679,13 +3579,13 @@ public final class Storage {
     internal_static_Query_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Query_descriptor,
-        new java.lang.String[] { "Action", "Key", "Data", "Metadata", "Size", "SequenceNo", });
+        new java.lang.String[] { "Action", "Key", "SequenceNo", "Data", "Metadata", });
     internal_static_Response_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_Response_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Response_descriptor,
-        new java.lang.String[] { "Action", "Success", "Key", "Size", "SequenceNo", "Infomessage", "Failure", "Data", "MetaData", "Payload", });
+        new java.lang.String[] { "Action", "Success", "Key", "SequenceNo", "Infomessage", "Failure", "Data", "MetaData", "Payload", });
     pipe.common.Common.getDescriptor();
   }
 
