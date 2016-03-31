@@ -1,7 +1,8 @@
-package Election;
+package util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.TimeoutListener;
 
 import java.util.Date;
 
@@ -12,15 +13,15 @@ import java.util.Date;
 * Owner should be notified once the timer is out
 * If owner cancel the task, timer should not notify the owner or should be interrupted
 * */
-public class ElectionTimer{
+public class Timer {
 
 	private static final Logger logger = LoggerFactory.getLogger ("Election Timer");
 	private final long electionTimeout;
-	private INodeState nodeState;
+	private TimeoutListener listener;
 	private TimerThread timerThread;
 
-	public ElectionTimer(INodeState nodeState, long electionTimeout) {
-		this.nodeState = nodeState;
+	public Timer(TimeoutListener listener, long electionTimeout) {
+		this.listener = listener;
 		this.electionTimeout = electionTimeout;
 		timerThread = new TimerThread ();
 	}
@@ -44,7 +45,7 @@ public class ElectionTimer{
 					logger.info ("********Election timer started: " + new Date (System.currentTimeMillis ()));
 					wait (electionTimeout);
 					logger.info ("********Election timed out: " + new Date (System.currentTimeMillis ()));
-					nodeState.onElectionTimeout ();
+					listener.notifyTimeout ();
 				} catch (InterruptedException e) {
 					logger.info ("********Election Timer was interrupted: " + new Date (System.currentTimeMillis ()));
 				}
