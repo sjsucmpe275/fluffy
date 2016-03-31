@@ -169,7 +169,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	}
 
 	public long getDelayTime() {
-		return dt;
+		return 10000;
 	}
 
 	public Logger getLogger()  {

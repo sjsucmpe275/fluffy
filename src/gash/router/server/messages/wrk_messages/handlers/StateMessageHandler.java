@@ -21,7 +21,7 @@ public class StateMessageHandler implements IWrkMessageHandler {
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
 		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, null);
+			nextHandler.handleMessage (workMessage, channel);
 			return;
 		}
 

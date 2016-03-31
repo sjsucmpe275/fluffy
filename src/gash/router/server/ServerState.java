@@ -20,19 +20,22 @@ public class ServerState {
 	private INodeState follower;
 	private INodeState currentState;
 
-	public ServerState()	{
+	public ServerState() {
 		leader = new Leader();
-		candidate = new Candidate();
-		follower = new Follower();
+		candidate = new Candidate(this);
+		follower = new Follower(this);
 		currentState = follower;
 	}
-	
+
 	public RoutingConf getConf() {
 		return conf;
 	}
 
 	public void setConf(RoutingConf conf) {
 		this.conf = conf;
+		if (conf.getNodeId() == 1) {
+			currentState = candidate;
+		}
 	}
 
 	public EdgeMonitor getEmon() {
@@ -48,18 +51,22 @@ public class ServerState {
 	}
 
 	public void setState(NodeStateEnum state) {
-		if(state == NodeStateEnum.CANDIDATE)	{
+		if (state == NodeStateEnum.CANDIDATE) {
 			currentState = candidate;
 		}
-		if(state == NodeStateEnum.FOLLOWER)	{
+		if (state == NodeStateEnum.FOLLOWER) {
 			currentState = follower;
 		}
-		if(state == NodeStateEnum.LEADER)	{
+		if (state == NodeStateEnum.LEADER) {
 			currentState = leader;
 		}
 	}
 
 	public void setTasks(TaskList tasks) {
 		this.tasks = tasks;
+	}
+
+	public INodeState getCurrentState() {
+		return currentState;
 	}
 }

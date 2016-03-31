@@ -1,5 +1,6 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
+import Election.Candidate;
 import gash.router.server.WorkChannelHandler;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeList;
@@ -23,7 +24,7 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
 		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, null);
+			nextHandler.handleMessage (workMessage, channel);
 			return;
 		}
 
@@ -59,6 +60,9 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 		BeatMessage beatMessage = new BeatMessage (workChannelHandler.getServerState().getConf().getNodeId());
 		beatMessage.setDestination (workMessage.getHeader ().getNodeId ());
 
+		if (workChannelHandler.getServerState().getCurrentState() instanceof Candidate) {
+			((Candidate)workChannelHandler.getServerState().getCurrentState()).getClusterSize();
+		}
 		channel.writeAndFlush (beatMessage.getMessage ());
 	}
 

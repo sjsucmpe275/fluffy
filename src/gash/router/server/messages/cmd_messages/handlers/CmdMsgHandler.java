@@ -18,6 +18,7 @@ public class CmdMsgHandler implements ICmdMessageHandler {
 
 	@Override
 	public void handleMessage(CommandMessage cmdMessage, Channel channel) throws Exception {
+		
 		if(! cmdMessage.hasMessage () && nextHandler != null)  {
 			nextHandler.handleMessage (cmdMessage, channel);
 			return;
@@ -29,6 +30,7 @@ public class CmdMsgHandler implements ICmdMessageHandler {
 		}
 
 		cmdChannelHandler.getLogger ().info(cmdMessage.getMessage());
+		
 	}
 
 	@Override

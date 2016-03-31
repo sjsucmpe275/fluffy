@@ -110,7 +110,7 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 			case STORE:
 
 				if (query.hasKey()) {
-					key = dbHandler.put(query.getKey(), query.getData().toByteArray());
+					key = dbHandler.put(query.getKey(), 0, query.getData().toByteArray());
 				} else {
 					key = dbHandler.store(query.getData().toByteArray());
 				}
@@ -126,7 +126,7 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 				break;
 
 			case UPDATE:
-				key = dbHandler.put(query.getKey(), query.getData().toByteArray());
+				key = dbHandler.put(query.getKey(),0, query.getData().toByteArray());
 				rb.setAction(query.getAction());
 				rb.setKey(key);
 				rb.setSuccess(true);

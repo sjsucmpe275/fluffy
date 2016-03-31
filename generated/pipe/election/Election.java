@@ -52,6 +52,33 @@ public final class Election {
      * <code>optional int32 leader_id = 4;</code>
      */
     int getLeaderId();
+
+    /**
+     * <code>optional int32 election_id = 5;</code>
+     */
+    boolean hasElectionId();
+    /**
+     * <code>optional int32 election_id = 5;</code>
+     */
+    int getElectionId();
+
+    /**
+     * <code>optional int32 votedFor = 6;</code>
+     */
+    boolean hasVotedFor();
+    /**
+     * <code>optional int32 votedFor = 6;</code>
+     */
+    int getVotedFor();
+
+    /**
+     * <code>optional bool voteGranted = 7;</code>
+     */
+    boolean hasVoteGranted();
+    /**
+     * <code>optional bool voteGranted = 7;</code>
+     */
+    boolean getVoteGranted();
   }
   /**
    * Protobuf type {@code LeaderStatus}
@@ -140,6 +167,21 @@ public final class Election {
             case 32: {
               bitField0_ |= 0x00000008;
               leaderId_ = input.readInt32();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              electionId_ = input.readInt32();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              votedFor_ = input.readInt32();
+              break;
+            }
+            case 56: {
+              bitField0_ |= 0x00000040;
+              voteGranted_ = input.readBool();
               break;
             }
           }
@@ -285,6 +327,22 @@ public final class Election {
        * <code>THELEADERIS = 2;</code>
        */
       THELEADERIS(1, 2),
+      /**
+       * <code>GETCLUSTERSIZE = 3;</code>
+       */
+      GETCLUSTERSIZE(2, 3),
+      /**
+       * <code>SIZEIS = 4;</code>
+       */
+      SIZEIS(3, 4),
+      /**
+       * <code>VOTEREQUEST = 5;</code>
+       */
+      VOTEREQUEST(4, 5),
+      /**
+       * <code>VOTERESPONSE = 6;</code>
+       */
+      VOTERESPONSE(5, 6),
       ;
 
       /**
@@ -295,6 +353,22 @@ public final class Election {
        * <code>THELEADERIS = 2;</code>
        */
       public static final int THELEADERIS_VALUE = 2;
+      /**
+       * <code>GETCLUSTERSIZE = 3;</code>
+       */
+      public static final int GETCLUSTERSIZE_VALUE = 3;
+      /**
+       * <code>SIZEIS = 4;</code>
+       */
+      public static final int SIZEIS_VALUE = 4;
+      /**
+       * <code>VOTEREQUEST = 5;</code>
+       */
+      public static final int VOTEREQUEST_VALUE = 5;
+      /**
+       * <code>VOTERESPONSE = 6;</code>
+       */
+      public static final int VOTERESPONSE_VALUE = 6;
 
 
       public final int getNumber() { return value; }
@@ -303,6 +377,10 @@ public final class Election {
         switch (value) {
           case 1: return WHOISTHELEADER;
           case 2: return THELEADERIS;
+          case 3: return GETCLUSTERSIZE;
+          case 4: return SIZEIS;
+          case 5: return VOTEREQUEST;
+          case 6: return VOTERESPONSE;
           default: return null;
         }
       }
@@ -442,11 +520,59 @@ public final class Election {
       return leaderId_;
     }
 
+    public static final int ELECTION_ID_FIELD_NUMBER = 5;
+    private int electionId_;
+    /**
+     * <code>optional int32 election_id = 5;</code>
+     */
+    public boolean hasElectionId() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional int32 election_id = 5;</code>
+     */
+    public int getElectionId() {
+      return electionId_;
+    }
+
+    public static final int VOTEDFOR_FIELD_NUMBER = 6;
+    private int votedFor_;
+    /**
+     * <code>optional int32 votedFor = 6;</code>
+     */
+    public boolean hasVotedFor() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional int32 votedFor = 6;</code>
+     */
+    public int getVotedFor() {
+      return votedFor_;
+    }
+
+    public static final int VOTEGRANTED_FIELD_NUMBER = 7;
+    private boolean voteGranted_;
+    /**
+     * <code>optional bool voteGranted = 7;</code>
+     */
+    public boolean hasVoteGranted() {
+      return ((bitField0_ & 0x00000040) == 0x00000040);
+    }
+    /**
+     * <code>optional bool voteGranted = 7;</code>
+     */
+    public boolean getVoteGranted() {
+      return voteGranted_;
+    }
+
     private void initFields() {
       action_ = pipe.election.Election.LeaderStatus.LeaderQuery.WHOISTHELEADER;
       state_ = pipe.election.Election.LeaderStatus.LeaderState.LEADERUNKNOWN;
       leaderHost_ = "";
       leaderId_ = 0;
+      electionId_ = 0;
+      votedFor_ = 0;
+      voteGranted_ = false;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -477,6 +603,15 @@ public final class Election {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeInt32(4, leaderId_);
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeInt32(5, electionId_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeInt32(6, votedFor_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        output.writeBool(7, voteGranted_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -501,6 +636,18 @@ public final class Election {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, leaderId_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, electionId_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, votedFor_);
+      }
+      if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(7, voteGranted_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -631,6 +778,12 @@ public final class Election {
         bitField0_ = (bitField0_ & ~0x00000004);
         leaderId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000008);
+        electionId_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        votedFor_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
+        voteGranted_ = false;
+        bitField0_ = (bitField0_ & ~0x00000040);
         return this;
       }
 
@@ -675,6 +828,18 @@ public final class Election {
           to_bitField0_ |= 0x00000008;
         }
         result.leaderId_ = leaderId_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.electionId_ = electionId_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.votedFor_ = votedFor_;
+        if (((from_bitField0_ & 0x00000040) == 0x00000040)) {
+          to_bitField0_ |= 0x00000040;
+        }
+        result.voteGranted_ = voteGranted_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -704,6 +869,15 @@ public final class Election {
         }
         if (other.hasLeaderId()) {
           setLeaderId(other.getLeaderId());
+        }
+        if (other.hasElectionId()) {
+          setElectionId(other.getElectionId());
+        }
+        if (other.hasVotedFor()) {
+          setVotedFor(other.getVotedFor());
+        }
+        if (other.hasVoteGranted()) {
+          setVoteGranted(other.getVoteGranted());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -914,6 +1088,102 @@ public final class Election {
         return this;
       }
 
+      private int electionId_ ;
+      /**
+       * <code>optional int32 election_id = 5;</code>
+       */
+      public boolean hasElectionId() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional int32 election_id = 5;</code>
+       */
+      public int getElectionId() {
+        return electionId_;
+      }
+      /**
+       * <code>optional int32 election_id = 5;</code>
+       */
+      public Builder setElectionId(int value) {
+        bitField0_ |= 0x00000010;
+        electionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 election_id = 5;</code>
+       */
+      public Builder clearElectionId() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        electionId_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int votedFor_ ;
+      /**
+       * <code>optional int32 votedFor = 6;</code>
+       */
+      public boolean hasVotedFor() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional int32 votedFor = 6;</code>
+       */
+      public int getVotedFor() {
+        return votedFor_;
+      }
+      /**
+       * <code>optional int32 votedFor = 6;</code>
+       */
+      public Builder setVotedFor(int value) {
+        bitField0_ |= 0x00000020;
+        votedFor_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional int32 votedFor = 6;</code>
+       */
+      public Builder clearVotedFor() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        votedFor_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean voteGranted_ ;
+      /**
+       * <code>optional bool voteGranted = 7;</code>
+       */
+      public boolean hasVoteGranted() {
+        return ((bitField0_ & 0x00000040) == 0x00000040);
+      }
+      /**
+       * <code>optional bool voteGranted = 7;</code>
+       */
+      public boolean getVoteGranted() {
+        return voteGranted_;
+      }
+      /**
+       * <code>optional bool voteGranted = 7;</code>
+       */
+      public Builder setVoteGranted(boolean value) {
+        bitField0_ |= 0x00000040;
+        voteGranted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional bool voteGranted = 7;</code>
+       */
+      public Builder clearVoteGranted() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        voteGranted_ = false;
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:LeaderStatus)
     }
 
@@ -939,14 +1209,17 @@ public final class Election {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\016election.proto\"\202\002\n\014LeaderStatus\022)\n\006act" +
+      "\n\016election.proto\"\201\003\n\014LeaderStatus\022)\n\006act" +
       "ion\030\001 \002(\0162\031.LeaderStatus.LeaderQuery\022(\n\005" +
       "state\030\002 \001(\0162\031.LeaderStatus.LeaderState\022\023" +
-      "\n\013leader_host\030\003 \001(\t\022\021\n\tleader_id\030\004 \001(\005\"A" +
-      "\n\013LeaderState\022\021\n\rLEADERUNKNOWN\020\001\022\017\n\013LEAD" +
-      "ERALIVE\020\002\022\016\n\nLEADERDEAD\020\003\"2\n\013LeaderQuery" +
-      "\022\022\n\016WHOISTHELEADER\020\001\022\017\n\013THELEADERIS\020\002B\021\n" +
-      "\rpipe.electionH\001"
+      "\n\013leader_host\030\003 \001(\t\022\021\n\tleader_id\030\004 \001(\005\022\023" +
+      "\n\013election_id\030\005 \001(\005\022\020\n\010votedFor\030\006 \001(\005\022\023\n" +
+      "\013voteGranted\030\007 \001(\010\"A\n\013LeaderState\022\021\n\rLEA" +
+      "DERUNKNOWN\020\001\022\017\n\013LEADERALIVE\020\002\022\016\n\nLEADERD" +
+      "EAD\020\003\"u\n\013LeaderQuery\022\022\n\016WHOISTHELEADER\020\001" +
+      "\022\017\n\013THELEADERIS\020\002\022\022\n\016GETCLUSTERSIZE\020\003\022\n\n" +
+      "\006SIZEIS\020\004\022\017\n\013VOTEREQUEST\020\005\022\020\n\014VOTERESPON",
+      "SE\020\006B\021\n\rpipe.electionH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -965,7 +1238,7 @@ public final class Election {
     internal_static_LeaderStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_LeaderStatus_descriptor,
-        new java.lang.String[] { "Action", "State", "LeaderHost", "LeaderId", });
+        new java.lang.String[] { "Action", "State", "LeaderHost", "LeaderId", "ElectionId", "VotedFor", "VoteGranted", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

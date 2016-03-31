@@ -65,6 +65,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		failureMessageHandler.setNextHandler (pingMessageHandler);
 		pingMessageHandler.setNextHandler (stateMessageHandler);
 		stateMessageHandler.setNextHandler (taskMessageHandler);
+		taskMessageHandler.setNextHandler(electionMessageHandler);
 
 		//Define the start of Chain
 		wrkMessageHandler = beatMessageHandler;
@@ -89,17 +90,17 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
 		logger.info ("Destination is: " + msg.getHeader ().getDestination ());
 */
+		
+		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
+			getLogger ().info ("Same message received by source! Dropping message...");
+			return;
+		}
 
 		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
 			
 			if (msg.getHeader().getMaxHops() == 0) {
 				//TODO This might be the detination.. Think before dropping..
 				getLogger ().info ("MAX HOPS is Zero! Dropping message...");
-				return;
-			}
-			
-			if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-				getLogger ().info ("Same message received by source! Dropping message...");
 				return;
 			}
 

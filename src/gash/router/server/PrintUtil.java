@@ -69,6 +69,8 @@ public class PrintUtil {
 			System.out.println("Ping");
 		else if(msg.hasBeat ())
 			System.out.println("Beat");
+		else if(msg.hasLeader())
+			System.out.println("Election");
 		else
 			System.out.println("Unknown");
 

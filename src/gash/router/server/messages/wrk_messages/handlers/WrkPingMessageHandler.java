@@ -20,7 +20,7 @@ public class WrkPingMessageHandler implements IWrkMessageHandler {
 	@Override
 	public void handleMessage(Work.WorkMessage workMessage, Channel channel) {
 		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, null);
+			nextHandler.handleMessage (workMessage, channel);
 			return;
 		}
 
