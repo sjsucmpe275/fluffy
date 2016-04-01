@@ -3,6 +3,8 @@ package election;
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.election.Election.LeaderStatus;
@@ -15,6 +17,8 @@ import util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
+
+	private final Logger logger = LoggerFactory.getLogger ("Follower");
 
 	private Timer timer;
 	private ServerState state;

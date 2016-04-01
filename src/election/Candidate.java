@@ -3,6 +3,8 @@ package election;
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.election.Election.LeaderStatus;
@@ -15,6 +17,7 @@ import util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
+	private final Logger logger = LoggerFactory.getLogger ("Candidate");
 	private int requiredVotes;
 	private int sizeOfCluster;
 	private ServerState state;
@@ -34,7 +37,7 @@ public class Candidate implements INodeState, TimeoutListener {
 		LeaderStatus leaderStatus = workMessage.getLeader();
 		switch (leaderStatus.getAction()) {
 		case GETCLUSTERSIZE:
-			System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
+			logger.info ("Replying to :" + workMessage.getHeader().getNodeId());
 			channel.writeAndFlush(createSizeIsMessage(workMessage.getHeader().getNodeId()));
 			break;
 		case SIZEIS:

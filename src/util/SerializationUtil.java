@@ -77,7 +77,7 @@ public class SerializationUtil {
 			for (ByteString data : input) {
 				bos.write(data.toByteArray());
 			}
-
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
