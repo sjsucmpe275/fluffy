@@ -33,12 +33,21 @@ public class EdgeHealthMonitorTask extends TimerTask {
 		 * assume neighbour instances are in failure state and remove the node
 		 * from InBound edges list
 		 */
+
+		/* While checking the health of inbound edges I check if node is present in outbound edge because
+		my assumption is if a heart beat is received from node which is present in outbound edge then I consider
+		it as reply. This assumption will cause inbound heartbeat not updated in cyclic loop but channel is still active.
+		This is the only use case, and remaining all other use cases are handled.
+	    */
 		edgeMonitor.getInboundEdges().getEdgesMap().values().stream()
-				.filter(ei -> (currentTime - ei.getLastHeartbeat()) > (edgeMonitor.getDelayTime())).forEach(ei -> {
+				.filter(ei -> ((currentTime - ei.getLastHeartbeat()) > (edgeMonitor.getDelayTime()) &&
+						!edgeMonitor.getOutboundEdges ().hasNode (ei.getRef ())))
+				.forEach(ei -> {
 					long hb = currentTime - ei.getLastHeartbeat();
 					if (debug)
 						edgeMonitor.getLogger().info("Last heat beat received before: " + hb);
-					edgeMonitor.getInboundEdges().removeNode(ei.getRef());
+					ei.setChannel (null);
+					ei.setActive (false);
 				});
 
 		if (debug)

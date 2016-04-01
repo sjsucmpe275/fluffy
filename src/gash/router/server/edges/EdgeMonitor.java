@@ -115,6 +115,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 
 							ei.setChannel(channel.channel());
 							ei.setActive(channel.channel().isActive());
+							ei.setLastHeartbeat (System.currentTimeMillis ());
 							System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 									+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 

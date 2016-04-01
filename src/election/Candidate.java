@@ -1,8 +1,7 @@
-package Election;
+package election;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
-import gash.router.server.edges.EdgeMonitor;
 import io.netty.channel.Channel;
 import pipe.common.Common;
 import pipe.common.Common.Header;
@@ -18,7 +17,6 @@ public class Candidate implements INodeState, TimeoutListener {
 	int voteCount;
 	int sizeOfCluster;
 	private ServerState state;
-	private EdgeMonitor edgeMonitor;
 	private ConcurrentHashMap<Integer, Object> visitedNodesMap;
 	private long clusterSizeTimeout;
 	private Timer timer;
@@ -71,6 +69,31 @@ public class Candidate implements INodeState, TimeoutListener {
 		timer.startTimer();
 	}
 
+	@Override
+	public void beforeStateChange() {
+
+	}
+
+	@Override
+	public void afterStateChange() {
+
+	}
+
+	@Override
+	public void onNewOrHigherTerm() {
+
+	}
+
+	@Override
+	public void onLeaderDiscovery() {
+
+	}
+
+	@Override
+	public void onHigherTerm() {
+
+	}
+
 	public WorkMessage createSizeIsMessage(int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = Common.Header.newBuilder();
@@ -87,7 +110,6 @@ public class Candidate implements INodeState, TimeoutListener {
 		wb.setSecret(1);
 
 		return wb.build();
-
 	}
 
 	public WorkMessage createGetClusterSizeMessage(int destination) {
@@ -131,14 +153,8 @@ public class Candidate implements INodeState, TimeoutListener {
 	}
 
 	@Override
-	public void stateChanged() {
-
-	}
-
-	@Override
 	public void notifyTimeout() {
-		// TODO Auto-generated method stub
-		voteCount = visitedNodesMap.size();
+		sizeOfCluster = visitedNodesMap.size();
 		startElection();
 		timer = null;
 		timer = new Timer(new TimeoutListener() {
@@ -157,4 +173,5 @@ public class Candidate implements INodeState, TimeoutListener {
 		state.getEmon().broadcastMessage(createVoteRequest());
 		
 	}
+	
 }

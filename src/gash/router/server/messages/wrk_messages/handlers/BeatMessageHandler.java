@@ -1,6 +1,6 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import Election.Candidate;
+import election.Candidate;
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeList;
@@ -24,6 +24,9 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 		this.logger = logger;
 	}
 
+	/*
+	* Messages related to leader should be forwarded to current state of the node.
+	* */
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
 		if(workMessage.hasBeat ())  {
@@ -42,14 +45,22 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 		logger.info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
 		logger.info ("Destination is: " + workMessage.getHeader ().getDestination ());
 
-		// Update out-bound edges with time when heart beat was received as a reply sent.
+		if(workMessage.getBeat ().hasIsLeader () && workMessage.getBeat ().getIsLeader ())    {
+			state.getCurrentState ().handleMessage (workMessage, channel);
+			return;
+		}
+
+		/* Update out-bound edges with time when heart beat was received as a reply sent.
+			I consider heart beat as a reply when source node is in my outbound edges.
+	    */
 		EdgeList outBoundEdges = state.getEmon ().getOutboundEdges ();
 
 		EdgeInfo oei = outBoundEdges.getNode (workMessage.getHeader ().getNodeId ());
 
 		if(oei != null) {
 			logger.info ("Received reply for my beat, Dropping message");
-			oei.setLastHeartbeat (workMessage.getHeader ().getTime ());
+			oei.setLastHeartbeat (System.currentTimeMillis ());
+			//oei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 			return;
 		}
 
@@ -58,7 +69,8 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 		EdgeInfo iei = inBoundEdges.getNode (workMessage.getHeader ().getNodeId ());
 
 		if(iei != null) {
-			iei.setLastHeartbeat (workMessage.getHeader ().getTime ());
+			iei.setLastHeartbeat (System.currentTimeMillis ());
+			//iei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 		}
 
 		logger.info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());

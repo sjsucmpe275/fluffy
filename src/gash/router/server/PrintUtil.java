@@ -70,7 +70,7 @@ public class PrintUtil {
 		else if(msg.hasBeat ())
 			System.out.println("Beat");
 		else if(msg.hasLeader())
-			System.out.println("Election");
+			System.out.println("election");
 		else
 			System.out.println("Unknown");
 

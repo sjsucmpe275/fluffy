@@ -3,7 +3,7 @@ package gash.router.server.messages.wrk_messages.handlers;
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
-import pipe.work.Work.WorkMessage;
+import pipe.work.Work.*;
 
 
 /**
@@ -36,6 +36,7 @@ public class StateMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 
+		WorkState s = workMessage.getState();
 	}
 
 	@Override

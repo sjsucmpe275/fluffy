@@ -2,7 +2,6 @@ package util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import util.TimeoutListener;
 
 import java.util.Date;
 
@@ -15,24 +14,27 @@ import java.util.Date;
 * */
 public class Timer {
 
-	private static final Logger logger = LoggerFactory.getLogger ("Election Timer");
-	private final long electionTimeout;
+	private static final Logger logger = LoggerFactory.getLogger ("Timer");
+	private static final boolean debug = true;
+	private final long timeout;
 	private TimeoutListener listener;
 	private TimerThread timerThread;
 
-	public Timer(TimeoutListener listener, long electionTimeout) {
+	public Timer(TimeoutListener listener, long timeout) {
 		this.listener = listener;
-		this.electionTimeout = electionTimeout;
+		this.timeout = timeout;
 		timerThread = new TimerThread ();
 	}
 
 	public void startTimer()   {
-		logger.info ("********Request to start election timer: " + new Date (System.currentTimeMillis ()));
+		if(debug)
+			logger.info ("********Request to start timer: " + new Date (System.currentTimeMillis ()));
 		timerThread.start ();
 	}
 
 	public void cancel()    {
-		logger.info ("********Request to cancel election timer: " + new Date (System.currentTimeMillis ()));
+		if(debug)
+			logger.info ("********Request to cancel timer: " + new Date (System.currentTimeMillis ()));
 		timerThread.interrupt ();
 	}
 
@@ -40,15 +42,15 @@ public class Timer {
 
 		@Override
 		public void run(){
-			synchronized (this){
-				try {
-					logger.info ("********Election timer started: " + new Date (System.currentTimeMillis ()));
-					wait (electionTimeout);
-					logger.info ("********Election timed out: " + new Date (System.currentTimeMillis ()));
-					listener.notifyTimeout ();
-				} catch (InterruptedException e) {
-					logger.info ("********Election Timer was interrupted: " + new Date (System.currentTimeMillis ()));
-				}
+			try {
+				if(debug)
+					logger.info ("********Timer started: " + new Date (System.currentTimeMillis ()));
+				wait (timeout);
+				if(debug)
+					logger.info ("********Timed out: " + new Date (System.currentTimeMillis ()));
+				listener.notifyTimeout ();
+			} catch (InterruptedException e) {
+				logger.info ("********Timer was interrupted: " + new Date (System.currentTimeMillis ()));
 			}
 		}
 	}

@@ -31,6 +31,9 @@ public class BeatMessage {
 		header.setMaxHops (1);
 		header.setTime (System.currentTimeMillis ());
 		beat = Heartbeat.newBuilder();
+		/* By default Heart Messages are not created for Leader.
+		* If it is for leader, setIsLeader API should be explicitly called*/
+		setIsLeader (false);
 	}
 
 	public WorkMessage getMessage()   {
@@ -45,6 +48,10 @@ public class BeatMessage {
 		workMessage.setBeat (beat);
 		workMessage.setSecret (secret);
 		return workMessage.build ();
+	}
+
+	public void setIsLeader(boolean isLeader) {
+		beat.setIsLeader (isLeader);
 	}
 
 	public void setEnqueued(int enqueued)   {
