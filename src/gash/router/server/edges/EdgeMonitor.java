@@ -29,13 +29,17 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.gemstone.gemfire.internal.sequencelog.model.Edge;
+
 import pipe.work.Work.WorkMessage;
 
 import java.util.Timer;
 
 public class EdgeMonitor implements EdgeListener, Runnable {
 	private static Logger logger = LoggerFactory.getLogger("edge monitor");
-
+	private static final boolean debug = false;
+	
 	private EdgeList outboundEdges;
 	private EdgeList inboundEdges;
 	private long dt = 2000;
@@ -85,18 +89,18 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	@Override
 	public void run() {
 		while (forever) {
-			logger.info ("Database being used: " + state.getConf ().getDatabase ());
-
 			try {
 				for (EdgeInfo ei : outboundEdges.getEdgesMap ().values()) {
 					if (ei.isActive() && ei.getChannel() != null) {
-						logger.info ("*******Sending Heartbeat to: " + ei.getRef ());
+						if (debug)
+							logger.info ("*******Sending Heartbeat to: " + ei.getRef ());
 						BeatMessage beatMessage = new BeatMessage (state.getConf ().getNodeId ());
 						beatMessage.setDestination (ei.getRef ());
 						ei.getChannel().writeAndFlush(beatMessage.getMessage ());
 					} else {
 						// TODO create a client to the node
-						logger.info("trying to connect to node " + ei.getRef());
+						if (debug)
+							logger.info("trying to connect to node " + ei.getRef());
 
 						try {
 							WorkChannelInitializer wi = new WorkChannelInitializer (state, false);
@@ -121,7 +125,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 
 						} catch (Throwable ex) {
 							logger.error("failed to initialize the client connection");
-							ex.printStackTrace();
+//							ex.printStackTrace();
 						}
 						logger.info("trying to connect to node " + ei.getRef());
 					}
@@ -129,7 +133,6 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 
 				Thread.sleep(dt);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -147,7 +150,15 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	
 	public void broadcastMessage(WorkMessage msg) {
 		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
-			edge.getChannel().writeAndFlush(msg);
+			if (edge.isActive() && edge.getChannel() != null) {
+				edge.getChannel().writeAndFlush(msg);
+			}
+		}
+		
+		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
+			if (edge.isActive() && edge.getChannel() != null) {
+				edge.getChannel().writeAndFlush(msg);
+			}
 		}
 	}
 

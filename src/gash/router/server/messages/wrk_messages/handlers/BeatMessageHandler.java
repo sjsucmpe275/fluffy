@@ -18,6 +18,7 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 	private final ServerState state;
 	private final Logger logger;
 	private IWrkMessageHandler nextHandler;
+	private final static boolean debug = false;
 
 	public BeatMessageHandler(ServerState state, Logger logger) {
 		this.state = state;
@@ -42,8 +43,10 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 
-		logger.info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
-		logger.info ("Destination is: " + workMessage.getHeader ().getDestination ());
+		if(debug)	{
+			logger.info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
+			logger.info ("Destination is: " + workMessage.getHeader ().getDestination ());
+		}
 
 		if(workMessage.getBeat ().hasIsLeader () && workMessage.getBeat ().getIsLeader ())    {
 			state.getCurrentState ().handleMessage (workMessage, channel);
@@ -58,7 +61,8 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 		EdgeInfo oei = outBoundEdges.getNode (workMessage.getHeader ().getNodeId ());
 
 		if(oei != null) {
-			logger.info ("Received reply for my beat, Dropping message");
+			if(debug)
+				logger.info ("Received reply for my beat, Dropping message");
 			oei.setLastHeartbeat (System.currentTimeMillis ());
 			//oei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 			return;
@@ -73,7 +77,8 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 			//iei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 		}
 
-		logger.info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
+		if(debug)
+			logger.info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
 		// construct the message to reply heart beat - notifying I am alive
 		BeatMessage beatMessage = new BeatMessage (state.getConf().getNodeId());
 		beatMessage.setDestination (workMessage.getHeader ().getNodeId ());

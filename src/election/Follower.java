@@ -46,6 +46,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		case THELEADERIS:
 			break;
 		case VOTEREQUEST:
+			System.out.println("VOTE REQUEST RECEIVED...");
 			if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
 				VoteMessage vote = new VoteMessage(state.getConf().getNodeId(), workMessage.getLeader().getElectionId(),
 						workMessage.getLeader().getLeaderId());
@@ -162,6 +163,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 			leaderStatus.setElectionId(electionId);
 			leaderStatus.setVotedFor(VoteFor);
 			leaderStatus.setVoteGranted(true);
+			leaderStatus.setAction(LeaderQuery.VOTERESPONSE);
 		}
 
 		public WorkMessage getMessage()   {
