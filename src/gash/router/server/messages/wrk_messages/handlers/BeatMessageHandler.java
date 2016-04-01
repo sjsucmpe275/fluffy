@@ -28,7 +28,7 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 			return;
 		}
 
-		if(nextHandler == null) {
+		if(! workMessage.hasBeat () && nextHandler == null) {
 			System.out.println("*****No Handler available*****");
 			return;
 		}

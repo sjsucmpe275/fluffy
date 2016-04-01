@@ -53,7 +53,7 @@ public class Follower implements INodeState {
 			if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
 				VoteMessage vote = new VoteMessage(state.getConf().getNodeId(), workMessage.getLeader().getElectionId(),
 						workMessage.getLeader().getLeaderId());
-				channel.writeAndFlush(vote.getMessage());
+				state.getEmon().broadcastMessage(vote.getMessage());
 			}
 			break;
 		case VOTERESPONSE:
