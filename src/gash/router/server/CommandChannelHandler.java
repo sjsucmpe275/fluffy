@@ -36,22 +36,20 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	private static Logger logger = LoggerFactory.getLogger("cmd");
 	private RoutingConf conf;
 	private ICmdMessageHandler cmdMessageHandler;
-	//protected IDBHandler dbhandler;
 
 	public CommandChannelHandler(RoutingConf conf) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
 		}
-		//dbhandler = new RedisDBHandler();
 
 		initializeMessageHandlers();
 	}
 
 	private void initializeMessageHandlers() throws Exception {
 		//Define Handlers
-		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler (this);
+		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler (conf, logger);
 		ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler (this);
-		ICmdMessageHandler msgHandler = new CmdMsgHandler (this);
+		ICmdMessageHandler msgHandler = new CmdMsgHandler (conf, logger);
 		ICmdMessageHandler queryHandler = new CmdQueryMsgHandler (this);
 
 		//Chain all the handlers

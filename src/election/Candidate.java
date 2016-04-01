@@ -1,10 +1,7 @@
-package Election;
-
-import java.util.concurrent.ConcurrentHashMap;
+package election;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
-import gash.router.server.edges.EdgeMonitor;
 import io.netty.channel.Channel;
 import pipe.common.Common;
 import pipe.common.Common.Header;
@@ -14,6 +11,8 @@ import pipe.election.Election.LeaderStatus.LeaderState;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
 	private int requiredVotes;
@@ -28,19 +27,6 @@ public class Candidate implements INodeState, TimeoutListener {
 		this.state = state;
 		this.visitedNodes = new ConcurrentHashMap<Integer, Object>();
 		this.votes = new ConcurrentHashMap<Integer, Object>();
-	}
-
-	public void getClusterSize() {
-		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon().getOutboundEdges().getEdgesMap();
-		for (Integer nodeId : edgeMap.keySet()) {
-			EdgeInfo edge = edgeMap.get(nodeId);
-			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(createGetClusterSizeMessage(nodeId));
-			}
-		}
-
-		timer = new Timer(this, state.getConf().getElectionTimeout());
-		timer.startTimer();
 	}
 
 	@Override

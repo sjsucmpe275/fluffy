@@ -1,6 +1,6 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import gash.router.server.ServerState;
+import gash.router.container.RoutingConf;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import routing.Pipe.CommandMessage;
@@ -10,12 +10,12 @@ import routing.Pipe.CommandMessage;
  */
 public class CmdMsgHandler implements ICmdMessageHandler {
 
-	private final ServerState state;
+	private final RoutingConf conf;
 	private final Logger logger;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdMsgHandler(ServerState state, Logger logger)   {
-		this.state = state;
+	public CmdMsgHandler(RoutingConf conf, Logger logger)   {
+		this.conf = conf;
 		this.logger = logger;
 	}
 
