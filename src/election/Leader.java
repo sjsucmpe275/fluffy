@@ -2,12 +2,16 @@ package Election;
 
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
 
 import java.util.ArrayList;
 
 public class Leader implements INodeState, FollowerListener{
+
+	private final Logger logger = LoggerFactory.getLogger ("Leader");
 
 	private ServerState state;
 	private ArrayList<Integer> activeNodes;

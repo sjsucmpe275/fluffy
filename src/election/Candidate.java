@@ -1,11 +1,10 @@
-package Election;
-
-import java.util.concurrent.ConcurrentHashMap;
+package election;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
-import gash.router.server.edges.EdgeMonitor;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.election.Election.LeaderStatus;
@@ -15,7 +14,10 @@ import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Candidate implements INodeState, TimeoutListener {
+	private final Logger logger = LoggerFactory.getLogger ("Candidate");
 	private int requiredVotes;
 	private int sizeOfCluster;
 	private ServerState state;
@@ -30,25 +32,12 @@ public class Candidate implements INodeState, TimeoutListener {
 		this.votes = new ConcurrentHashMap<Integer, Object>();
 	}
 
-	public void getClusterSize() {
-		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon().getOutboundEdges().getEdgesMap();
-		for (Integer nodeId : edgeMap.keySet()) {
-			EdgeInfo edge = edgeMap.get(nodeId);
-			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(createGetClusterSizeMessage(nodeId));
-			}
-		}
-
-		timer = new Timer(this, state.getConf().getElectionTimeout());
-		timer.startTimer();
-	}
-
 	@Override
 	public synchronized void handleMessage(WorkMessage workMessage, Channel channel) {
 		LeaderStatus leaderStatus = workMessage.getLeader();
 		switch (leaderStatus.getAction()) {
 		case GETCLUSTERSIZE:
-			System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
+			logger.info ("Replying to :" + workMessage.getHeader().getNodeId());
 			channel.writeAndFlush(createSizeIsMessage(workMessage.getHeader().getNodeId()));
 			break;
 		case SIZEIS:
