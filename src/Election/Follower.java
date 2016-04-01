@@ -21,7 +21,7 @@ public class Follower implements INodeState {
 	public Follower(ServerState serverState){
 		this.state=serverState;
 		
-		timer.scheduleAtFixedRate(new ElectionTimer(this), 0, getDelay());
+		//timer.scheduleAtFixedRate(new ElectionTimer(this), 0, getDelay());
 	}
 
 	protected long getDelay() {
@@ -35,6 +35,7 @@ public class Follower implements INodeState {
 		 * */
 		if(workMessage.hasBeat())	{
 			setLastHeartbeat(System.currentTimeMillis());
+			
 		}
 		
 		if(workMessage.getLeader().getAction() == LeaderQuery.VOTEREQUEST)	{
@@ -49,7 +50,7 @@ public class Follower implements INodeState {
 	@Override
 	public void stateChanged()	{
 		//Start the timer
-		timer.scheduleAtFixedRate(new ElectionTimer(this), 0, getDelay());
+		//timer.scheduleAtFixedRate(new ElectionTimer(this), 0, getDelay());
 	}
 	
 	public long getLastHeartbeat() {

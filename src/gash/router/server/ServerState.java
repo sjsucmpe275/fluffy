@@ -5,6 +5,8 @@ import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
 
 import java.util.HashMap;
+import java.util.TreeSet;
+
 import Election.Candidate;
 import Election.Follower;
 import Election.INodeState;
@@ -21,6 +23,7 @@ public class ServerState {
 	private INodeState currentState;
 	private int leaderId;
 	private int electionId;//termId
+	private TreeSet listOfNodeIds;
 
 	public ServerState()	{
 		leader = new Leader(this);
@@ -29,16 +32,26 @@ public class ServerState {
 		currentState = follower;
 		leaderId = -1;
 		electionId=0;
+		listOfNodeIds = new TreeSet();
 	}
 	
 	public RoutingConf getConf() {
 		return conf;
 	}
+	
+	public TreeSet getListOfNodeIds(){
+		return listOfNodeIds;
+	}
+	
+	public void addListOfNode(int nodeId){
+		if(!listOfNodeIds.contains(nodeId))
+			listOfNodeIds.add(nodeId);
+	}
 
 	public void setConf(RoutingConf conf) {
 		this.conf = conf;
 	}
-
+	
 	public EdgeMonitor getEmon() {
 		return emon;
 	}

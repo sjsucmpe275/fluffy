@@ -5,11 +5,11 @@ import io.netty.channel.Channel;
 import pipe.work.Work.WorkMessage;
 
 public class Candidate implements INodeState {
-	int VoteCount;
-	int sizeOfCluster;
-	
+	private int VoteCount;
+	private int sizeOfCluster;
+	private ServerState state;
 	public Candidate(ServerState serverState) {
-		// TODO Auto-generated constructor stub
+		this.state=serverState;
 	}
 	
 	public void requestVote(){
@@ -18,7 +18,8 @@ public class Candidate implements INodeState {
 	
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
+			state.addListOfNode(state.getConf().getNodeId());
+		
 		
 	}
 	

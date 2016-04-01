@@ -6,16 +6,17 @@ import pipe.work.Work.WorkMessage;
 
 public class Leader implements INodeState{
 
-	
+	private ServerState state;
 	public Leader(ServerState serverState) {
-		// TODO Auto-generated constructor stub
+		this.state=serverState;
 	}
 
 	public void sendHeartBeat(){}
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
+			state.addListOfNode(state.getConf().getNodeId());
+		
 		
 	}
 	
