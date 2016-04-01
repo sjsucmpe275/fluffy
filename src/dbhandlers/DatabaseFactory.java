@@ -10,7 +10,7 @@ public class DatabaseFactory {
 	public IDBHandler getDatabaseHandler(String dbName) throws Exception{
 
 		if(dbName.equals ("redis")) {
-			return null;
+			return new RedisDBHandler();
 		}
 
 		if(dbName.equals ("memcached")) {

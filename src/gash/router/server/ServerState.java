@@ -1,8 +1,10 @@
 package gash.router.server;
 
+import Election.*;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
+
 
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -50,6 +52,9 @@ public class ServerState {
 
 	public void setConf(RoutingConf conf) {
 		this.conf = conf;
+		if (conf.getNodeId() == 1) {
+			currentState = candidate;
+		}
 	}
 	
 	public EdgeMonitor getEmon() {
@@ -63,12 +68,10 @@ public class ServerState {
 	public TaskList getTasks() {
 		return tasks;
 	}
-
-	public INodeState getCurrentState()	{
-		return currentState;
-	}
 	
 	public void setState(NodeStateEnum state) {
+		currentState.beforeStateChange ();
+
 		if(state == NodeStateEnum.CANDIDATE)	{
 			currentState = candidate;
 		}
@@ -78,11 +81,16 @@ public class ServerState {
 		if(state == NodeStateEnum.LEADER)	{
 			currentState = leader;
 		}
-		currentState.stateChanged();
+
+		currentState.afterStateChange ();
 	}
 
 	public void setTasks(TaskList tasks) {
 		this.tasks = tasks;
+	}
+
+	public INodeState getCurrentState() {
+		return currentState;
 	}
 
 	public int getLeaderId() {

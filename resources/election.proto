@@ -24,7 +24,6 @@ message LeaderStatus {
       SIZEIS = 4;
       VOTEREQUEST = 5;
       VOTERESPONSE = 6;
-      
    }
    
    // Request: WHOISTHELEADER
