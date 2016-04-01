@@ -1,15 +1,9 @@
 package gash.router.server;
 
+import election.*;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
-
-import java.util.HashMap;
-import Election.Candidate;
-import Election.Follower;
-import Election.INodeState;
-import Election.Leader;
-import Election.NodeStateEnum;
 
 public class ServerState {
 	private RoutingConf conf;
@@ -19,12 +13,16 @@ public class ServerState {
 	private INodeState candidate;
 	private INodeState follower;
 	private INodeState currentState;
+	private int leaderId;
+	private int electionId;//termId
 
 	public ServerState()	{
-		leader = new Leader();
-		candidate = new Candidate();
-		follower = new Follower();
+		leader = new Leader(this);
+		candidate = new Candidate(this);
+		follower = new Follower(this);
 		currentState = follower;
+		leaderId = -1;
+		electionId=0;
 	}
 	
 	public RoutingConf getConf() {
@@ -33,6 +31,9 @@ public class ServerState {
 
 	public void setConf(RoutingConf conf) {
 		this.conf = conf;
+		if (conf.getNodeId() == 1) {
+			currentState = candidate;
+		}
 	}
 
 	public EdgeMonitor getEmon() {
@@ -46,8 +47,10 @@ public class ServerState {
 	public TaskList getTasks() {
 		return tasks;
 	}
-
+	
 	public void setState(NodeStateEnum state) {
+		currentState.beforeStateChange ();
+
 		if(state == NodeStateEnum.CANDIDATE)	{
 			currentState = candidate;
 		}
@@ -57,9 +60,31 @@ public class ServerState {
 		if(state == NodeStateEnum.LEADER)	{
 			currentState = leader;
 		}
+
+		currentState.afterStateChange ();
 	}
 
 	public void setTasks(TaskList tasks) {
 		this.tasks = tasks;
+	}
+
+	public INodeState getCurrentState() {
+		return currentState;
+	}
+
+	public int getLeaderId() {
+		return leaderId;
+	}
+
+	public void setLeaderId(int leaderId) {
+		this.leaderId = leaderId;
+	}
+
+	public int getElectionId() {
+		return electionId;
+	}
+
+	public void setElectionId(int electionId) {
+		this.electionId = electionId;
 	}
 }

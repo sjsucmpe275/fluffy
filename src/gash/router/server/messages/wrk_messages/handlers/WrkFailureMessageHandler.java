@@ -1,9 +1,10 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import gash.router.server.WorkChannelHandler;
+import gash.router.server.ServerState;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
 import pipe.common.Common;
-import pipe.work.Work.*;
+import pipe.work.Work.WorkMessage;
 
 /**
  * @author: codepenman
@@ -11,27 +12,31 @@ import pipe.work.Work.*;
  */
 public class WrkFailureMessageHandler implements IWrkMessageHandler{
 
-	private final WorkChannelHandler workChannelHandler;
+	private final ServerState state;
+	private final Logger logger;
 	private IWrkMessageHandler nextHandler;
 
-	public WrkFailureMessageHandler(WorkChannelHandler workChannelHandler)   {
-		this.workChannelHandler = workChannelHandler;
+	public WrkFailureMessageHandler(ServerState state, Logger logger)   {
+		this.state = state;
+		this.logger = logger;
 	}
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, null);
-			return;
+		if(workMessage.hasErr ())  {
+			handle(workMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (workMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+	}
 
-		if(nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
-
+	private void handle(WorkMessage workMessage, Channel channel) {
 		Common.Failure err = workMessage.getErr();
-		workChannelHandler.getLogger().error("failure from " + workMessage.getHeader().getNodeId());
+		logger.error("failure from " + workMessage.getHeader().getNodeId());
 	}
 
 	@Override

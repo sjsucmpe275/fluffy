@@ -1,8 +1,9 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import gash.router.server.WorkChannelHandler;
+import gash.router.server.ServerState;
 import io.netty.channel.Channel;
-import pipe.work.Work;
+import org.slf4j.Logger;
+import pipe.work.Work.*;
 
 /**
  * @author: codepenman
@@ -10,26 +11,31 @@ import pipe.work.Work;
  */
 public class WrkPingMessageHandler implements IWrkMessageHandler {
 
-	private final WorkChannelHandler workChannelHandler;
+	private final ServerState state;
+	private final Logger logger;
 	private IWrkMessageHandler nextHandler;
 
-	public WrkPingMessageHandler(WorkChannelHandler workChannelHandler) {
-		this.workChannelHandler = workChannelHandler;
+	public WrkPingMessageHandler(ServerState state, Logger logger) {
+		this.state = state;
+		this.logger = logger;
 	}
 
 	@Override
-	public void handleMessage(Work.WorkMessage workMessage, Channel channel) {
-		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, null);
-			return;
+	public void handleMessage(WorkMessage workMessage, Channel channel) {
+		if(workMessage.hasPing ())  {
+			handle(workMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (workMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+	}
 
-		if(nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
+	private void handle(WorkMessage workMessage, Channel channel) {
 
-		workChannelHandler.getLogger ().info("ping from " + workMessage.getHeader().getNodeId());
+		logger.info("ping from " + workMessage.getHeader().getNodeId());
 		//Todo: I commented this code to avoid infinite loop. Will update later
 				/*boolean p = msg.getPing();
 				WorkMessage.Builder rb = WorkMessage.newBuilder();
