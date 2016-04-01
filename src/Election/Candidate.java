@@ -1,6 +1,5 @@
 package Election;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import gash.router.server.ServerState;
@@ -19,10 +18,11 @@ public class Candidate implements INodeState {
 	private ServerState state;
 	private EdgeMonitor edgeMonitor;
 	private ConcurrentHashMap<Integer, Object> visitedNodesMap;
+	private long clusterSizeTimeout;
 
 	public Candidate(ServerState state) {
 		this.state = state;
-		this.visitedNodesMap=new ConcurrentHashMap<>();
+		this.visitedNodesMap = new ConcurrentHashMap<>();
 	}
 
 	public Candidate() {
@@ -36,11 +36,12 @@ public class Candidate implements INodeState {
 		LeaderStatus leaderStatus = workMessage.getLeader();
 		switch (leaderStatus.getAction()) {
 		case GETCLUSTERSIZE:
-			System.out.println("Replying to :"+workMessage.getHeader().getNodeId());
+			System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
 			channel.writeAndFlush(createSizeIsMessage(workMessage.getHeader().getNodeId()));
+
 			break;
 		case SIZEIS:
-			System.out.println("Getting size is:"+workMessage.getHeader().getNodeId());
+			System.out.println("Getting size is:" + workMessage.getHeader().getNodeId());
 			visitedNodesMap.put(workMessage.getHeader().getNodeId(), new Object());
 			System.out.println("Visited Nodes Hashmap:");
 			System.out.println(visitedNodesMap);
@@ -86,6 +87,10 @@ public class Candidate implements INodeState {
 
 	}
 
+	public int returnClusterSize() {
+		return visitedNodesMap.size();
+	}
+
 	public WorkMessage createMessage(int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = Common.Header.newBuilder();
@@ -93,7 +98,6 @@ public class Candidate implements INodeState {
 		header.setDestination(destination);
 		header.setMaxHops(10);
 		header.setTime(System.currentTimeMillis());
-		
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.GETCLUSTERSIZE);
@@ -105,10 +109,8 @@ public class Candidate implements INodeState {
 		return wb.build();
 	}
 
-	
 	@Override
-	public void stateChanged()	{
-		
+	public void stateChanged() {
+
 	}
-	
 }

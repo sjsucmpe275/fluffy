@@ -61,6 +61,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 		}
 
 		// cannot go below 2 sec
+		// if 3000>2000; this.dt=3000
 		if (state.getConf().getHeartbeatDt() > this.dt)
 			this.dt = state.getConf().getHeartbeatDt();
 
@@ -68,7 +69,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 
 		// Schedule this task only after Delay Time is set..
 		Timer timer = new Timer ();
-		timer.scheduleAtFixedRate (edgeHealthMonitorTask, 0, getDelayTime ());
+		timer.scheduleAtFixedRate (edgeHealthMonitorTask, 0, getDelayTime ()); //getDelayTime=10000
 	}
 
 	public void createInboundIfNew(int ref, String host, int port, Channel channel) {

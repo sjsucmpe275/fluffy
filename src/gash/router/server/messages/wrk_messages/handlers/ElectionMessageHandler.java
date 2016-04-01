@@ -19,10 +19,12 @@ public class ElectionMessageHandler implements IWrkMessageHandler {
 			nextHandler.handleMessage(workMessage, channel);
 			return;
 		}
-		if (nextHandler == null) {
+		
+		if (!workMessage.hasLeader() && nextHandler == null ) {
 			System.out.println("*****No Handler available*****");
-			//return;
+			return;
 		}
+		
 		System.out.println("Election Message Received forwarding to state");
 		workHandler.getServerState().getCurrentState().handleMessage(workMessage, channel);
 	}
