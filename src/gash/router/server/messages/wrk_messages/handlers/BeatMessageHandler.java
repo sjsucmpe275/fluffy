@@ -16,7 +16,8 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 
 	private final WorkChannelHandler workChannelHandler;
 	private IWrkMessageHandler nextHandler;
-
+	private final static boolean debug = false;
+	
 	public BeatMessageHandler(WorkChannelHandler workChannelHandler) {
 		this.workChannelHandler = workChannelHandler;
 	}
@@ -33,16 +34,23 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 			return;
 		}
 
-		workChannelHandler.getLogger().info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
-		workChannelHandler.getLogger ().info ("Destination is: " + workMessage.getHeader ().getDestination ());
-
+		if (debug) {
+			workChannelHandler.getLogger().info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
+			workChannelHandler.getLogger ().info ("Destination is: " + workMessage.getHeader ().getDestination ());
+		}
+		
+		if (workChannelHandler.getServerState().getCurrentState() instanceof Candidate) {
+			((Candidate)workChannelHandler.getServerState().getCurrentState()).getClusterSize();
+		}
+		
 		// Update out-bound edges with time when heart beat was received as a reply sent.
 		EdgeList outBoundEdges = workChannelHandler.getServerState ().getEmon ().getOutboundEdges ();
 
 		EdgeInfo oei = outBoundEdges.getNode (workMessage.getHeader ().getNodeId ());
 
 		if(oei != null) {
-			workChannelHandler.getLogger ().info ("Received reply for my beat, Dropping message");
+			if (debug)
+				workChannelHandler.getLogger ().info ("Received reply for my beat, Dropping message");
 			oei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 			return;
 		}
@@ -55,7 +63,9 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 			iei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 		}
 
-		workChannelHandler.getLogger().info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
+		if (debug)
+			workChannelHandler.getLogger().info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
+		
 		// construct the message to reply heart beat - notifying I am alive
 		BeatMessage beatMessage = new BeatMessage (workChannelHandler.getServerState().getConf().getNodeId());
 		beatMessage.setDestination (workMessage.getHeader ().getNodeId ());

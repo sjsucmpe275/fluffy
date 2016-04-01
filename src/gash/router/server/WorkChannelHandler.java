@@ -83,8 +83,8 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			return;
 		}
 		
-		if (debug)
-			PrintUtil.printWork(msg);
+//		if (debug)
+//			PrintUtil.printWork(msg);
 
 /*
 		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
@@ -97,22 +97,35 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		}
 
 		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
-			
-			if (msg.getHeader().getMaxHops() == 0) {
-				//TODO This might be the detination.. Think before dropping..
-				getLogger ().info ("MAX HOPS is Zero! Dropping message...");
-				return;
+
+			if (msg.getHeader().getMaxHops() <= 0) {
+				getLogger().info("MAX HOPS is Zero! Dropping message...");
+
+				// Return only if destination is not me or max hops is negative.
+				if (msg.getHeader().getDestination() != -1 || msg.getHeader().getMaxHops() < 0) {
+					getLogger().info("Dropping message....");
+					return;
+				}
 			}
 
-			getLogger ().info ("Forwarding message...");
-			WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
-			Header.Builder hb = Header.newBuilder(wb.getHeader());
-			hb.setMaxHops(hb.getMaxHops() - 1);
-			wb.setHeader(hb);
-			state.getEmon().broadcastMessage(wb.build());
-			return;
+			if (msg.getHeader().getMaxHops() - 1 > 0) {
+				getLogger().info("Forwarding message...");
+				WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
+				Header.Builder hb = Header.newBuilder(wb.getHeader());
+				hb.setMaxHops(hb.getMaxHops() - 1);
+				wb.setHeader(hb);
+				state.getEmon().broadcastMessage(wb.build());
+			}
+			if (msg.getHeader().getDestination() != -1 || msg.getHeader().getMaxHops() < 0) {
+				getLogger().info("Dropping message....@");
+				return;
+			}
 		}
 
+		if (debug)
+			PrintUtil.printWork(msg);
+
+		
 		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
@@ -121,8 +134,8 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			* Create in-bound edge's if it is not created/if it was removed when connection was down.
 			* */
 			InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress ();
-			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
-			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
+//			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
+//			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
 
 			getServerState ().getEmon ().createInboundIfNew (msg.getHeader ().getNodeId (),
 					socketAddress.getHostName (),

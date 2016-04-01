@@ -1,64 +1,36 @@
 package Election;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.sun.webkit.ThemeClient;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
-import gash.router.server.edges.EdgeMonitor;
 import io.netty.channel.Channel;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.election.Election.LeaderStatus;
 import pipe.election.Election.LeaderStatus.LeaderQuery;
+import pipe.election.Election.LeaderStatus.LeaderState;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
 
 public class Candidate implements INodeState, TimeoutListener {
-	int voteCount;
-	int sizeOfCluster;
+	private int requiredVotes;
+	private int sizeOfCluster;
 	private ServerState state;
-	private EdgeMonitor edgeMonitor;
-	private ConcurrentHashMap<Integer, Object> visitedNodesMap;
-	private long clusterSizeTimeout;
+	private ConcurrentHashMap<Integer, Object> visitedNodes;
 	private Timer timer;
+	private ConcurrentHashMap<Integer, Object> votes;
+	private final Object theObject = new Object();
 
 	public Candidate(ServerState state) {
 		this.state = state;
-		this.visitedNodesMap = new ConcurrentHashMap<>();
-	}
-
-	public Candidate() {
-	}
-
-	public void requestVote() {
-	}
-
-	@Override
-	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		LeaderStatus leaderStatus = workMessage.getLeader();
-		switch (leaderStatus.getAction()) {
-		case GETCLUSTERSIZE:
-			System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
-			channel.writeAndFlush(createSizeIsMessage(workMessage.getHeader().getNodeId()));
-			break;
-		case SIZEIS:
-			System.out.println("Getting size is:" + workMessage.getHeader().getNodeId());
-			visitedNodesMap.put(workMessage.getHeader().getNodeId(), new Object());
-			System.out.println("Visited Nodes Hashmap:");
-			System.out.println(visitedNodesMap);
-			break;
-		case THELEADERIS:
-			break;
-		case VOTEREQUEST:
-			break;
-		case VOTERESPONSE:
-			System.out.println("Receiving Vote Response from :"+workMessage.getHeader().getNodeId());
-			break;
-		case WHOISTHELEADER:
-			break;
-		default:
-		}
+		this.visitedNodes = new ConcurrentHashMap<Integer, Object>();
+		this.votes = new ConcurrentHashMap<Integer, Object>();
 	}
 
 	public void getClusterSize() {
@@ -70,11 +42,82 @@ public class Candidate implements INodeState, TimeoutListener {
 			}
 		}
 
-		timer = new Timer(this, 10000);
+		timer = new Timer(this, state.getConf().getElectionTimeout());
 		timer.startTimer();
 	}
 
-	public WorkMessage createSizeIsMessage(int destination) {
+	@Override
+	public synchronized void handleMessage(WorkMessage workMessage, Channel channel) {
+		LeaderStatus leaderStatus = workMessage.getLeader();
+		switch (leaderStatus.getAction()) {
+		case GETCLUSTERSIZE:
+			System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
+			channel.writeAndFlush(createSizeIsMessage(workMessage.getHeader().getNodeId()));
+			break;
+		case SIZEIS:
+			System.out.println("Getting size is:" + workMessage.getHeader().getNodeId());
+			visitedNodes.put(workMessage.getHeader().getNodeId(), theObject);
+			System.out.print("Visited Nodes Hashmap:");
+			System.out.println(visitedNodes);
+			break;
+		case THELEADERIS:
+			break;
+		case VOTEREQUEST:
+			break;
+		case VOTERESPONSE:
+			System.out.println("Receiving Vote Response from :" + workMessage.getHeader().getNodeId());
+
+			LeaderStatus leader = workMessage.getLeader();
+			if (leader.getVotedFor() == state.getLeaderId() && leader.getVoteGranted()) {
+				votes.put(workMessage.getHeader().getNodeId(), theObject);
+				System.out.println(votes);
+			}
+
+			break;
+		case WHOISTHELEADER:
+			break;
+		default:
+		}
+	}
+
+	@Override
+	public void stateChanged() {
+		clear();
+		getClusterSize();
+	}
+
+	@Override
+	public void notifyTimeout() {
+		sizeOfCluster = visitedNodes.size() + 1;
+		requiredVotes = (int) Math.round((sizeOfCluster / 2.0) + 0.5f);
+		System.out.println("###############################");
+		System.out.println("Size of the network is" + sizeOfCluster);
+		System.out.println("Required vote count is" + requiredVotes);
+		System.out.println("###############################");
+		startElection();
+		timer = null;
+		timer = new Timer(new TimeoutListener() {
+
+			@Override
+			public void notifyTimeout() {
+				state.getCurrentState();
+				System.out.println("#########################");
+				System.out.println("Election is over..");
+				System.out.println("#########################");
+
+				if (votes.size() >= requiredVotes) {
+					state.getEmon().broadcastMessage(createLeaderIsMessage());
+					System.out.println("State is leader now..");
+					state.setState(NodeStateEnum.LEADER);
+				}
+
+				clear();
+			}
+		}, state.getConf().getElectionTimeout());
+		timer.startTimer();
+	}
+
+	private WorkMessage createSizeIsMessage(int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = Common.Header.newBuilder();
 		header.setNodeId(state.getConf().getNodeId());
@@ -93,7 +136,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	}
 
-	public WorkMessage createGetClusterSizeMessage(int destination) {
+	private WorkMessage createGetClusterSizeMessage(int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = Common.Header.newBuilder();
 		header.setNodeId(state.getConf().getNodeId());
@@ -104,15 +147,14 @@ public class Candidate implements INodeState, TimeoutListener {
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.GETCLUSTERSIZE);
 
-
 		wb.setHeader(header);
 		wb.setLeader(leaderStatus);
 		wb.setSecret(1);
 
 		return wb.build();
 	}
-	
-	public WorkMessage createVoteRequest() {
+
+	private WorkMessage createVoteRequest() {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = Common.Header.newBuilder();
 		header.setNodeId(state.getConf().getNodeId());
@@ -122,9 +164,9 @@ public class Candidate implements INodeState, TimeoutListener {
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.VOTEREQUEST);
-		leaderStatus.setElectionId(state.getElectionId()+1);
+		System.out.println(state.getElectionId());
+		leaderStatus.setElectionId(state.getElectionId());
 		leaderStatus.setLeaderId(state.getConf().getNodeId());
-		
 
 		wb.setHeader(header);
 		wb.setLeader(leaderStatus);
@@ -133,31 +175,37 @@ public class Candidate implements INodeState, TimeoutListener {
 		return wb.build();
 	}
 
-	@Override
-	public void stateChanged() {
+	private WorkMessage createLeaderIsMessage() {
 
-	}
+		WorkMessage.Builder wb = WorkMessage.newBuilder();
+		Header.Builder header = Common.Header.newBuilder();
+		header.setNodeId(state.getConf().getNodeId());
+		header.setDestination(-1);
+		header.setMaxHops(10);
+		header.setTime(System.currentTimeMillis());
 
-	@Override
-	public void notifyTimeout() {
-		// TODO Auto-generated method stub
-		voteCount = visitedNodesMap.size();
-		startElection();
-		timer = null;
-		timer = new Timer(new TimeoutListener() {
+		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
+		leaderStatus.setAction(LeaderQuery.THELEADERIS);
+		System.out.println(state.getElectionId());
+		leaderStatus.setElectionId(state.getElectionId());
+		leaderStatus.setLeaderId(state.getConf().getNodeId());
+		leaderStatus.setState(LeaderState.LEADERALIVE);
+		wb.setHeader(header);
+		wb.setLeader(leaderStatus);
+		wb.setSecret(1);
 
-			@Override
-			public void notifyTimeout() {
-				// TODO Auto-generated method stub
-				state.getCurrentState();
-			}
-
-		}, 10000);
+		return wb.build();
 	}
 
 	private void startElection() {
-		// TODO Auto-generated method stub
+		state.setElectionId(state.getElectionId() + 1);
 		state.getEmon().broadcastMessage(createVoteRequest());
-		
+	}
+
+	private void clear() {
+		votes.clear();
+		sizeOfCluster = 0;
+		requiredVotes = 0;
+		visitedNodes.clear();
 	}
 }

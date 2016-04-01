@@ -60,7 +60,7 @@ public class PrintUtil {
 	}
 
 	public static void printWork(WorkMessage msg) {
-		PrintUtil.printHeader(msg.getHeader());
+//		PrintUtil.printHeader(msg.getHeader());
 
 		System.out.print("\nWork: ");
 		if (msg.hasErr())
@@ -69,12 +69,13 @@ public class PrintUtil {
 			System.out.println("Ping");
 		else if(msg.hasBeat ())
 			System.out.println("Beat");
-		else if(msg.hasLeader())
+		else if(msg.hasLeader()) {
 			System.out.println("Election");
-		else
+			System.out.println(msg);
+		} else
 			System.out.println("Unknown");
 
-		System.out.println(PrintUtil.gap + "Sec:  " + msg.getSecret());
+//		System.out.println(PrintUtil.gap + "Secret:  " + msg.getSecret());
 	}
 
 	public static void printFailure(Failure f) {
