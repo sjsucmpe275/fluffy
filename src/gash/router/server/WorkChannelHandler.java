@@ -83,8 +83,8 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			return;
 		}
 		
-//		if (debug)
-//			PrintUtil.printWork(msg);
+		if (debug)
+			PrintUtil.printWork(msg);
 
 /*
 		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
@@ -98,27 +98,18 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 
 		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
 
-			if (msg.getHeader().getMaxHops() <= 0) {
-				getLogger().info("MAX HOPS is Zero! Dropping message...");
-
-				// Return only if destination is not me or max hops is negative.
-				if (msg.getHeader().getDestination() != -1 || msg.getHeader().getMaxHops() < 0) {
-					getLogger().info("Dropping message....");
+			if (msg.getHeader().getDestination() == -1) {
+				if (msg.getHeader().getMaxHops() > 0) {
+					broadcast(msg);
+				}
+			} else {
+				if (msg.getHeader().getMaxHops() > 0) {
+					broadcast(msg);
+					return;
+				} else {
+					getLogger().info("MAX HOPS is Zero! Dropping message...");
 					return;
 				}
-			}
-
-			if (msg.getHeader().getMaxHops() - 1 > 0) {
-				getLogger().info("Forwarding message...");
-				WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
-				Header.Builder hb = Header.newBuilder(wb.getHeader());
-				hb.setMaxHops(hb.getMaxHops() - 1);
-				wb.setHeader(hb);
-				state.getEmon().broadcastMessage(wb.build());
-			}
-			if (msg.getHeader().getDestination() != -1 || msg.getHeader().getMaxHops() < 0) {
-				getLogger().info("Dropping message....@");
-				return;
 			}
 		}
 
@@ -150,6 +141,15 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		}
 
 		System.out.flush();
+	}
+
+	private void broadcast(WorkMessage msg) {
+		getLogger().info("Forwarding message...");
+		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
+		Header.Builder hb = Header.newBuilder(wb.getHeader());
+		hb.setMaxHops(hb.getMaxHops() - 1);
+		wb.setHeader(hb);
+		state.getEmon().broadcastMessage(wb.build());
 	}
 
 	/**
