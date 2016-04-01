@@ -1,7 +1,8 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import gash.router.server.CommandChannelHandler;
+import gash.router.container.RoutingConf;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
 import routing.Pipe.CommandMessage;
 
 /**
@@ -9,25 +10,29 @@ import routing.Pipe.CommandMessage;
  */
 public class CmdFailureMsgHandler implements ICmdMessageHandler {
 
-	private final CommandChannelHandler cmdChannelHandler;
+	private final RoutingConf conf;
+	private final Logger logger;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdFailureMsgHandler(CommandChannelHandler cmdChannelHandler)  {
-		this.cmdChannelHandler = cmdChannelHandler;
+	public CmdFailureMsgHandler(RoutingConf state, Logger logger)  {
+		this.conf = state;
+		this.logger = logger;
 	}
 
 	@Override
 	public void handleMessage(CommandMessage cmdMessage, Channel channel) throws Exception {
-		if(! cmdMessage.hasErr () && nextHandler != null)  {
-			nextHandler.handleMessage (cmdMessage, channel);
-			return;
+		if(cmdMessage.hasErr ())  {
+			handle(cmdMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (cmdMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+	}
 
-		if(nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
-
+	private void handle(CommandMessage cmdMessage, Channel channel) {
 
 	}
 

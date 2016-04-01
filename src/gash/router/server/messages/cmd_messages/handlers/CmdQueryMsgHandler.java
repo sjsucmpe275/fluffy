@@ -8,9 +8,11 @@ import io.netty.channel.Channel;
 import pipe.common.Common;
 import routing.Pipe.*;
 import storage.Storage;
+import storage.Storage.Metadata;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
+import java.util.Map;
 
 /**
  * @author: codepenman.
@@ -29,15 +31,18 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 	@Override
 	public void handleMessage(CommandMessage cmdMessage, Channel channel) throws Exception {
-		if(! cmdMessage.hasQuery () && nextHandler != null)  {
-			nextHandler.handleMessage (cmdMessage, channel);
-			return;
+		if(cmdMessage.hasQuery ())  {
+			handle(cmdMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (cmdMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+}
 
-		if(nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
+	private void handle(CommandMessage cmdMessage, Channel channel) throws Exception {
 
 		Storage.Query query = cmdMessage.getQuery();
 		Common.Header.Builder hb = buildHeader();
@@ -46,100 +51,116 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 		String key = query.getKey();
 
 		switch (query.getAction()) {
-			case GET:
-				rb.setAction(query.getAction());
-				Object data = dbHandler.get(key);
-				if (data == null) {
+		case GET:
+			rb.setAction(query.getAction());
+			Map<Integer, byte[]> dataMap = dbHandler.get(key);
+			if (dataMap.isEmpty()) {
 
-					Common.Failure.Builder fb = Common.Failure.newBuilder();
-					fb.setMessage("Key not present");
-					fb.setId(101);
+				Common.Failure.Builder fb = Common.Failure.newBuilder();
+				fb.setMessage("Key not present");
+				fb.setId(101);
 
-					rb.setSuccess(false);
-					rb.setFailure(fb);
-
-					cb.setHeader(hb);
-					cb.setResponse(rb);
-					channel.writeAndFlush(cb.build());
-				} else {
-					rb.setSuccess(true);
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					ObjectOutputStream os = new ObjectOutputStream(bos);
-
-					os.writeObject(data);
-					rb.setData(ByteString.copyFrom(bos.toByteArray()));
-					rb.setInfomessage("Action completed successfully!");
-					rb.setKey(key);
-
-					cb.setHeader(hb);
-					cb.setResponse(rb);
-					channel.writeAndFlush(cb.build());
-
-				}
-				break;
-
-			case DELETE:
-				data = dbHandler.remove(key);
-				if (data == null) {
-					Common.Failure.Builder fb = Common.Failure.newBuilder();
-					fb.setMessage("Key not present");
-					fb.setId(101);
-
-					rb.setSuccess(false);
-					rb.setFailure(fb);
-
-					cb.setHeader(hb);
-					cb.setResponse(rb);
-					channel.writeAndFlush(cb.build());
-				}  else {
-					rb.setSuccess(true);
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					ObjectOutputStream os = new ObjectOutputStream(bos);
-
-					os.writeObject(data);
-					rb.setData(ByteString.copyFrom(bos.toByteArray()));
-					rb.setInfomessage("Action completed successfully!");
-					rb.setKey(key);
-
-					cb.setHeader(hb);
-					cb.setResponse(rb);
-					channel.writeAndFlush(cb.build());
-				}
-				break;
-
-			case STORE:
-
-				if (query.hasKey()) {
-					key = dbHandler.put(query.getKey(), 0, query.getData().toByteArray());
-				} else {
-					key = dbHandler.store(query.getData().toByteArray());
-				}
-
-				rb.setAction(query.getAction());
-				rb.setKey(key);
-				rb.setSuccess(true);
-				rb.setInfomessage("Data stored successfully at key: " + key);
+				rb.setSuccess(false);
+				rb.setFailure(fb);
 
 				cb.setHeader(hb);
 				cb.setResponse(rb);
 				channel.writeAndFlush(cb.build());
-				break;
+			} else {
+				System.out.println(dataMap);
+				for (Integer sequenceNo : dataMap.keySet()) {
+					rb.setSuccess(true);
+					if (sequenceNo == 0) {
+						rb.setMetaData(Metadata.parseFrom(dataMap.get(sequenceNo)));
+					} else {
+						rb.setData(ByteString.copyFrom(dataMap.get(sequenceNo)));
+					}
+					rb.setKey(key);
+					rb.setSequenceNo(sequenceNo);
 
-			case UPDATE:
-				key = dbHandler.put(query.getKey(),0, query.getData().toByteArray());
-				rb.setAction(query.getAction());
-				rb.setKey(key);
-				rb.setSuccess(true);
-				rb.setInfomessage("Data stored successfully at key: " + key);
+					cb.setHeader(hb);
+					cb.setResponse(rb);
+					channel.write(cb.build());
+				}
+				channel.flush();
+			}
+			break;
+
+		case DELETE:
+			Object data = dbHandler.remove(key);
+			if (data == null) {
+				Common.Failure.Builder fb = Common.Failure.newBuilder();
+				fb.setMessage("Key not present");
+				fb.setId(101);
+
+				rb.setSuccess(false);
+				rb.setFailure(fb);
 
 				cb.setHeader(hb);
 				cb.setResponse(rb);
 				channel.writeAndFlush(cb.build());
-				break;
+			} else {
+				rb.setSuccess(true);
+				ByteArrayOutputStream bos = new ByteArrayOutputStream();
+				ObjectOutputStream os = new ObjectOutputStream(bos);
 
-			default:
-				cmdChannelHandler.getLogger ().info("Default case!");
-				break;
+				os.writeObject(data);
+				rb.setData(ByteString.copyFrom(bos.toByteArray()));
+				rb.setInfomessage("Action completed successfully!");
+				rb.setKey(key);
+
+				cb.setHeader(hb);
+				cb.setResponse(rb);
+				channel.writeAndFlush(cb.build());
+			}
+			break;
+
+		case STORE:
+
+			if (query.hasKey()) {
+				
+				if (query.hasMetadata()) {
+					dbHandler.put(query.getKey(), 0, query.getMetadata().toByteArray());
+				} else {
+					key = dbHandler.put(query.getKey(), query.getSequenceNo(), query.getData().toByteArray());
+				}
+			} else {
+				key = dbHandler.store(query.getData().toByteArray());
+				
+				// TODO temporary fix
+				Metadata.Builder mb = Metadata.newBuilder();
+				mb.setSeqSize(1);
+				mb.setTime(System.currentTimeMillis());
+				mb.setSize(query.getData().size());
+				dbHandler.put(key, 0, mb.build().toByteArray());
+			}
+
+			rb.setAction(query.getAction());
+			rb.setKey(key);
+			rb.setSuccess(true);
+			rb.setSequenceNo(query.getSequenceNo());
+			rb.setInfomessage("Data stored successfully at key: " + key);
+
+			cb.setHeader(hb);
+			cb.setResponse(rb);
+			channel.writeAndFlush(cb.build());
+			break;
+
+		case UPDATE:
+			key = dbHandler.put(query.getKey(), query.getSequenceNo(), query.getData().toByteArray());
+			rb.setAction(query.getAction());
+			rb.setKey(key);
+			rb.setSuccess(true);
+			rb.setInfomessage("Data stored successfully at key: " + key);
+
+			cb.setHeader(hb);
+			cb.setResponse(rb);
+			channel.writeAndFlush(cb.build());
+			break;
+
+		default:
+			cmdChannelHandler.getLogger().info("Default case!");
+			break;
 		}
 }
 

@@ -228,7 +228,7 @@ public class RedisDBHandler implements IDBHandler {
 			return null;
 		}
 		String uuid = UUID.randomUUID().toString();
-		String key = put(uuid, 0, value);
+		String key = put(uuid, 1, value);
 		return key;
 	}
 

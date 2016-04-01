@@ -1,32 +1,37 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import gash.router.server.WorkChannelHandler;
+import gash.router.server.ServerState;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
 import pipe.work.Work.WorkMessage;
 
 public class ElectionMessageHandler implements IWrkMessageHandler {
 
-	private final WorkChannelHandler workHandler;
+	private final ServerState state;
+	private final Logger logger;
 	private IWrkMessageHandler nextHandler;
 
-	public ElectionMessageHandler(WorkChannelHandler workChannelHandler) {
-		this.workHandler = workChannelHandler;
+	public ElectionMessageHandler(ServerState state, Logger logger) {
+		this.state = state;
+		this.logger = logger;
 	}
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if (!workMessage.hasLeader() && nextHandler != null) {
-			nextHandler.handleMessage(workMessage, channel);
-			return;
+		if(workMessage.hasLeader ())    {
+			handle(workMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (workMessage, channel);
+			}else   {
+				logger.info ("*******No handler available********");
+			}
 		}
-		
-		if (!workMessage.hasLeader() && nextHandler == null ) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
-		
-		System.out.println("Election Message Received forwarding to state");
-		workHandler.getServerState().getCurrentState().handleMessage(workMessage, channel);
+	}
+
+	private void handle(WorkMessage workMessage, Channel channel) {
+		logger.info ("Election Message Received forwarding to state");
+		state.getCurrentState().handleMessage(workMessage, channel);
 	}
 
 	@Override

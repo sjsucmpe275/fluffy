@@ -1,4 +1,4 @@
-package Election;
+package election;
 
 public enum NodeStateEnum {
 

@@ -54,12 +54,13 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 
 	private void initializeMessageHandlers() {
 		//Define Handlers
-		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (this);
-		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (this);
-		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (this);
-		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (this);
-		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (this);
-		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(this);
+		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (state, logger);
+		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (state, logger);
+		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (state, logger);
+		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (state, logger);
+		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (state, logger);
+		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(state, logger);
+
 		//Chain all the handlers
 		beatMessageHandler.setNextHandler (failureMessageHandler);
 		failureMessageHandler.setNextHandler (pingMessageHandler);
@@ -171,6 +172,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
+		throw new Exception (cause);
 	}
 
 	public ServerState getServerState() {

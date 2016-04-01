@@ -21,7 +21,7 @@ public class EdgeInfo {
 	private int ref;
 	private String host;
 	private int port;
-	private long lastHeartbeat = -1;
+	private long lastHeartbeat = 0;
 	private boolean active = false;
 	private Channel channel;
 

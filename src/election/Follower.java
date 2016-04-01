@@ -1,11 +1,10 @@
-package Election;
-
-import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
+package election;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.election.Election.LeaderStatus;
@@ -13,20 +12,21 @@ import pipe.election.Election.LeaderStatus.LeaderQuery;
 import pipe.election.Election.LeaderStatus.LeaderState;
 import pipe.work.Work.WorkMessage;
 import pipe.work.Work.WorkState;
+import util.TimeoutListener;
+import util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class Follower implements INodeState {
+public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
 
-	private long lastHeartBeatValue;
+	private final Logger logger = LoggerFactory.getLogger ("Follower");
+
 	private Timer timer;
 	private ServerState state;
 	private ConcurrentHashMap<Integer, Object> visitedNodesMap;
 
 	public Follower(ServerState serverState) {
 		this.state = serverState;
-	}
-
-	protected long getDelay() {
-		return state.getConf().getElectionTimeout();
+		timer = new Timer(this, state.getConf ().getHeartbeatDt ());
 	}
 
 	@Override
@@ -65,6 +65,31 @@ public class Follower implements INodeState {
 		}
 	}
 
+	@Override
+	public void beforeStateChange() {
+
+	}
+
+	@Override
+	public void afterStateChange() {
+
+	}
+
+	@Override
+	public void onNewOrHigherTerm() {
+
+	}
+
+	@Override
+	public void onLeaderDiscovery() {
+
+	}
+
+	@Override
+	public void onHigherTerm() {
+
+	}
+
 	public WorkMessage createSizeIsMessage(int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = Common.Header.newBuilder();
@@ -80,7 +105,6 @@ public class Follower implements INodeState {
 		wb.setLeader(leaderStatus);
 		wb.setSecret(1);
 		return wb.build();
-
 	}
 
 	public WorkMessage createMessage(int source, int destination) {
@@ -101,60 +125,44 @@ public class Follower implements INodeState {
 		return wb.build();
 	}
 
-	public void getClusterSize() {
-
+	private void onElectionTimeout() {
+		state.setState (NodeStateEnum.CANDIDATE);
 	}
 
 	@Override
-	public void stateChanged() {
-		// Start the timer
-//		timer.scheduleAtFixedRate(new ElectionTimer(this), 0, getDelay());
+	public void notifyTimeout() {
+		onElectionTimeout ();
 	}
 
-	public long getLastHeartbeat() {
-		return lastHeartBeatValue;
+	@Override
+	public void onLeaderBadHealth() {
+		//Start Election Timer
+
+		/*state.setState (NodeStateEnum.CANDIDATE);*/
 	}
 
-	public void setLastHeartbeat(long lastHeartbeat) {
-		this.lastHeartBeatValue = lastHeartbeat;
-	}
-
-	public void isElectionNeeded(boolean result) {
-		if (result) {
-			timer.cancel();
-			state.setState(NodeStateEnum.CANDIDATE);
-		}
-	}
-
-	private class VoteMessage {
+	private class VoteMessage{
 		private WorkState.Builder workState;
 		private LeaderState leaderState;
 		private Common.Header.Builder header;
 		private LeaderStatus.Builder leaderStatus;
 		private int nodeId;
-		private int destination = -1; // By default Heart Beat Message will be
-										// sent to all Nodes..
+		private int destination = -1; // By default Heart Beat Message will be sent to all Nodes..
 		private int secret = 1;
 		private int electionId;
-		/*
-		 * 
-		 * optional string leader_host= 3; optional int32 leader_id = 4;
-		 * optional int32 election_id = 5; optional int32 votedFor = 6; optional
-		 * bool voteGranted = 7;
-		 */
-
-		public VoteMessage(int nodeId, int electionId, int VoteFor) {
+		
+		public VoteMessage(int nodeId,int electionId,int VoteFor)    {
 			this.nodeId = nodeId;
 			workState = WorkState.newBuilder();
-			workState.setEnqueued(-1);
-			workState.setProcessed(-1);
+			workState.setEnqueued (-1);
+			workState.setProcessed (-1);
 			leaderState = LeaderState.LEADERDEAD;
-			header = Common.Header.newBuilder();
-			header.setNodeId(nodeId);
-			header.setDestination(destination);
-			header.setMaxHops(1);
-			header.setTime(System.currentTimeMillis());
-			this.electionId = electionId;
+			header = Common.Header.newBuilder ();
+			header.setNodeId (nodeId);
+			header.setDestination (destination);
+			header.setMaxHops (1);
+			header.setTime (System.currentTimeMillis ());
+			this.electionId=electionId;
 			leaderStatus = LeaderStatus.newBuilder();
 			leaderStatus.setElectionId(electionId);
 			leaderStatus.setVotedFor(VoteFor);
@@ -162,42 +170,40 @@ public class Follower implements INodeState {
 			leaderStatus.setAction(LeaderQuery.VOTERESPONSE);
 		}
 
-		public WorkMessage getMessage() {
+		public WorkMessage getMessage()   {
 
-			header.setTime(System.currentTimeMillis());
+			header.setTime (System.currentTimeMillis ());
 
-			WorkMessage.Builder workMessage = WorkMessage.newBuilder();
-			workMessage.setHeader(header);
+			WorkMessage.Builder workMessage = WorkMessage.newBuilder ();
+			workMessage.setHeader (header);
 			workMessage.setLeader(leaderStatus);
-			workMessage.setSecret(secret);
-			return workMessage.build();
+			workMessage.setSecret (secret);
+			return workMessage.build ();
 		}
 
-		public void setEnqueued(int enqueued) {
-			workState.setEnqueued(enqueued);
+		public void setEnqueued(int enqueued)   {
+			workState.setEnqueued (enqueued);
 		}
 
 		public void setProcessed(int processed) {
-			workState.setProcessed(processed);
+			workState.setProcessed (processed);
 		}
 
-		public void setNodeId(int nodeId) {
-			header.setNodeId(nodeId);
+		public void setNodeId(int nodeId)   {
+			header.setNodeId (nodeId);
 		}
 
 		public void setDestination(int destination) {
-			header.setDestination(destination);
+			header.setDestination (destination);
 		}
 
-		// Todo:Harish Number of max hops can be adjusted based on the number of
-		// nodes may be outBoundEdges size()
-		public void setMaxHops(int maxHops) {
-			header.setMaxHops(maxHops);
+		//Todo:Harish Number of max hops can be adjusted based on the number of nodes may be outBoundEdges size()
+		public void setMaxHops(int maxHops)    {
+			header.setMaxHops (maxHops);
 		}
 
 		public void setSecret(int secret) {
 			this.secret = secret;
 		}
-
 	}
 }
