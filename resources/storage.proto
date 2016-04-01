@@ -3,7 +3,30 @@ option java_package = "storage";
 
 import "common.proto";
 
+/*
+ * ============Introduction============
+ * We assume data is in bytes format so that we can handle any type of data 
+ * (images, text or anything else).
+ *
+ * File should be split into 1MB chunks. Each chunk should have sequenceID 
+ * starting from 1. (0 is reserved for MetaData chunk). It should be transfered 
+ * to the cluster using protobuf as CommandMessages.
+ * 
+ * Chunk should be saved along with sequenceID. If user requests for data, we
+ * need to asynchronously send the data chunks with sequenceIDs. Client program 
+ * will sort chunks and create file from those chunks. 
+ * 
+ * Data will be stored as key value pairs. Key can be provided by user as well. 
+ * For storing on server, we need to use <key>_<sequenceID> to store data.
+ * 
+ */
 
+
+/*
+ * ============Data Operations============
+ * There are 4 types of operations which can be performed on data. They are 
+ * analogous to CRUD operations in databases.
+ */
 enum Action {
 	GET = 1;
 	STORE = 2; 
@@ -11,7 +34,42 @@ enum Action {
 	DELETE = 4;
 }
 
-// Storage Query from client to cluster
+/*
+ * ============Metadata============ 
+ * This class is for storing metadata. We
+ * should store sequence size so that we can successfully reconstruct
+ * complete file/data from chunks. (Basically, we should know when we should
+ * write chunks to the file and so we should know what is the sequence
+ * size).
+ *
+ * So, for example, if a file has 8 chunks of data. seq_size should be 8 +
+ * 1. (1 for metadata chunk).
+ *
+ * size attribute is for storing file size in bytes. (optional) time will
+ * store creation time. (optional)
+ *
+ * Metadata chunk should be created by client program. To create it, client
+ * should first identify file size and how many chunks will be created from
+ * the file.
+ *
+ * Metadata should be stored as sequenceNo 0.
+ */
+message Metadata {
+	required int32 seq_size = 19;
+	optional int32 size = 20;
+	optional int64 time = 21;
+}
+
+
+/*
+ * ============Query============
+ * 
+ * Query is command for the cluster. It should contain 
+ * - Action to be performed 
+ * - Key for the data 
+ * - Sequence number (for metadata chunk -> 0)
+ * - Data or Metadata   
+ */
 message Query {
 	
 	// Action to be performed
@@ -19,15 +77,26 @@ message Query {
 	
 	// Key to store; optional 
 	optional string key = 6;
+
+	optional int32 sequence_no = 8;	
 	
 	// Data in bytes to store
 	optional bytes data = 7;
-
-	optional int32 size = 8;
 	
-	optional int32 sequence_no = 9;
+	optional Metadata metadata = 22;
+	
 }
 
+/*
+ * ============Response============
+ * Response to the Query. It should contain:
+ * - action for which response is given
+ * - success status
+ * - key for which action is performed
+ * - sequence no of the response chunk
+ * - information message to be displayed (optional)
+ * - Payload as failure, data or metadata.
+ */
 message Response {
 
 	// Action for which response is being sent
@@ -40,19 +109,19 @@ message Response {
 	// provide key, return newly generated key.
 	optional string key = 12;
 
-	optional int32 size = 13;
-	
 	optional int32 sequence_no = 14;
-	
+
+	// Message, if any, after successful operation
+	optional string infomessage = 15;
+
 	oneof payload {
-	
-		// Message, if any, after successful operation
-		string infomessage = 15;
 
 		// Failure with reason 
 		Failure failure = 16;	
 		
 		// Data in case of GET action
 		bytes data = 17;
+		
+		Metadata metaData = 18;
 	}
 }
