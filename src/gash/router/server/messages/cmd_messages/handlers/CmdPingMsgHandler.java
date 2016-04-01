@@ -20,15 +20,18 @@ public class CmdPingMsgHandler implements ICmdMessageHandler {
 
 	@Override
 	public void handleMessage(CommandMessage cmdMessage, Channel channel) throws Exception{
-		if(! cmdMessage.hasPing () && nextHandler != null)  {
-			nextHandler.handleMessage (cmdMessage, channel);
-			return;
+		if(cmdMessage.hasPing ())  {
+			handle(cmdMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (cmdMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+	}
 
-		if(nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
+	private void handle(CommandMessage cmdMessage, Channel channel) {
 
 		cmdChannelHandler.getLogger ().info("ping from " + cmdMessage.getHeader().getNodeId());
 		// construct the message to send

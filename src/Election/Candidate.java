@@ -1,7 +1,5 @@
 package Election;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeMonitor;
@@ -13,6 +11,8 @@ import pipe.election.Election.LeaderStatus.LeaderQuery;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
 	int voteCount;
@@ -29,9 +29,6 @@ public class Candidate implements INodeState, TimeoutListener {
 	}
 
 	public Candidate() {
-	}
-
-	public void requestVote() {
 	}
 
 	@Override

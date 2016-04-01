@@ -54,7 +54,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 
 	private void initializeMessageHandlers() {
 		//Define Handlers
-		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (this);
+		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (state, logger);
 		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (this);
 		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (this);
 		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (this);

@@ -1,8 +1,10 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import gash.router.server.WorkChannelHandler;
+import gash.router.server.ServerState;
 import io.netty.channel.Channel;
-import pipe.work.Work.*;
+import org.slf4j.Logger;
+import pipe.work.Work.Task;
+import pipe.work.Work.WorkMessage;
 
 
 /**
@@ -11,25 +13,29 @@ import pipe.work.Work.*;
  */
 public class TaskMessageHandler implements IWrkMessageHandler {
 
-	private final WorkChannelHandler workChannelHandler;
+	private final ServerState state;
+	private final Logger logger;
 	private IWrkMessageHandler nextHandler;
 
-	public TaskMessageHandler(WorkChannelHandler workChannelHandler) {
-		this.workChannelHandler = workChannelHandler;
+	public TaskMessageHandler(ServerState state, Logger logger) {
+		this.state = state;
+		this.logger = logger;
 	}
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, channel);
-			return;
+		if(workMessage.hasTask ())  {
+			handle(workMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (workMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+	}
 
-		if(nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
-
+	private void handle(WorkMessage workMessage, Channel channel) {
 		Task t = workMessage.getTask();
 	}
 

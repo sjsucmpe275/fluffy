@@ -1,11 +1,12 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
 import Election.Candidate;
-import gash.router.server.WorkChannelHandler;
+import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeList;
 import gash.router.server.messages.wrk_messages.BeatMessage;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
 import pipe.work.Work.WorkMessage;
 
 /**
@@ -14,54 +15,60 @@ import pipe.work.Work.WorkMessage;
  */
 public class BeatMessageHandler implements IWrkMessageHandler{
 
-	private final WorkChannelHandler workChannelHandler;
+	private final ServerState state;
+	private final Logger logger;
 	private IWrkMessageHandler nextHandler;
 
-	public BeatMessageHandler(WorkChannelHandler workChannelHandler) {
-		this.workChannelHandler = workChannelHandler;
+	public BeatMessageHandler(ServerState state, Logger logger) {
+		this.state = state;
+		this.logger = logger;
 	}
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if(! workMessage.hasBeat () && nextHandler != null)  {
-			nextHandler.handleMessage (workMessage, channel);
-			return;
+		if(workMessage.hasBeat ())  {
+			handle(workMessage, channel);
+		}else   {
+			if(nextHandler != null) {
+				nextHandler.handleMessage (workMessage, channel);
+			}else   {
+				System.out.println("*****No Handler available*****");
+			}
 		}
+	}
 
-		if(! workMessage.hasBeat () && nextHandler == null) {
-			System.out.println("*****No Handler available*****");
-			return;
-		}
+	private void handle(WorkMessage workMessage, Channel channel) {
 
-		workChannelHandler.getLogger().info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
-		workChannelHandler.getLogger ().info ("Destination is: " + workMessage.getHeader ().getDestination ());
+		logger.info("Received Heartbeat from: " + workMessage.getHeader().getNodeId());
+		logger.info ("Destination is: " + workMessage.getHeader ().getDestination ());
 
 		// Update out-bound edges with time when heart beat was received as a reply sent.
-		EdgeList outBoundEdges = workChannelHandler.getServerState ().getEmon ().getOutboundEdges ();
+		EdgeList outBoundEdges = state.getEmon ().getOutboundEdges ();
 
 		EdgeInfo oei = outBoundEdges.getNode (workMessage.getHeader ().getNodeId ());
 
 		if(oei != null) {
-			workChannelHandler.getLogger ().info ("Received reply for my beat, Dropping message");
+			logger.info ("Received reply for my beat, Dropping message");
 			oei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 			return;
 		}
 
 		//Update in-bound when heart beat was received..
-		EdgeList inBoundEdges = workChannelHandler.getServerState ().getEmon ().getInboundEdges ();
+		EdgeList inBoundEdges = state.getEmon ().getInboundEdges ();
 		EdgeInfo iei = inBoundEdges.getNode (workMessage.getHeader ().getNodeId ());
 
 		if(iei != null) {
 			iei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 		}
 
-		workChannelHandler.getLogger().info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
+		logger.info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
 		// construct the message to reply heart beat - notifying I am alive
-		BeatMessage beatMessage = new BeatMessage (workChannelHandler.getServerState().getConf().getNodeId());
+		BeatMessage beatMessage = new BeatMessage (state.getConf().getNodeId());
 		beatMessage.setDestination (workMessage.getHeader ().getNodeId ());
 
-		if (workChannelHandler.getServerState().getCurrentState() instanceof Candidate) {
-			((Candidate)workChannelHandler.getServerState().getCurrentState()).getClusterSize();
+		//todo:Harish This piece of code should be removed
+		if (state.getCurrentState() instanceof Candidate) {
+			((Candidate)state.getCurrentState()).getClusterSize();
 		}
 		channel.writeAndFlush (beatMessage.getMessage ());
 	}
