@@ -104,4 +104,11 @@ public class Candidate implements INodeState {
 
 		return wb.build();
 	}
+
+	
+	@Override
+	public void stateChanged()	{
+		
+	}
+	
 }

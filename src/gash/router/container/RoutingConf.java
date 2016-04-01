@@ -37,6 +37,7 @@ public class RoutingConf {
 	private boolean internalNode = true;
 	private int heartbeatDt = 2000;
 	private String database;
+	private int electionTimeout;
 	private List<RoutingEntry> routing;
 
 	public HashMap<String, Integer> asHashMap() {
@@ -113,6 +114,14 @@ public class RoutingConf {
 
 	public void setDatabase(String database) {
 		this.database = database;
+	}
+
+	public int getElectionTimeout() {
+		return electionTimeout;
+	}
+
+	public void setElectionTimeout(int electionTimeout) {
+		this.electionTimeout = electionTimeout;
 	}
 
 	@XmlRootElement(name = "entry")

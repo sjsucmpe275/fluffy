@@ -1,17 +1,15 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import gash.router.server.ServerState;
 import gash.router.server.WorkChannelHandler;
 import io.netty.channel.Channel;
 import pipe.work.Work.WorkMessage;
 
 public class ElectionMessageHandler implements IWrkMessageHandler {
 
-	private WorkChannelHandler workHandler;
+	private final WorkChannelHandler workHandler;
 	private IWrkMessageHandler nextHandler;
 
 	public ElectionMessageHandler(WorkChannelHandler workChannelHandler) {
-
 		this.workHandler = workChannelHandler;
 	}
 
@@ -27,7 +25,6 @@ public class ElectionMessageHandler implements IWrkMessageHandler {
 		}
 		System.out.println("Election Message Received forwarding to state");
 		workHandler.getServerState().getCurrentState().handleMessage(workMessage, channel);
-
 	}
 
 	@Override
