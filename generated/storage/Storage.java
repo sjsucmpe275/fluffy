@@ -128,13 +128,13 @@ public final class Storage {
     int getSeqSize();
 
     /**
-     * <code>optional int32 size = 20;</code>
+     * <code>optional int64 size = 20;</code>
      */
     boolean hasSize();
     /**
-     * <code>optional int32 size = 20;</code>
+     * <code>optional int64 size = 20;</code>
      */
-    int getSize();
+    long getSize();
 
     /**
      * <code>optional int64 time = 21;</code>
@@ -221,7 +221,7 @@ public final class Storage {
             }
             case 160: {
               bitField0_ |= 0x00000002;
-              size_ = input.readInt32();
+              size_ = input.readInt64();
               break;
             }
             case 168: {
@@ -285,17 +285,17 @@ public final class Storage {
     }
 
     public static final int SIZE_FIELD_NUMBER = 20;
-    private int size_;
+    private long size_;
     /**
-     * <code>optional int32 size = 20;</code>
+     * <code>optional int64 size = 20;</code>
      */
     public boolean hasSize() {
       return ((bitField0_ & 0x00000002) == 0x00000002);
     }
     /**
-     * <code>optional int32 size = 20;</code>
+     * <code>optional int64 size = 20;</code>
      */
-    public int getSize() {
+    public long getSize() {
       return size_;
     }
 
@@ -316,7 +316,7 @@ public final class Storage {
 
     private void initFields() {
       seqSize_ = 0;
-      size_ = 0;
+      size_ = 0L;
       time_ = 0L;
     }
     private byte memoizedIsInitialized = -1;
@@ -340,7 +340,7 @@ public final class Storage {
         output.writeInt32(19, seqSize_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeInt32(20, size_);
+        output.writeInt64(20, size_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeInt64(21, time_);
@@ -360,7 +360,7 @@ public final class Storage {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt32Size(20, size_);
+          .computeInt64Size(20, size_);
       }
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         size += com.google.protobuf.CodedOutputStream
@@ -502,7 +502,7 @@ public final class Storage {
         super.clear();
         seqSize_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
-        size_ = 0;
+        size_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000002);
         time_ = 0L;
         bitField0_ = (bitField0_ & ~0x00000004);
@@ -634,34 +634,34 @@ public final class Storage {
         return this;
       }
 
-      private int size_ ;
+      private long size_ ;
       /**
-       * <code>optional int32 size = 20;</code>
+       * <code>optional int64 size = 20;</code>
        */
       public boolean hasSize() {
         return ((bitField0_ & 0x00000002) == 0x00000002);
       }
       /**
-       * <code>optional int32 size = 20;</code>
+       * <code>optional int64 size = 20;</code>
        */
-      public int getSize() {
+      public long getSize() {
         return size_;
       }
       /**
-       * <code>optional int32 size = 20;</code>
+       * <code>optional int64 size = 20;</code>
        */
-      public Builder setSize(int value) {
+      public Builder setSize(long value) {
         bitField0_ |= 0x00000002;
         size_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional int32 size = 20;</code>
+       * <code>optional int64 size = 20;</code>
        */
       public Builder clearSize() {
         bitField0_ = (bitField0_ & ~0x00000002);
-        size_ = 0;
+        size_ = 0L;
         onChanged();
         return this;
       }
@@ -3543,7 +3543,7 @@ public final class Storage {
   static {
     java.lang.String[] descriptorData = {
       "\n\rstorage.proto\032\014common.proto\"8\n\010Metadat" +
-      "a\022\020\n\010seq_size\030\023 \002(\005\022\014\n\004size\030\024 \001(\005\022\014\n\004tim" +
+      "a\022\020\n\010seq_size\030\023 \002(\005\022\014\n\004size\030\024 \001(\003\022\014\n\004tim" +
       "e\030\025 \001(\003\"m\n\005Query\022\027\n\006action\030\005 \002(\0162\007.Actio" +
       "n\022\013\n\003key\030\006 \001(\t\022\023\n\013sequence_no\030\010 \001(\005\022\014\n\004d" +
       "ata\030\007 \001(\014\022\033\n\010metadata\030\026 \001(\0132\t.Metadata\"\302" +
