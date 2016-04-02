@@ -36,10 +36,8 @@ public class FollowerHealthMonitor {
 	private ConcurrentHashMap<Integer, Long> follower2BeatTimeMap;
 	private final ServerState state;
 	private FollowerListener followerListener;
-	// private long interval;
 	private HealthMonitorTask task;
 	private AtomicBoolean stop;
-	private Object lock;
 
 	public FollowerHealthMonitor(FollowerListener followerListener, ServerState state, long timeout) {
 		this.followerListener = followerListener;
@@ -48,7 +46,6 @@ public class FollowerHealthMonitor {
 		// the original timeout
 		task = new HealthMonitorTask(timeout);
 		stop = new AtomicBoolean(false);
-		this.lock = new Object();
 		this.follower2BeatTimeMap = new ConcurrentHashMap<>();
 	}
 
@@ -110,17 +107,4 @@ public class FollowerHealthMonitor {
 			}
 		}
 	}
-	/*
-	 * private class FollowerConnectionInfo { private boolean active; private
-	 * final Channel channel;
-	 * 
-	 * FollowerConnectionInfo(Channel channel, boolean active) { this.channel =
-	 * channel; this.active = active; }
-	 * 
-	 * public boolean isActive() { return active; }
-	 * 
-	 * public void setActive(boolean active) { this.active = active; }
-	 * 
-	 * public Channel getChannel() { return channel; } }
-	 */
 }

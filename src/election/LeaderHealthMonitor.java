@@ -1,11 +1,11 @@
 package election;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author: codepenman.
@@ -19,15 +19,12 @@ public class LeaderHealthMonitor {
 	private AtomicBoolean stop;
 	private HealthMonitorTask task;
 	private AtomicLong beatTime;
-	private Object lock;
 
 	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout, String identifier) {
 		this.healthListener = healthListener;
 		task = new HealthMonitorTask(timeout);
 		stop = new AtomicBoolean(false);
 		beatTime = new AtomicLong(System.currentTimeMillis());
-		lock = new Object();
-		System.out.println(Thread.currentThread() + ":" + identifier);
 	}
 
 	public void start() {
@@ -63,8 +60,8 @@ public class LeaderHealthMonitor {
 						healthListener.onLeaderBadHealth();
 						break;
 					}
-					synchronized (lock) {
-						lock.wait(timeout);
+					synchronized (this) {
+						wait(timeout);
 					}
 				}
 			} catch (InterruptedException e) {
