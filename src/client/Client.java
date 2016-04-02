@@ -4,6 +4,7 @@
 package client;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -24,6 +25,8 @@ import util.SerializationUtil;
  */
 public class Client implements CommListener {
 
+	private static final int M = 1024 * 1024;
+
 	private String host = "127.0.0.1";
 	private int port = 4568;
 	private MessageClient mc;
@@ -34,53 +37,8 @@ public class Client implements CommListener {
 
 	public Client() throws InterruptedException {
 		mc = new MessageClient(host, port);
-		init();
-	}
-
-	private void init() {
 		responseList = new LinkedList<>();
 		mc.addListener(this);
-	}
-
-	private void handleGet(String key) {
-		mc.get(key);
-	}
-
-	private void handleStore(String value) {
-		mc.store(ByteString.copyFrom(value.getBytes()));
-	}
-
-	private void handlePut(String key) {
-
-		SerializationUtil util = new SerializationUtil();
-		List<ByteString> dataList = util.readfile(filepath, 0, 1024 * 1024, -1);
-		File tempFile = new File(filepath);
-
-		mc.putMetadata(key, dataList.size(), filepath.length());
-		int sequenceNo = 1;
-		for (ByteString data : dataList) {
-			mc.put(key, sequenceNo++, data);
-		}
-
-	}
-
-	private void handleDelete() {
-
-	}
-
-	private void handleGets(String key) {
-		mc.get(key);
-	}
-
-	
-	private void handleDelete(String key) {
-		// Not implemented
-		throw new RuntimeException("Not implemented!");
-	}
-
-	private void handlePuts(String key, String value) {
-		mc.putMetadata(key, 1, value.getBytes().length);
-		mc.put(key, 1, ByteString.copyFrom(value.getBytes()));
 	}
 
 	@Override
@@ -90,6 +48,7 @@ public class Client implements CommListener {
 
 	@Override
 	public void onMessage(CommandMessage msg) {
+
 		if (!fileOutput) {
 			System.out.println(msg);
 		}
@@ -101,6 +60,7 @@ public class Client implements CommListener {
 			} else {
 				ByteString data = msg.getResponse().getData();
 				String str = new String(data.toByteArray());
+				
 				if (!fileOutput) {
 					System.out.println("Fetched data: " + str);
 				}
@@ -129,24 +89,25 @@ public class Client implements CommListener {
 		}
 	}
 
-	public void handleCommand(String[] args) {
-
+	public void handleCommand(String[] args) throws FileNotFoundException {
 		if (args.length < 1) {
 			System.out.println("Operation not specified!");
 			return;
 		}
 
-		switch (args[0]) {
+		System.out.println(Thread.currentThread() + ": Handling " + args[0] );
+		switch (args[0].toUpperCase()) {
 		case "GET":
 
 			if (args.length < 3) {
-				System.out.println("Not enough params.\n->Key\n->Output File Location");
+				System.out.println(
+					"Not enough params.\n->Key\n->Output File Location");
 				return;
 			}
 			fileOutput = true;
 			String key = args[1];
 			filepath = args[2];
-			handleGet(key);
+			mc.get(key);
 			break;
 
 		case "GETS":
@@ -157,7 +118,7 @@ public class Client implements CommListener {
 			}
 			key = args[1];
 			fileOutput = false;
-			handleGets(key);
+			mc.get(key);
 			break;
 
 		case "STORE":
@@ -166,17 +127,33 @@ public class Client implements CommListener {
 				return;
 			}
 			String value = args[1];
-			handleStore(value);
+			mc.store(ByteString.copyFrom(value.getBytes()));
 			break;
 
 		case "PUT":
 			if (args.length < 3) {
-				System.out.println("Not enough params.\n->Key\n->Input File Location");
+				System.out.println(
+					"Not enough params.\n->Key\n->Input File Location");
 				return;
 			}
 			key = args[1];
 			filepath = args[2];
-			handlePut(key);
+			SerializationUtil util = new SerializationUtil();
+			File tempFile = new File(filepath);
+			if (!tempFile.exists()) {
+				throw new FileNotFoundException(filepath);
+			}
+			long fileSize = tempFile.length();
+			mc.putMetadata(key, (int) (Math.ceil(1.0 * fileSize / M)),
+				fileSize);
+			for (int i = 0; i < 1 + (fileSize / M / 10); i++) {
+				List<ByteString> dataList = util.readfile(filepath, 0, M, 10);
+
+				int sequenceNo = 1;
+				for (ByteString data : dataList) {
+					mc.put(key, sequenceNo++, data);
+				}
+			}
 			break;
 
 		case "PUTS":
@@ -186,7 +163,8 @@ public class Client implements CommListener {
 			}
 			key = args[1];
 			value = args[2];
-			handlePuts(key, value);
+			mc.putMetadata(key, 1, value.getBytes().length);
+			mc.put(key, 1, ByteString.copyFrom(value.getBytes()));
 			break;
 
 		case "DELETE":
@@ -195,7 +173,7 @@ public class Client implements CommListener {
 				return;
 			}
 			key = args[1];
-			handleDelete(key);
+			System.out.println("Delete not implemented");
 			break;
 
 		default:
@@ -210,21 +188,29 @@ public class Client implements CommListener {
 		}
 
 		try {
-			Thread.sleep(10 * 1000);
+			Thread.sleep(1 * 1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 
+		
+	}
+	
+	public void releaseClient() {
 		System.out.println("Client closing...");
 		mc.release();
 	}
+	
 
 	/**
 	 * @param args
 	 * @throws InterruptedException
+	 * @throws FileNotFoundException
 	 */
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args)
+		throws InterruptedException, FileNotFoundException {
 		Client c = new Client();
 		c.handleCommand(args);
+		c.releaseClient();
 	}
 }
