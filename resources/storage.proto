@@ -56,7 +56,7 @@ enum Action {
  */
 message Metadata {
 	required int32 seq_size = 19;
-	optional int32 size = 20;
+	optional int64 size = 20;
 	optional int64 time = 21;
 }
 

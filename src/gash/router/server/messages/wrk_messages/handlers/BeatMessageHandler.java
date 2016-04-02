@@ -1,12 +1,13 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import election.Candidate;
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeList;
 import gash.router.server.messages.wrk_messages.BeatMessage;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
+
+import election.Candidate;
 import pipe.work.Work.WorkMessage;
 
 /**

@@ -124,7 +124,7 @@ public class MessageClient {
 		}
 	}
 
-	public void putMetadata(String key, int seqSize, int fileLength) {
+	public void putMetadata(String key, int seqSize, long fileLength) {
 		Header.Builder hb = buildHeader();
 	
 		CommandMessage.Builder cb = CommandMessage.newBuilder();

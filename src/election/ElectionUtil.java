@@ -1,6 +1,3 @@
-/**
- * 
- */
 package election;
 
 import gash.router.server.ServerState;

@@ -24,6 +24,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	private static final Logger logger = LoggerFactory.getLogger("Follower");
 	private static final Random random = new Random();
 
+
 	private Timer timer;
 	private LeaderHealthMonitor leaderMonitor;
 	private ServerState state;
@@ -40,6 +41,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		timer = new Timer(this, state.getConf().getElectionTimeout() 
 				+ random.nextInt(200));
 		timer.startTimer();
+
 	}
 
 	@Override
@@ -73,7 +75,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		}
 	}
 
-	@Override
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 		logger.info("VOTE REQUEST RECEIVED...");
 		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
@@ -86,6 +87,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void handleVoteResponse(WorkMessage workMessage, Channel channel) {
+
 
 	}
 
@@ -154,6 +156,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		timer.startTimer();
 	}
 
+
 	private class VoteMessage {
 
 		private WorkState.Builder workState;
@@ -221,5 +224,4 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		public void setSecret(int secret) {
 			this.secret = secret;
 		}
-	}
-}
+	}}

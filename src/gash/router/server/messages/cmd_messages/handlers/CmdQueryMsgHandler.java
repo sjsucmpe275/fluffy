@@ -49,7 +49,7 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 		Storage.Response.Builder rb = Storage.Response.newBuilder();
 		CommandMessage.Builder cb = CommandMessage.newBuilder();
 		String key = query.getKey();
-
+		
 		switch (query.getAction()) {
 		case GET:
 			rb.setAction(query.getAction());
@@ -65,7 +65,9 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 				cb.setHeader(hb);
 				cb.setResponse(rb);
-				channel.writeAndFlush(cb.build());
+				// enqueue instead of writing
+				//channel.writeAndFlush(cb.build());
+				cmdChannelHandler.enqueue(cb.build());
 			} else {
 				System.out.println(dataMap);
 				for (Integer sequenceNo : dataMap.keySet()) {
@@ -80,7 +82,9 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 					cb.setHeader(hb);
 					cb.setResponse(rb);
-					channel.write(cb.build());
+					// enqueue instead of writing
+					//channel.write(cb.build());
+					cmdChannelHandler.enqueue(cb.build());
 				}
 				channel.flush();
 			}
@@ -98,7 +102,9 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 				cb.setHeader(hb);
 				cb.setResponse(rb);
-				channel.writeAndFlush(cb.build());
+				// enqueue instead of writing
+				//channel.writeAndFlush(cb.build());
+				cmdChannelHandler.enqueue(cb.build());
 			} else {
 				rb.setSuccess(true);
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -111,7 +117,9 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 				cb.setHeader(hb);
 				cb.setResponse(rb);
-				channel.writeAndFlush(cb.build());
+				// enqueue instead of writing
+				//channel.writeAndFlush(cb.build());
+				cmdChannelHandler.enqueue(cb.build());
 			}
 			break;
 
@@ -143,7 +151,9 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 			cb.setHeader(hb);
 			cb.setResponse(rb);
-			channel.writeAndFlush(cb.build());
+			// enqueue instead of writing
+			//channel.writeAndFlush(cb.build());
+			cmdChannelHandler.enqueue(cb.build());
 			break;
 
 		case UPDATE:
@@ -155,7 +165,9 @@ public class CmdQueryMsgHandler implements ICmdMessageHandler {
 
 			cb.setHeader(hb);
 			cb.setResponse(rb);
-			channel.writeAndFlush(cb.build());
+			// enqueue instead of writing
+			//channel.writeAndFlush(cb.build());
+			cmdChannelHandler.enqueue(cb.build());
 			break;
 
 		default:
