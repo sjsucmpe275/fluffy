@@ -186,8 +186,8 @@ public class MessageServer {
 			if (conf == null)
 				throw new RuntimeException("missing conf");
 
-			state = new ServerState();
-			state.setConf(conf);
+			state = new ServerState(conf);
+//			state.setConf(conf);
 
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);

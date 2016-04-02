@@ -37,6 +37,11 @@ public class ServerState {
 		listOfNodeIds = new TreeSet();
 	}
 	
+	public ServerState(RoutingConf conf) {
+		// TODO Auto-generated constructor stub
+		setConf(conf);
+	}
+
 	public RoutingConf getConf() {
 		return conf;
 	}

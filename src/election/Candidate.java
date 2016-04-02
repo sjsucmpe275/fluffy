@@ -1,4 +1,4 @@
-package election;
+package Election;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
@@ -76,7 +76,7 @@ public class Candidate implements INodeState, TimeoutListener {
 	@Override
 	public void afterStateChange() {
 		clear();
-		getClusterSize();
+		//getClusterSize();
 	}
 
 	@Override

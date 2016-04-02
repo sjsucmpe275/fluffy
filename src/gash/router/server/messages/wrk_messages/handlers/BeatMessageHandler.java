@@ -1,6 +1,6 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import election.Candidate;
+import Election.Candidate;
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeList;
@@ -85,7 +85,7 @@ public class BeatMessageHandler implements IWrkMessageHandler{
 
 		//todo:Harish This piece of code should be removed
 		if (state.getCurrentState() instanceof Candidate) {
-			((Candidate)state.getCurrentState()).getClusterSize();
+			//((Candidate)state.getCurrentState()).getClusterSize();
 		}
 		channel.writeAndFlush (beatMessage.getMessage ());
 	}
