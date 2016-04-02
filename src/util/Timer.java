@@ -1,9 +1,9 @@
 package util;
 
+import java.util.Date;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Date;
 
 /*
 * Gets a request to start election timer.
@@ -19,10 +19,12 @@ public class Timer {
 	private final long timeout;
 	private TimeoutListener listener;
 	private TimerThread timerThread;
+	private Object lock;
 
 	public Timer(TimeoutListener listener, long timeout) {
 		this.listener = listener;
 		this.timeout = timeout;
+		this.lock = new Object();
 		timerThread = new TimerThread ();
 	}
 
@@ -45,7 +47,9 @@ public class Timer {
 			try {
 				if(debug)
 					logger.info ("********Timer started: " + new Date (System.currentTimeMillis ()));
-				wait (timeout);
+				synchronized (lock) {
+					lock.wait(timeout);
+				}
 				if(debug)
 					logger.info ("********Timed out: " + new Date (System.currentTimeMillis ()));
 				listener.notifyTimeout ();

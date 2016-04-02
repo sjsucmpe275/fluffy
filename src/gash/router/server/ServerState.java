@@ -1,22 +1,12 @@
 package gash.router.server;
 
-import Election.*;
+import election.*;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
 
-
-import java.util.HashMap;
-import java.util.TreeSet;
-
-import Election.Candidate;
-import Election.Follower;
-import Election.INodeState;
-import Election.Leader;
-import Election.NodeStateEnum;
-
 public class ServerState {
-	private RoutingConf conf;
+	private final RoutingConf conf;
 	private EdgeMonitor emon;
 	private TaskList tasks;
 	private INodeState leader;
@@ -24,44 +14,22 @@ public class ServerState {
 	private INodeState follower;
 	private INodeState currentState;
 	private int leaderId;
-	private int electionId;//termId
-	private TreeSet listOfNodeIds;
+	private int electionId;// termId
 
-	public ServerState()	{
-		leader = new Leader(this);
-		candidate = new Candidate(this);
-		follower = new Follower(this);
-		currentState = follower;
-		leaderId = -1;
-		electionId=0;
-		listOfNodeIds = new TreeSet();
-	}
-	
 	public ServerState(RoutingConf conf) {
-		// TODO Auto-generated constructor stub
-		setConf(conf);
+		this.conf = conf;
+		this.leader = new Leader(this);
+		this.candidate = new Candidate(this);
+		this.follower = new Follower(this);
+		this.currentState = follower;
+		this.leaderId = -1;
+		this.electionId = 0;
 	}
 
 	public RoutingConf getConf() {
 		return conf;
 	}
-	
-	public TreeSet getListOfNodeIds(){
-		return listOfNodeIds;
-	}
-	
-	public void addListOfNode(int nodeId){
-		if(!listOfNodeIds.contains(nodeId))
-			listOfNodeIds.add(nodeId);
-	}
 
-	public void setConf(RoutingConf conf) {
-		this.conf = conf;
-		if (conf.getNodeId() == 1) {
-			currentState = candidate;
-		}
-	}
-	
 	public EdgeMonitor getEmon() {
 		return emon;
 	}
@@ -73,21 +41,21 @@ public class ServerState {
 	public TaskList getTasks() {
 		return tasks;
 	}
-	
-	public void setState(NodeStateEnum state) {
-		currentState.beforeStateChange ();
 
-		if(state == NodeStateEnum.CANDIDATE)	{
+	public void setState(NodeStateEnum state) {
+		currentState.beforeStateChange();
+
+		if (state == NodeStateEnum.CANDIDATE) {
 			currentState = candidate;
 		}
-		if(state == NodeStateEnum.FOLLOWER)	{
+		if (state == NodeStateEnum.FOLLOWER) {
 			currentState = follower;
 		}
-		if(state == NodeStateEnum.LEADER)	{
+		if (state == NodeStateEnum.LEADER) {
 			currentState = leader;
 		}
 
-		currentState.afterStateChange ();
+		currentState.afterStateChange();
 	}
 
 	public void setTasks(TaskList tasks) {
