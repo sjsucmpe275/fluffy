@@ -27,6 +27,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import election.NodeStateEnum;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -186,8 +188,7 @@ public class MessageServer {
 			if (conf == null)
 				throw new RuntimeException("missing conf");
 
-			state = new ServerState();
-			state.setConf(conf);
+			state = new ServerState(conf);
 
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);
