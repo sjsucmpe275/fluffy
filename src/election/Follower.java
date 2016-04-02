@@ -1,15 +1,11 @@
 package election;
 
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import gash.router.server.edges.EdgeMonitor;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.election.Election.LeaderStatus;
 import pipe.election.Election.LeaderStatus.LeaderQuery;
@@ -19,18 +15,20 @@ import pipe.work.Work.WorkState;
 import util.TimeoutListener;
 import util.Timer;
 
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
 
 	private static final Logger logger = LoggerFactory.getLogger("Follower");
 	private static final Random random = new Random();
-
 
 	private Timer timer;
 	private LeaderHealthMonitor leaderMonitor;
 	private ServerState state;
 	private EdgeMonitor edgeMonitor;
 	private int nodeId;
-	private ConcurrentHashMap<Integer, Object> visitedNodesMap;
+	//private ConcurrentHashMap<Integer, Object> visitedNodesMap;
 	private ElectionUtil util;
 
 	public Follower(ServerState serverState) {
@@ -41,7 +39,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		timer = new Timer(this, state.getConf().getElectionTimeout() 
 				+ random.nextInt(200));
 		timer.startTimer();
-
+		//Todo:Harish Should we broad cast who is leader message here ?
 	}
 
 	@Override
@@ -75,6 +73,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		}
 	}
 
+	/* Todo: Harish Should reset election timer once I give my vote in new term */
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 		logger.info("VOTE REQUEST RECEIVED...");
 		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
@@ -87,13 +86,11 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void handleVoteResponse(WorkMessage workMessage, Channel channel) {
-
-
 	}
 
 	@Override
 	public void handleWhoIsTheLeader(WorkMessage workMessage, Channel channel) {
-
+		channel.writeAndFlush (util.createLeaderIsMessage (state));
 	}
 
 	@Override
@@ -102,7 +99,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		// TODO: Update visited nodes map
 		leaderMonitor.onBeat(System.currentTimeMillis());
 		timer.cancel();
-
 	}
 
 	@Override
@@ -123,23 +119,8 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		leaderMonitor.start();
 	}
 
-	@Override
-	public void onNewOrHigherTerm() {
-
-	}
-
-	@Override
-	public void onLeaderDiscovery() {
-
-	}
-
-	@Override
-	public void onHigherTerm() {
-
-	}
-
 	private void onElectionTimeout() {
-		logger.info("ELCTION TIMED OUT!");
+		logger.info("ELECTION TIMED OUT!");
 		state.setState(NodeStateEnum.CANDIDATE);
 	}
 

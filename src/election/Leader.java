@@ -1,15 +1,13 @@
 package election;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -17,17 +15,23 @@ public class Leader implements INodeState, FollowerListener {
 
 	private ServerState state;
 	private int nodeId;
-	private ArrayList<Integer> activeNodes;
+	private final Object theObject = new Object();
+	private final ConcurrentHashMap<Integer, Object> activeNodes;
 	private FollowerHealthMonitor followerMonitor;
 	private ElectionUtil util;
 
 	public Leader(ServerState state) {
 		this.state = state;
 		this.nodeId = state.getConf().getNodeId();
-		this.activeNodes = new ArrayList<>();
+		this.activeNodes = new ConcurrentHashMap<> ();
 		this.util = new ElectionUtil();
 	}
 
+	/*
+	* In this state, we don't need implementation for this state.
+	* Because If I have become leader, and before sending LeaderIs a candidate might come and ask for cluster size
+	* but its better to reply with LeaderIs message instead of cluster size message.
+	* */
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
 		logger.info("Replying to :" + workMessage.getHeader().getNodeId());
@@ -43,9 +47,11 @@ public class Leader implements INodeState, FollowerListener {
 					util.createGetClusterSizeMessage(nodeId, destinationId));
 			}
 		}
-
 	}
 
+	/*
+	* In this state we don't need implementation for this state.
+	* */
 	@Override
 	public void handleSizeIs(WorkMessage workMessage, Channel channel) {
 
@@ -61,26 +67,43 @@ public class Leader implements INodeState, FollowerListener {
 		}
 	}
 
+	/*
+	* Todo:Harish If Vote Request is for term higher than my curren term then I should move back to follower
+	* */
 	@Override
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 
 	}
 
+	/*
+	* There might be a delay to receive a vote from far neighbour,
+	* It is ok, not to consider a vote once I become a leader.
+	* */
 	@Override
 	public void handleVoteResponse(WorkMessage workMessage, Channel channel) {
 
 	}
 
+	/*
+	* Todo:Harish Will respond with LeaderIs message with my NodeId
+	* */
 	@Override
 	public void handleWhoIsTheLeader(WorkMessage workMessage, Channel channel) {
 
 	}
 
+	/*
+	* Todo:Harish, forward the heart beat message to followerHealthMonitor, he is in need of it to keep
+	* track of my followers status.
+	* Also add the follower to my list of follower's as part of beat messages.
+	* Health monitor will later remove follower if he don't respond for my heat beat
+	* */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
 
 	}
 
+	/*Todo:Harish, release all the resources. In this case it is only followerMonitor I see*/
 	@Override
 	public void beforeStateChange() {
 
@@ -94,27 +117,12 @@ public class Leader implements INodeState, FollowerListener {
 	}
 
 	@Override
-	public void onNewOrHigherTerm() {
-
-	}
-
-	@Override
-	public void onLeaderDiscovery() {
-
-	}
-
-	@Override
-	public void onHigherTerm() {
-
-	}
-
-	@Override
 	public void addFollower(int followerId) {
-		activeNodes.add(followerId);
+			activeNodes.put(followerId, theObject);
 	}
 
 	@Override
 	public void removeFollower(int followerId) {
-		activeNodes.remove(followerId);
+			activeNodes.remove(followerId);
 	}
 }

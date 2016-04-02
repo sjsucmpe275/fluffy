@@ -15,7 +15,6 @@
  */
 package gash.router.server;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;

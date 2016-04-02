@@ -10,12 +10,6 @@ public interface INodeState {
 
 	void afterStateChange();
 
-	void onNewOrHigherTerm();
-
-	void onLeaderDiscovery();
-
-	void onHigherTerm();
-
 	void handleGetClusterSize(WorkMessage workMessage, Channel channel);
 
 	void handleSizeIs(WorkMessage workMessage, Channel channel);
