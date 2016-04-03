@@ -1,9 +1,9 @@
 package util;
 
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Date;
 
 /*
 * Gets a request to start election timer.
@@ -16,15 +16,17 @@ public class Timer {
 
 	private static final Logger logger = LoggerFactory.getLogger ("Timer");
 	private static final boolean debug = true;
-	private final long timeout;
+	private long timeout;
 	private TimeoutListener listener;
 	private TimerThread timerThread;
+	//private AtomicBoolean stop;
 	private Object lock;
 
 	public Timer(TimeoutListener listener, long timeout) {
 		this.listener = listener;
 		this.timeout = timeout;
 		this.lock = new Object();
+		//stop = new AtomicBoolean (false);
 		timerThread = new TimerThread ();
 	}
 
@@ -34,9 +36,18 @@ public class Timer {
 		timerThread.start ();
 	}
 
+	public void resetTimer(TimeoutListener listener, long timeout)    {
+		this.timeout = timeout;
+		this.listener = listener;
+		timerThread.interrupt ();
+		//stop.getAndSet (false);
+		timerThread.start ();
+	}
+
 	public void cancel()    {
 		if(debug)
 			logger.info ("********Request to cancel timer: " + new Date (System.currentTimeMillis ()));
+		//stop.getAndSet (true);
 		timerThread.interrupt ();
 	}
 
@@ -47,12 +58,16 @@ public class Timer {
 			try {
 				if(debug)
 					logger.info ("********Timer started: " + new Date (System.currentTimeMillis ()));
-				synchronized (lock) {
-					lock.wait(timeout);
+
+				synchronized (this) {
+					wait(timeout);
 				}
+
 				if(debug)
 					logger.info ("********Timed out: " + new Date (System.currentTimeMillis ()));
+
 				listener.notifyTimeout ();
+
 			} catch (InterruptedException e) {
 				logger.info ("********Timer was interrupted: " + new Date (System.currentTimeMillis ()));
 			}

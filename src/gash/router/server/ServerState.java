@@ -15,6 +15,7 @@ public class ServerState {
 	private INodeState currentState;
 	private int leaderId;
 	private int electionId;// termId
+	private int votedFor;
 
 	public ServerState(RoutingConf conf) {
 		this.conf = conf;
@@ -24,6 +25,7 @@ public class ServerState {
 		this.currentState = follower;
 		this.leaderId = -1;
 		this.electionId = 0;
+		this.votedFor = -1;
 	}
 
 	public RoutingConf getConf() {
@@ -72,6 +74,14 @@ public class ServerState {
 
 	public void setLeaderId(int leaderId) {
 		this.leaderId = leaderId;
+	}
+
+	public void setVotedFor(int votedFor)   {
+		this.votedFor = votedFor;
+	}
+
+	public int getVotedFor()   {
+		return votedFor;
 	}
 
 	public int getElectionId() {

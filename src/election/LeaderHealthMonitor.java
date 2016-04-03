@@ -19,20 +19,30 @@ public class LeaderHealthMonitor {
 	private AtomicBoolean stop;
 	private HealthMonitorTask task;
 	private AtomicLong beatTime;
+	private AtomicBoolean isRunning;
 
-	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout, String identifier) {
+	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout) {
 		this.healthListener = healthListener;
 		task = new HealthMonitorTask(timeout);
 		stop = new AtomicBoolean(false);
+		isRunning = new AtomicBoolean (false);
 		beatTime = new AtomicLong(System.currentTimeMillis());
 	}
 
 	public void start() {
-		task.start();
+		/* Start the task, only if it is not started */
+		if(!isRunning.get ())   {
+			task.start();
+			isRunning.getAndSet (true);
+		}
 	}
 
 	public void cancel() {
-		stop.getAndSet(true);
+		/* Cancel the task, only if it not stopped before */
+		if(stop.get ()) {
+			stop.getAndSet(true);
+			task.interrupt ();
+		}
 	}
 
 	public void onBeat(long beatTime) {

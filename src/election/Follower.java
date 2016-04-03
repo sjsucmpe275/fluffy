@@ -6,12 +6,7 @@ import gash.router.server.edges.EdgeMonitor;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.common.Common;
-import pipe.election.Election.LeaderStatus;
-import pipe.election.Election.LeaderStatus.LeaderQuery;
-import pipe.election.Election.LeaderStatus.LeaderState;
 import pipe.work.Work.WorkMessage;
-import pipe.work.Work.WorkState;
 import util.TimeoutListener;
 import util.Timer;
 
@@ -36,10 +31,14 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		this.util = new ElectionUtil();
 		this.edgeMonitor = state.getEmon();
 		this.nodeId = state.getConf().getNodeId();
-		timer = new Timer(this, state.getConf().getElectionTimeout() 
-				+ random.nextInt(200));
+		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getHeartbeatDt ());
+		timer = new Timer(this, getElectionTimeout ());
 		timer.startTimer();
-		//Todo:Harish Should we broad cast who is leader message here ?
+	}
+
+	private int getElectionTimeout() {
+		return state.getConf().getElectionTimeout()
+				+ random.nextInt(200);
 	}
 
 	@Override
@@ -66,21 +65,36 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
-		if (state.getElectionId() < workMessage.getLeader().getElectionId()) {
+
+	/*
+	* I check if I got this message from a new leader with new terms
+	* */
+		if (workMessage.getLeader().getElectionId() >  state.getElectionId() &&
+				workMessage.getLeader ().getLeaderId () != state.getLeaderId ()) {
 			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(workMessage.getLeader().getElectionId());
 			state.setLeaderId(workMessage.getLeader().getLeaderId());
+
+			/*Once I get a new leader, I will cancel my previous leader monitor task and start it again for
+			* new monitor*/
+			leaderMonitor.cancel ();
+			leaderMonitor.start ();
 		}
 	}
 
-	/* Todo: Harish Should reset election timer once I give my vote in new term */
+	/* As part of this event,  Follower will vote if he has not voted in this term and update him term */
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 		logger.info("VOTE REQUEST RECEIVED...");
-		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
+		if (workMessage.getLeader().getElectionId() > state.getElectionId()/* &&
+				workMessage.getLeader ().getLeaderId () != state.getVotedFor ()*/) {
+			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			VoteMessage vote = new VoteMessage(nodeId,
 				workMessage.getLeader().getElectionId(),
 				workMessage.getLeader().getLeaderId());
 			state.getEmon().broadcastMessage(vote.getMessage());
+
+			// Reset timer, so that if nobody becomes leader in near by future I can go to Candidate state.
+			timer.resetTimer (this, getElectionTimeout ());
 		}
 	}
 
@@ -88,17 +102,41 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	public void handleVoteResponse(WorkMessage workMessage, Channel channel) {
 	}
 
+	/*
+	* I do nothing because, node that is sending this message will receive Heart Beat/Leader Is message
+	* in future by my leader
+	* */
 	@Override
 	public void handleWhoIsTheLeader(WorkMessage workMessage, Channel channel) {
-		channel.writeAndFlush (util.createLeaderIsMessage (state));
 	}
 
+	/* if it is equal or higher then notify leaderMonitor. and reset timer. (only if leaderId and electionId is same)
+	* if it is lesser then drop it, */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
-		// Updating heartbeat
-		// TODO: Update visited nodes map
-		leaderMonitor.onBeat(System.currentTimeMillis());
+		/* There might be a timer waiting for response from leader, If I am here I assume I got response from leader
+		* and cancel my previously started timer*/
 		timer.cancel();
+
+		int newTerm = workMessage.getLeader ().getElectionId ();
+		int currentTerm = state.getElectionId ();
+
+		int newLeaderId = workMessage.getLeader ().getLeaderId ();
+		int currentLeaderId = state.getLeaderId ();
+
+		if(newTerm > currentTerm && newLeaderId > currentLeaderId)   {
+			state.setElectionId (newTerm);
+			state.setLeaderId (newLeaderId);
+			// Reset Leader Monitor Task
+			leaderMonitor.cancel ();
+			leaderMonitor.start ();
+		}
+
+		if(newTerm == currentTerm && newLeaderId == currentLeaderId)    {
+			// Updating heartbeat
+			leaderMonitor.onBeat(System.currentTimeMillis());
+		}
+		// TODO: Update visited nodes map
 	}
 
 	@Override
@@ -106,16 +144,12 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		logger.info("Canceling timer task in follower..");
 		timer.cancel();
 
-		if (leaderMonitor != null) {
-			logger.info("Canceling leader health task in follower..");
-			leaderMonitor.cancel();
-		}
+		logger.info("Canceling leader health task in follower..");
+		leaderMonitor.cancel();
 	}
 
 	@Override
 	public void afterStateChange() {
-		leaderMonitor = new LeaderHealthMonitor(this,
-			state.getConf().getHeartbeatDt(), "Follower-LeaderHealthMonitor");
 		leaderMonitor.start();
 	}
 
@@ -132,77 +166,10 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	@Override
 	public void onLeaderBadHealth() {
 		logger.info("Leader dead.. Going for random time out..");
-		timer.cancel();
-		timer = new Timer(this, 150 + random.nextInt(150));
-		timer.startTimer();
+		timer.resetTimer (this, getRandomTimeout ());
 	}
 
-
-	private class VoteMessage {
-
-		private WorkState.Builder workState;
-		private LeaderState leaderState;
-		private Common.Header.Builder header;
-		private LeaderStatus.Builder leaderStatus;
-		private int nodeId;
-		private int destination = -1; // By default Heart Beat Message will be
-									  // sent to all Nodes..
-		private int secret = 1;
-		private int electionId;
-
-		public VoteMessage(int nodeId, int electionId, int VoteFor) {
-			this.nodeId = nodeId;
-			workState = WorkState.newBuilder();
-			workState.setEnqueued(-1);
-			workState.setProcessed(-1);
-			leaderState = LeaderState.LEADERDEAD;
-			header = Common.Header.newBuilder();
-			header.setNodeId(nodeId);
-			header.setDestination(destination);
-			header.setMaxHops(1);
-			header.setTime(System.currentTimeMillis());
-			this.electionId = electionId;
-			leaderStatus = LeaderStatus.newBuilder();
-			leaderStatus.setElectionId(electionId);
-			leaderStatus.setVotedFor(VoteFor);
-			leaderStatus.setVoteGranted(true);
-			leaderStatus.setAction(LeaderQuery.VOTERESPONSE);
-		}
-
-		public WorkMessage getMessage() {
-
-			header.setTime(System.currentTimeMillis());
-
-			WorkMessage.Builder workMessage = WorkMessage.newBuilder();
-			workMessage.setHeader(header);
-			workMessage.setLeader(leaderStatus);
-			workMessage.setSecret(secret);
-			return workMessage.build();
-		}
-
-		public void setEnqueued(int enqueued) {
-			workState.setEnqueued(enqueued);
-		}
-
-		public void setProcessed(int processed) {
-			workState.setProcessed(processed);
-		}
-
-		public void setNodeId(int nodeId) {
-			header.setNodeId(nodeId);
-		}
-
-		public void setDestination(int destination) {
-			header.setDestination(destination);
-		}
-
-		// Todo:Harish Number of max hops can be adjusted based on the number of
-		// nodes may be outBoundEdges size()
-		public void setMaxHops(int maxHops) {
-			header.setMaxHops(maxHops);
-		}
-
-		public void setSecret(int secret) {
-			this.secret = secret;
-		}
-	}}
+	private int getRandomTimeout() {
+		return 150 + random.nextInt(150);
+	}
+}

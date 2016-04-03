@@ -21,20 +21,19 @@ public class Candidate implements INodeState, TimeoutListener {
 	private int requiredVotes;
 	private int sizeOfCluster;
 	private Timer timer;
-	//Todo: Harish, why do we need visitedNodes MAP, if we have written this did we forget any functionality ?
-	private ConcurrentHashMap<Integer, Object> visitedNodes;
+	private ConcurrentHashMap<Integer, Object> visitedNodes; // I need this to identify size of cluster
 	private ConcurrentHashMap<Integer, Object> votes;
 	private ElectionUtil util;
 
 	public Candidate(ServerState state) {
 		this.state = state;
 		this.nodeId = state.getConf().getNodeId();
+		timer = new Timer(this, state.getConf ().getElectionTimeout ());
 		this.visitedNodes = new ConcurrentHashMap<> ();
 		this.votes = new ConcurrentHashMap<> ();
 		this.util = new ElectionUtil();
 	}
 
-	/* Todo:Harish I believe this method should first try to getClusterSize and then reply to the message */
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
 		channel.writeAndFlush(util.createSizeIsMessage(nodeId,
@@ -48,22 +47,21 @@ public class Candidate implements INodeState, TimeoutListener {
 		logger.info("Visited Nodes Hashmap:" + visitedNodes);
 	}
 
-	/*Todo:Harish - Should stop the election timer started if started and if this candidate finds a new leader/new term*/
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
-		if (state.getElectionId() < workMessage.getLeader().getElectionId()) {
-			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
-			state.setElectionId(workMessage.getLeader().getElectionId());
-			state.setLeaderId(workMessage.getLeader().getLeaderId());
-			state.setState(NodeStateEnum.FOLLOWER);
-		}
+		validateTermAndUpdateStateIfRequired (workMessage);
 	}
 
-	/* Todo:Should respond with vote, if Vote Request is for new term and stop the timer if started */
 	@Override
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
-
+		logger.info("VOTE REQUEST RECEIVED...");
+		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
+			VoteMessage vote = new VoteMessage(nodeId,
+					workMessage.getLeader().getElectionId(),
+					workMessage.getLeader().getLeaderId());
+			state.getEmon().broadcastMessage(vote.getMessage());
+			state.setState (NodeStateEnum.FOLLOWER);
+		}
 	}
 
 	@Override
@@ -72,6 +70,7 @@ public class Candidate implements INodeState, TimeoutListener {
 			+ workMessage.getHeader().getNodeId());
 
 		LeaderStatus leader = workMessage.getLeader();
+		/*getLeaderId - nothing other than candiate Id, I set this value before I send vote request*/
 		if (leader.getVotedFor() == state.getLeaderId()
 			&& leader.getVoteGranted()) {
 			votes.put(workMessage.getHeader().getNodeId(), theObject);
@@ -80,25 +79,30 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	}
 
-	/* Todo: harish I believe I should ask him to vote me, as part of this message */
 	@Override
 	public void handleWhoIsTheLeader(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
-
 	}
 
-	/*Todo:harish, I think we dont have to do anything here, because even before I receive beat message
-	* I will recieve Leader Is and I move to follower state */
+	/*
+	* Term is more than or equal my term I will become follower, if lesser done do anything
+	* */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
-
+		validateTermAndUpdateStateIfRequired (workMessage);
 	}
 
-	/*Todo: Harish Stop the timers - we can stop it here instead of doing it in handlerLeaderIs and handleVoteRequest*/
+	private void validateTermAndUpdateStateIfRequired(WorkMessage workMessage) {
+		if (workMessage.getLeader().getElectionId() >= state.getElectionId()) {
+			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
+			state.setElectionId(workMessage.getLeader().getElectionId());
+			state.setLeaderId(workMessage.getLeader().getLeaderId());
+			state.setState(NodeStateEnum.FOLLOWER);
+		}
+	}
+
 	@Override
 	public void beforeStateChange() {
-
+		timer.cancel ();
 	}
 
 	@Override
@@ -118,32 +122,28 @@ public class Candidate implements INodeState, TimeoutListener {
 		logger.info("###############################");
 		
 		startElection();
-		timer = null;
-		timer = new Timer(new TimeoutListener() {
 
-			@Override
-			public void notifyTimeout() {
-				state.getCurrentState();
-				logger.info("#########################");
-				logger.info("Election is over..");
-				logger.info("Time: " + System.currentTimeMillis());
-				logger.info("#########################");
+		timer.resetTimer (() -> {
+			state.getCurrentState();
+			logger.info("#########################");
+			logger.info("Election is over..");
+			logger.info("Time: " + System.currentTimeMillis());
+			logger.info("#########################");
 
-				if (votes.size() + 1 >= requiredVotes) {
-					//TODO this should be in separate method.
-					state.getEmon().broadcastMessage(util
+			if (votes.size() + 1 >= requiredVotes) {
+				//TODO this should be in separate method.
+				state.getEmon().broadcastMessage(util
 						.createLeaderIsMessage(state));
-					logger.info("State is leader now..");
-					state.setState(NodeStateEnum.LEADER);
-				}
-
-				clear();
+				logger.info("State is leader now..");
+				state.setState(NodeStateEnum.LEADER);
 			}
-		}, state.getConf().getElectionTimeout());
-		timer.startTimer();
+
+			clear();
+		}, state.getConf ().getElectionTimeout ());
 	}
 
-	/* Todo: How is this really working? We are not broad casting messages, so how this message is sent to all*/
+	/* Todo: Currently I am broadcasting only to Out Bound edges, based on the progress will decide about in-bound
+	* edges as well*/
 	private void getClusterSize() {
 		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
 				.getOutboundEdges().getEdgesMap();
@@ -157,7 +157,6 @@ public class Candidate implements INodeState, TimeoutListener {
 			}
 		}
 
-		timer = new Timer(this, state.getConf ().getElectionTimeout ());
 		timer.startTimer();
 	}
 
