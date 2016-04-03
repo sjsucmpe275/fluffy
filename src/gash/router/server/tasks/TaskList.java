@@ -29,14 +29,22 @@ import pipe.work.Work.Task;
  *
  */
 public class TaskList {
+
 	protected static Logger logger = LoggerFactory.getLogger("work");
+	private static final int SIZE_FOR_STEALING = 2;
+	private static final int QUEUE_SIZE = 10;
 
 	private LinkedBlockingDeque<Task> inbound;
 	private int processed;
 	private int balanced;
 	private Rebalancer rebalance;
 
+	public TaskList() {
+		inbound = new LinkedBlockingDeque<>(QUEUE_SIZE);
+	}
+
 	public TaskList(Rebalancer rb) {
+		this();
 		rebalance = rb;
 	}
 
@@ -54,6 +62,14 @@ public class TaskList {
 
 	public int numBalanced() {
 		return balanced;
+	}
+
+	public int getMaxQueueSize() {
+		return QUEUE_SIZE;
+	}
+
+	public boolean shouldSteal() {
+		return inbound.size() < SIZE_FOR_STEALING;
 	}
 
 	/**
