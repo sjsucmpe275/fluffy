@@ -2,10 +2,12 @@ package gash.router.server;
 
 import election.*;
 import gash.router.container.RoutingConf;
+import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
+import gash.router.container.Observer;
 
-public class ServerState {
+public class ServerState implements Observer{
 	private final RoutingConf conf;
 	private EdgeMonitor emon;
 	private TaskList tasks;
@@ -81,4 +83,23 @@ public class ServerState {
 	public void setElectionId(int electionId) {
 		this.electionId = electionId;
 	}
+
+	@Override
+	public void onFileChanged(RoutingConf configuration) {
+		System.out.println("in server state");
+			this.conf.setNodeId(configuration.getNodeId());;
+			this.conf.setCommandPort(configuration.getCommandPort());
+			this.conf.setWorkPort(configuration.getWorkPort());
+			this.conf.setInternalNode(configuration.isInternalNode());
+			this.conf.setHeartbeatDt(configuration.getHeartbeatDt());
+			this.conf.setDatabase(configuration.getDatabase());
+			this.conf.setElectionTimeout(configuration.getElectionTimeout());
+			for(int i=0;i<configuration.routing.size();i++){
+				this.conf.routing.add(configuration.routing.get(i));
+			}
+			
+			
+		}
+		
+	
 }

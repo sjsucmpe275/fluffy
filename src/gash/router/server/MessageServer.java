@@ -8,17 +8,20 @@ import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import gash.router.container.MonitoringTask;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import election.NodeStateEnum;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.HashMap;
+
+import javax.management.monitor.Monitor;
 
 public class MessageServer {
 	protected static Logger logger = LoggerFactory.getLogger("server");
@@ -30,7 +33,7 @@ public class MessageServer {
 
 	protected RoutingConf conf;
 	protected boolean background = false;
-
+	public static MonitoringTask monitor = new MonitoringTask();
 	/**
 	 * initialize the server with a configuration of it's resources
 	 * 
@@ -42,6 +45,7 @@ public class MessageServer {
 
 	public MessageServer(RoutingConf conf) {
 		this.conf = conf;
+		
 	}
 
 	public void release() {
@@ -86,6 +90,7 @@ public class MessageServer {
 			br = new BufferedInputStream(new FileInputStream(cfg));
 			br.read(raw);
 			conf = JsonUtil.decode(new String(raw), RoutingConf.class);
+			System.out.println(conf.getNodeId());
 			if (!verifyConf(conf))
 				throw new RuntimeException("verification of configuration failed");
 		} catch (Exception ex) {
@@ -168,17 +173,22 @@ public class MessageServer {
 	 */
 	private static class StartWorkCommunication implements Runnable {
 		ServerState state;
-
+		
 		public StartWorkCommunication(RoutingConf conf) {
 			if (conf == null)
 				throw new RuntimeException("missing conf");
-
+			
+			final Path path = FileSystems.getDefault().getPath(System.getProperty("user.home"), "/Documents/Workspace-275/fluffy/runtime/");
+			monitor.monitorFile(path.toString());
+			logger.info("in message server");
 			state = new ServerState(conf);
-
+			monitor.registerObserver(state);
+			
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);
 
 			EdgeMonitor emon = new EdgeMonitor(state);
+			monitor.registerObserver(emon);
 			Thread t = new Thread(emon);
 			t.start();
 		}
