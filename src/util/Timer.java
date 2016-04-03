@@ -41,7 +41,7 @@ public class Timer {
 		this.listener = listener;
 		timerThread.interrupt ();
 		//stop.getAndSet (false);
-		timerThread.start ();
+		timerThread.run ();
 	}
 
 	public void cancel()    {

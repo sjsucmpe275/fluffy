@@ -122,8 +122,11 @@ public class Candidate implements INodeState, TimeoutListener {
 		logger.info("###############################");
 		
 		startElection();
+		
+		timer.cancel();
+		timer = null;
 
-		timer.resetTimer (() -> {
+		timer = new Timer (() -> {
 			state.getCurrentState();
 			logger.info("#########################");
 			logger.info("Election is over..");
@@ -140,6 +143,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			clear();
 		}, state.getConf ().getElectionTimeout ());
+		timer.startTimer();
 	}
 
 	/* Todo: Currently I am broadcasting only to Out Bound edges, based on the progress will decide about in-bound

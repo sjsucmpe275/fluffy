@@ -87,10 +87,6 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 		BeatMessage beatMessage = new BeatMessage(state.getConf().getNodeId());
 		beatMessage.setDestination(workMessage.getHeader().getNodeId());
 
-		// todo:Harish This piece of code should be removed
-		if (state.getCurrentState() instanceof Candidate) {
-			((Candidate) state.getCurrentState()).getClusterSize();
-		}
 		channel.writeAndFlush(beatMessage.getMessage());
 	}
 

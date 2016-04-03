@@ -94,7 +94,10 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 			state.getEmon().broadcastMessage(vote.getMessage());
 
 			// Reset timer, so that if nobody becomes leader in near by future I can go to Candidate state.
-			timer.resetTimer (this, getElectionTimeout ());
+			timer.cancel();
+			timer = null;
+			timer = new Timer (this, getElectionTimeout ());
+			timer.startTimer();
 		}
 	}
 
@@ -166,7 +169,10 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	@Override
 	public void onLeaderBadHealth() {
 		logger.info("Leader dead.. Going for random time out..");
-		timer.resetTimer (this, getRandomTimeout ());
+		timer.cancel();
+		timer = null;		
+		timer = new Timer (this, getRandomTimeout ());
+		timer.startTimer();
 	}
 
 	private int getRandomTimeout() {
