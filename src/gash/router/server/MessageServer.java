@@ -34,12 +34,15 @@ public class MessageServer {
 	protected RoutingConf conf;
 	protected boolean background = false;
 	public static MonitoringTask monitor = new MonitoringTask();
+	public static File confFile;
+	
 	/**
 	 * initialize the server with a configuration of it's resources
 	 * 
 	 * @param cfg
 	 */
 	public MessageServer(File cfg) {
+		this.confFile = cfg;
 		init(cfg);
 	}
 
@@ -178,8 +181,8 @@ public class MessageServer {
 			if (conf == null)
 				throw new RuntimeException("missing conf");
 			
-			final Path path = FileSystems.getDefault().getPath(System.getProperty("user.home"), "/Documents/Workspace-275/fluffy/runtime/");
-			monitor.monitorFile(path.toString());
+			//final Path path = FileSystems.getDefault().getPath();
+			monitor.monitorFile(confFile.getPath());
 			logger.info("in message server");
 			state = new ServerState(conf);
 			monitor.registerObserver(state);

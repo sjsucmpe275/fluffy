@@ -41,11 +41,11 @@ public class MonitoringTask implements Subject {
 
 	@Override
 	public void notifyObservers(File file) {
-		RoutingConf configuration = init(file);
+		RoutingConf conf =init(file);
 		logger.info("Notifying Observers ");
 		
 		for (Observer ob : observers) {
-			ob.onFileChanged(configuration);
+			ob.onFileChanged(conf);
 		}
 
 	}
@@ -120,8 +120,7 @@ public class MonitoringTask implements Subject {
 						if (kind == StandardWatchEventKinds.OVERFLOW) {
 							Thread.yield();
 							continue;
-						} else if (kind == java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY
-								&& filename.toString().equals(file.getName())) {
+						} else if (kind == java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY) {
 							logger.info("in event ");
 							notifyObservers(file);
 						}

@@ -196,6 +196,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	@Override
 	public void onFileChanged(RoutingConf configuration) {
 		logger.info("in edge monitor ");
+		outboundEdges = new EdgeList();
 		for (RoutingEntry e : configuration.getRouting()) {
 			outboundEdges.addNode(e.getId(), e.getHost(), e.getPort());
 		}
