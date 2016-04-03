@@ -14,7 +14,8 @@
 			<arg value="${resources.dir}/election.proto"/>
 			<arg value="${resources.dir}/pipe.proto"/>
 			<arg value="${resources.dir}/work.proto"/>			
-			<arg value="${resources.dir}/storage.proto"/>			
+			<arg value="${resources.dir}/storage.proto"/>	
+			<arg value="${resources.dir}/monitor.proto"/>		
 		    </exec>
 	  </target>
 </project>
