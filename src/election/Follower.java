@@ -14,16 +14,17 @@ import pipe.common.Common;
 import pipe.election.Election.LeaderStatus;
 import pipe.election.Election.LeaderStatus.LeaderQuery;
 import pipe.election.Election.LeaderStatus.LeaderState;
+import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 import pipe.work.Work.WorkState;
 import util.TimeoutListener;
 import util.Timer;
 
-public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
+public class Follower
+	implements INodeState, TimeoutListener, LeaderHealthListener {
 
 	private static final Logger logger = LoggerFactory.getLogger("Follower");
 	private static final Random random = new Random();
-
 
 	private Timer timer;
 	private LeaderHealthMonitor leaderMonitor;
@@ -38,25 +39,43 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		this.util = new ElectionUtil();
 		this.edgeMonitor = state.getEmon();
 		this.nodeId = state.getConf().getNodeId();
-		timer = new Timer(this, state.getConf().getElectionTimeout() 
-				+ random.nextInt(200));
+		timer = new Timer(this,
+			state.getConf().getElectionTimeout() + random.nextInt(200));
 		timer.startTimer();
 
+	}
+
+	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
+			if (wrkMessage.getHeader().getDestination() == nodeId) {
+				System.out.println("Carrying out command:" + wrkMessage
+					.getTask().getTaskMessage().getQuery().getKey());
+				Task.Builder t = Task.newBuilder();
+				t.setSeqId(wrkMessage.getTask().getTaskMessage().getQuery()
+					.getSequenceNo());
+				t.setSeriesId(wrkMessage.getTask().getTaskMessage().getQuery()
+					.getKey().hashCode());
+				t.setTaskMessage(wrkMessage.getTask().getTaskMessage());
+				state.getTasks().addTask(t.build());
+			}
+		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+
+		}
 	}
 
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
 
 		logger.info("Replying to :" + workMessage.getHeader().getNodeId());
-		edgeMonitor.broadcastMessage(util.createSizeIsMessage(nodeId, 
-				workMessage.getHeader().getNodeId()));
+		edgeMonitor.broadcastMessage(util.createSizeIsMessage(nodeId,
+			workMessage.getHeader().getNodeId()));
 		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = edgeMonitor
-				.getOutboundEdges().getEdgesMap();
+			.getOutboundEdges().getEdgesMap();
 		for (Integer destinationId : edgeMap.keySet()) {
 			EdgeInfo edge = edgeMap.get(destinationId);
 			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(util
-						.createGetClusterSizeMessage(nodeId, destinationId));
+				edge.getChannel().writeAndFlush(
+					util.createGetClusterSizeMessage(nodeId, destinationId));
 			}
 		}
 	}
@@ -87,7 +106,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void handleVoteResponse(WorkMessage workMessage, Channel channel) {
-
 
 	}
 
@@ -156,7 +174,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		timer.startTimer();
 	}
 
-
 	private class VoteMessage {
 
 		private WorkState.Builder workState;
@@ -165,7 +182,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		private LeaderStatus.Builder leaderStatus;
 		private int nodeId;
 		private int destination = -1; // By default Heart Beat Message will be
-									  // sent to all Nodes..
+										// sent to all Nodes..
 		private int secret = 1;
 		private int electionId;
 
@@ -224,4 +241,5 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		public void setSecret(int secret) {
 			this.secret = secret;
 		}
-	}}
+	}
+}

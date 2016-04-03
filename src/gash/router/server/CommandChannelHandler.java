@@ -41,6 +41,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import pipe.common.Common;
+import pipe.common.Common.Header;
+import pipe.work.Work.Task;
+import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
 /**
@@ -51,7 +55,8 @@ import routing.Pipe.CommandMessage;
  * @author gash
  * 
  */
-public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMessage> {
+public class CommandChannelHandler
+	extends SimpleChannelInboundHandler<CommandMessage> {
 	protected static Logger logger = LoggerFactory.getLogger("cmd");
 	private RoutingConf conf;
 	private ICmdMessageHandler cmdMessageHandler;
@@ -59,7 +64,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	private Worker worker;
 	private EventLoopGroup group;
 	private ChannelFuture channel;
-	private static HashMap<SocketAddress,Channel> channelMap= new HashMap<SocketAddress,Channel>();
+	private static HashMap<SocketAddress, Channel> channelMap = new HashMap<SocketAddress, Channel>();
+
 	public CommandChannelHandler(RoutingConf conf) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
@@ -71,7 +77,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 	private void initializeMessageHandlers() throws Exception {
 		// Define Handlers
-		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler(conf, logger);
+		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler(conf,
+			logger);
 		ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler(this);
 		ICmdMessageHandler msgHandler = new CmdMsgHandler(conf, logger);
 		ICmdMessageHandler queryHandler = new CmdQueryMsgHandler(this);
@@ -92,7 +99,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	public void enqueue(CommandMessage req) throws Exception {
 		// enqueue message
 		outbound.put(req);
-		
+
 	}
 
 	/**
@@ -103,7 +110,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	 * @param msg
 	 */
 	public void handleMessage(CommandMessage msg, Channel channel) {
-		
+
 		channelMap.put(channel.remoteAddress(), channel);
 		if (msg == null) {
 			// TODO add logging
@@ -116,7 +123,26 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 		// TODO How can you implement this without if-else statements? - With
 		// COR
 		try {
-			cmdMessageHandler.handleMessage(msg, channel);
+			// cmdMessageHandler.handleMessage(msg, channel);
+
+			WorkMessage.Builder wb = WorkMessage.newBuilder();
+
+			Header.Builder header = Common.Header.newBuilder();
+			header.setNodeId(-1);
+			header.setDestination(-1);
+			header.setMaxHops(10);
+			header.setTime(System.currentTimeMillis());
+
+			Task.Builder t = Task.newBuilder();
+			t.setSeqId(msg.getQuery().getSequenceNo());
+			t.setSeriesId(msg.getQuery().getKey().hashCode());
+			t.setTaskMessage(msg);
+
+			wb.setHeader(header);
+			wb.setSecret(1);
+			wb.setTask(t);
+
+			this.channel.channel().writeAndFlush(wb.build());
 		} catch (Exception e) {
 			// TODO add logging
 			logger.error("Got an exception in command", e);
@@ -150,10 +176,11 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 			b.option(ChannelOption.TCP_NODELAY, true);
 			b.option(ChannelOption.SO_KEEPALIVE, true);
-			
+
 			// Make the connection attempt.
-			
-			channel = b.connect("localhost", conf.getCommandPort()).syncUninterruptibly();
+
+			channel = b.connect("localhost", conf.getWorkPort())
+				.syncUninterruptibly();
 
 			// want to monitor the connection to the server s.t. if we loose the
 			// connection, we can try to re-establish it.
@@ -161,8 +188,10 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			ClientClosedListener ccl = new ClientClosedListener(this);
 			channel.channel().closeFuture().addListener(ccl);
 
-			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
-					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
+			System.out.println(channel.channel().localAddress() + " -> open: "
+				+ channel.channel().isOpen() + ", write: "
+				+ channel.channel().isWritable() + ", reg: "
+				+ channel.channel().isRegistered());
 
 		} catch (Throwable ex) {
 			logger.error("failed to initialize the client connection", ex);
@@ -174,12 +203,14 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, CommandMessage msg) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, CommandMessage msg)
+		throws Exception {
 		handleMessage(msg, ctx.channel());
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+		throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
 	}
@@ -187,7 +218,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	public static class ClientClosedListener implements ChannelFutureListener {
 		CommandChannelHandler cc;
 
-		public ClientClosedListener(CommandChannelHandler commandChannelHandler) {
+		public ClientClosedListener(
+			CommandChannelHandler commandChannelHandler) {
 			this.cc = commandChannelHandler;
 		}
 
@@ -196,10 +228,11 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			// we lost the connection or have shutdown.
 			System.out.println("--> client lost connection to the server");
 			System.out.flush();
-			boolean result=channelMap.remove(future.channel().remoteAddress(),future.channel());
-			if(!result){
+			boolean result = channelMap.remove(future.channel().remoteAddress(),
+				future.channel());
+			if (!result) {
 				System.out.println("Error while deleting entry from Hash Map");
-			}	
+			}
 		}
 	}
 
@@ -212,7 +245,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			init();
 		}
 
-		if (channel != null && channel.isSuccess() && channel.channel().isWritable())
+		if (channel != null && channel.isSuccess()
+			&& channel.channel().isWritable())
 			return channel.channel();
 		else
 			throw new RuntimeException("Not able to establish connection ");

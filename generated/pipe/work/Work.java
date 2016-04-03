@@ -1361,6 +1361,19 @@ public final class Work {
      * <code>required int32 seq_id = 2;</code>
      */
     int getSeqId();
+
+    /**
+     * <code>optional .CommandMessage taskMessage = 3;</code>
+     */
+    boolean hasTaskMessage();
+    /**
+     * <code>optional .CommandMessage taskMessage = 3;</code>
+     */
+    routing.Pipe.CommandMessage getTaskMessage();
+    /**
+     * <code>optional .CommandMessage taskMessage = 3;</code>
+     */
+    routing.Pipe.CommandMessageOrBuilder getTaskMessageOrBuilder();
   }
   /**
    * Protobuf type {@code Task}
@@ -1427,6 +1440,19 @@ public final class Work {
             case 16: {
               bitField0_ |= 0x00000002;
               seqId_ = input.readInt32();
+              break;
+            }
+            case 26: {
+              routing.Pipe.CommandMessage.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000004) == 0x00000004)) {
+                subBuilder = taskMessage_.toBuilder();
+              }
+              taskMessage_ = input.readMessage(routing.Pipe.CommandMessage.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(taskMessage_);
+                taskMessage_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000004;
               break;
             }
           }
@@ -1499,9 +1525,31 @@ public final class Work {
       return seqId_;
     }
 
+    public static final int TASKMESSAGE_FIELD_NUMBER = 3;
+    private routing.Pipe.CommandMessage taskMessage_;
+    /**
+     * <code>optional .CommandMessage taskMessage = 3;</code>
+     */
+    public boolean hasTaskMessage() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional .CommandMessage taskMessage = 3;</code>
+     */
+    public routing.Pipe.CommandMessage getTaskMessage() {
+      return taskMessage_;
+    }
+    /**
+     * <code>optional .CommandMessage taskMessage = 3;</code>
+     */
+    public routing.Pipe.CommandMessageOrBuilder getTaskMessageOrBuilder() {
+      return taskMessage_;
+    }
+
     private void initFields() {
       seriesId_ = 0L;
       seqId_ = 0;
+      taskMessage_ = routing.Pipe.CommandMessage.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -1517,6 +1565,12 @@ public final class Work {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (hasTaskMessage()) {
+        if (!getTaskMessage().isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -1529,6 +1583,9 @@ public final class Work {
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeInt32(2, seqId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeMessage(3, taskMessage_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -1546,6 +1603,10 @@ public final class Work {
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, seqId_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, taskMessage_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -1661,6 +1722,7 @@ public final class Work {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+          getTaskMessageFieldBuilder();
         }
       }
       private static Builder create() {
@@ -1673,6 +1735,12 @@ public final class Work {
         bitField0_ = (bitField0_ & ~0x00000001);
         seqId_ = 0;
         bitField0_ = (bitField0_ & ~0x00000002);
+        if (taskMessageBuilder_ == null) {
+          taskMessage_ = routing.Pipe.CommandMessage.getDefaultInstance();
+        } else {
+          taskMessageBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -1709,6 +1777,14 @@ public final class Work {
           to_bitField0_ |= 0x00000002;
         }
         result.seqId_ = seqId_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        if (taskMessageBuilder_ == null) {
+          result.taskMessage_ = taskMessage_;
+        } else {
+          result.taskMessage_ = taskMessageBuilder_.build();
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1731,6 +1807,9 @@ public final class Work {
         if (other.hasSeqId()) {
           setSeqId(other.getSeqId());
         }
+        if (other.hasTaskMessage()) {
+          mergeTaskMessage(other.getTaskMessage());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
       }
@@ -1743,6 +1822,12 @@ public final class Work {
         if (!hasSeqId()) {
           
           return false;
+        }
+        if (hasTaskMessage()) {
+          if (!getTaskMessage().isInitialized()) {
+            
+            return false;
+          }
         }
         return true;
       }
@@ -1828,6 +1913,122 @@ public final class Work {
         seqId_ = 0;
         onChanged();
         return this;
+      }
+
+      private routing.Pipe.CommandMessage taskMessage_ = routing.Pipe.CommandMessage.getDefaultInstance();
+      private com.google.protobuf.SingleFieldBuilder<
+          routing.Pipe.CommandMessage, routing.Pipe.CommandMessage.Builder, routing.Pipe.CommandMessageOrBuilder> taskMessageBuilder_;
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public boolean hasTaskMessage() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public routing.Pipe.CommandMessage getTaskMessage() {
+        if (taskMessageBuilder_ == null) {
+          return taskMessage_;
+        } else {
+          return taskMessageBuilder_.getMessage();
+        }
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public Builder setTaskMessage(routing.Pipe.CommandMessage value) {
+        if (taskMessageBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          taskMessage_ = value;
+          onChanged();
+        } else {
+          taskMessageBuilder_.setMessage(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public Builder setTaskMessage(
+          routing.Pipe.CommandMessage.Builder builderForValue) {
+        if (taskMessageBuilder_ == null) {
+          taskMessage_ = builderForValue.build();
+          onChanged();
+        } else {
+          taskMessageBuilder_.setMessage(builderForValue.build());
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public Builder mergeTaskMessage(routing.Pipe.CommandMessage value) {
+        if (taskMessageBuilder_ == null) {
+          if (((bitField0_ & 0x00000004) == 0x00000004) &&
+              taskMessage_ != routing.Pipe.CommandMessage.getDefaultInstance()) {
+            taskMessage_ =
+              routing.Pipe.CommandMessage.newBuilder(taskMessage_).mergeFrom(value).buildPartial();
+          } else {
+            taskMessage_ = value;
+          }
+          onChanged();
+        } else {
+          taskMessageBuilder_.mergeFrom(value);
+        }
+        bitField0_ |= 0x00000004;
+        return this;
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public Builder clearTaskMessage() {
+        if (taskMessageBuilder_ == null) {
+          taskMessage_ = routing.Pipe.CommandMessage.getDefaultInstance();
+          onChanged();
+        } else {
+          taskMessageBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000004);
+        return this;
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public routing.Pipe.CommandMessage.Builder getTaskMessageBuilder() {
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return getTaskMessageFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      public routing.Pipe.CommandMessageOrBuilder getTaskMessageOrBuilder() {
+        if (taskMessageBuilder_ != null) {
+          return taskMessageBuilder_.getMessageOrBuilder();
+        } else {
+          return taskMessage_;
+        }
+      }
+      /**
+       * <code>optional .CommandMessage taskMessage = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilder<
+          routing.Pipe.CommandMessage, routing.Pipe.CommandMessage.Builder, routing.Pipe.CommandMessageOrBuilder> 
+          getTaskMessageFieldBuilder() {
+        if (taskMessageBuilder_ == null) {
+          taskMessageBuilder_ = new com.google.protobuf.SingleFieldBuilder<
+              routing.Pipe.CommandMessage, routing.Pipe.CommandMessage.Builder, routing.Pipe.CommandMessageOrBuilder>(
+                  getTaskMessage(),
+                  getParentForChildren(),
+                  isClean());
+          taskMessage_ = null;
+        }
+        return taskMessageBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:Task)
@@ -3811,17 +4012,18 @@ public final class Work {
   static {
     java.lang.String[] descriptorData = {
       "\n\nwork.proto\032\014common.proto\032\016election.pro" +
-      "to\"0\n\tWorkState\022\020\n\010enqueued\030\001 \002(\005\022\021\n\tpro" +
-      "cessed\030\002 \002(\005\"F\n\tHeartbeat\022\031\n\005state\030\001 \002(\013" +
-      "2\n.WorkState\022\020\n\010isLeader\030\002 \001(\010\022\014\n\004path\030\003" +
-      " \003(\005\")\n\004Task\022\021\n\tseries_id\030\001 \002(\003\022\016\n\006seq_i" +
-      "d\030\002 \002(\005\"\333\001\n\013WorkMessage\022\027\n\006header\030\001 \002(\0132" +
-      "\007.Header\022\016\n\006secret\030\002 \002(\003\022\027\n\003err\030\003 \001(\0132\010." +
-      "FailureH\000\022\016\n\004ping\030\004 \001(\010H\000\022\032\n\004beat\030\005 \001(\0132" +
-      "\n.HeartbeatH\000\022\025\n\004task\030\006 \001(\0132\005.TaskH\000\022\033\n\005" +
-      "state\030\007 \001(\0132\n.WorkStateH\000\022\037\n\006leader\030\010 \001(",
-      "\0132\r.LeaderStatusH\000B\t\n\007payloadB\r\n\tpipe.wo" +
-      "rkH\001"
+      "to\032\npipe.proto\"0\n\tWorkState\022\020\n\010enqueued\030" +
+      "\001 \002(\005\022\021\n\tprocessed\030\002 \002(\005\"F\n\tHeartbeat\022\031\n" +
+      "\005state\030\001 \002(\0132\n.WorkState\022\020\n\010isLeader\030\002 \001" +
+      "(\010\022\014\n\004path\030\003 \003(\005\"O\n\004Task\022\021\n\tseries_id\030\001 " +
+      "\002(\003\022\016\n\006seq_id\030\002 \002(\005\022$\n\013taskMessage\030\003 \001(\013" +
+      "2\017.CommandMessage\"\333\001\n\013WorkMessage\022\027\n\006hea" +
+      "der\030\001 \002(\0132\007.Header\022\016\n\006secret\030\002 \002(\003\022\027\n\003er" +
+      "r\030\003 \001(\0132\010.FailureH\000\022\016\n\004ping\030\004 \001(\010H\000\022\032\n\004b" +
+      "eat\030\005 \001(\0132\n.HeartbeatH\000\022\025\n\004task\030\006 \001(\0132\005.",
+      "TaskH\000\022\033\n\005state\030\007 \001(\0132\n.WorkStateH\000\022\037\n\006l" +
+      "eader\030\010 \001(\0132\r.LeaderStatusH\000B\t\n\007payloadB" +
+      "\r\n\tpipe.workH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -3836,6 +4038,7 @@ public final class Work {
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           pipe.common.Common.getDescriptor(),
           pipe.election.Election.getDescriptor(),
+          routing.Pipe.getDescriptor(),
         }, assigner);
     internal_static_WorkState_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -3854,7 +4057,7 @@ public final class Work {
     internal_static_Task_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Task_descriptor,
-        new java.lang.String[] { "SeriesId", "SeqId", });
+        new java.lang.String[] { "SeriesId", "SeqId", "TaskMessage", });
     internal_static_WorkMessage_descriptor =
       getDescriptor().getMessageTypes().get(3);
     internal_static_WorkMessage_fieldAccessorTable = new
@@ -3863,6 +4066,7 @@ public final class Work {
         new java.lang.String[] { "Header", "Secret", "Err", "Ping", "Beat", "Task", "State", "Leader", "Payload", });
     pipe.common.Common.getDescriptor();
     pipe.election.Election.getDescriptor();
+    routing.Pipe.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

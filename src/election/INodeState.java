@@ -3,6 +3,7 @@ package election;
 import io.netty.channel.Channel;
 import pipe.election.Election.LeaderStatus;
 import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
 
 public interface INodeState {
 
@@ -29,6 +30,8 @@ public interface INodeState {
 	void handleWhoIsTheLeader(WorkMessage workMessage, Channel channel);
 	
 	void handleBeat(WorkMessage workMessage, Channel channel);
+	
+	void handleCmdQuery(WorkMessage workMessage, Channel channel);
 
 	default void handleMessage(WorkMessage workMessage, Channel channel) {
 		LeaderStatus leaderStatus = workMessage.getLeader();

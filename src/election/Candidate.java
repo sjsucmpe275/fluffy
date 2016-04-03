@@ -16,7 +16,7 @@ import util.Timer;
 public class Candidate implements INodeState, TimeoutListener {
 	private final Logger logger = LoggerFactory.getLogger("Candidate");
 	private final Object theObject = new Object();
-	
+
 	private ServerState state;
 	private int nodeId;
 	private int requiredVotes;
@@ -34,16 +34,22 @@ public class Candidate implements INodeState, TimeoutListener {
 		this.util = new ElectionUtil();
 	}
 
+	@Override
+	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
+		// TODO Auto-generated method stub
+
+	}
+
 	public void getClusterSize() {
 		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
 			.getOutboundEdges().getEdgesMap();
-		
+
 		for (Integer destinationId : edgeMap.keySet()) {
 			EdgeInfo edge = edgeMap.get(destinationId);
-			
+
 			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-					nodeId, destinationId));
+				edge.getChannel().writeAndFlush(
+					util.createGetClusterSizeMessage(nodeId, destinationId));
 			}
 		}
 
@@ -143,7 +149,7 @@ public class Candidate implements INodeState, TimeoutListener {
 		logger.info("Required vote count is" + requiredVotes);
 		logger.info("Time:" + System.currentTimeMillis());
 		logger.info("###############################");
-		
+
 		startElection();
 		timer = null;
 		timer = new Timer(new TimeoutListener() {
@@ -157,9 +163,9 @@ public class Candidate implements INodeState, TimeoutListener {
 				logger.info("#########################");
 
 				if (votes.size() + 1 >= requiredVotes) {
-					//TODO this should be in separate method.
-					state.getEmon().broadcastMessage(util
-						.createLeaderIsMessage(state));
+					// TODO this should be in separate method.
+					state.getEmon()
+						.broadcastMessage(util.createLeaderIsMessage(state));
 					logger.info("State is leader now..");
 					state.setState(NodeStateEnum.LEADER);
 				}

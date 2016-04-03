@@ -101,6 +101,13 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 
 			if (msg.getHeader().getDestination() == -1) {
 				if (msg.getHeader().getMaxHops() > 0) {
+					if(msg.hasTask()){
+						WorkMessage.Builder wb=WorkMessage.newBuilder(msg);
+						Header.Builder hb = Header.newBuilder(msg.getHeader()); 
+						hb.setDestination(5);
+						wb.setHeader(hb);
+						msg=wb.build();
+					}
 					broadcast(msg);
 				}
 			} else {
