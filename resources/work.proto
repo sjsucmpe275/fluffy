@@ -4,7 +4,7 @@ option java_package = "pipe.work";
 
 import "common.proto";
 import "election.proto";
-
+import "pipe.proto";
 message WorkState {
    required int32 enqueued = 1;
    required int32 processed = 2;
@@ -22,6 +22,7 @@ message Heartbeat {
 message Task {  
     required int64 series_id = 1;
     required int32 seq_id = 2;
+    optional CommandMessage taskMessage = 3;
 }
 
 // These are messages to keep the network running (not to perform work)

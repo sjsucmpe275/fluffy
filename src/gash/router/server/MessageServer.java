@@ -1,6 +1,7 @@
 package gash.router.server;
 
 import gash.router.container.RoutingConf;
+import gash.router.server.edges.AdaptorEdgeMonitor;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.NoOpBalancer;
 import gash.router.server.tasks.TaskList;
@@ -58,11 +59,16 @@ public class MessageServer {
 
 	public void startServer() {
 		StartWorkCommunication comm = new StartWorkCommunication(conf);
+		StartAdaptorCommunication adapComm = new StartAdaptorCommunication(conf);
 		logger.info("Work starting");
 
 		// We always start the worker in the background
 		Thread cthread = new Thread(comm);
 		cthread.start();
+		
+		Thread cthreadAdaptor = new Thread(adapComm);
+		cthreadAdaptor.start();
+
 
 		if (!conf.isInternalNode()) {
 			StartCommandCommunication comm2 = new StartCommandCommunication(conf);
@@ -251,7 +257,76 @@ public class MessageServer {
 			}
 		}
 	}
+	private static class StartAdaptorCommunication implements Runnable {
+		ServerState state;
+		WorkerThread monitorThread;
+		
+		public StartAdaptorCommunication(RoutingConf conf) {
+			if (conf == null)
+				throw new RuntimeException("missing conf");
+			
+			//final Path path = FileSystems.getDefault().getPath();
+			
+			TaskList tasks = new TaskList(new NoOpBalancer());
+			state.setTasks(tasks);
 
+			AdaptorEdgeMonitor emon = new AdaptorEdgeMonitor(state);
+			
+			Thread t = new Thread(emon);
+			t.start();
+			
+			
+		}
+
+		public void run() {
+			// construct boss and worker threads (num threads = number of cores)
+
+			EventLoopGroup bossGroup = new NioEventLoopGroup();
+			EventLoopGroup workerGroup = new NioEventLoopGroup();
+
+			try {
+				ServerBootstrap b = new ServerBootstrap();
+				bootstrap.put(state.getConf().getWorkPort(), b);
+
+				b.group(bossGroup, workerGroup);
+				b.channel(NioServerSocketChannel.class);
+				b.option(ChannelOption.SO_BACKLOG, 100);
+				b.option(ChannelOption.TCP_NODELAY, true);
+				b.option(ChannelOption.SO_KEEPALIVE, true);
+
+				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
+
+				b.childHandler(new WorkChannelInitializer (state, false));
+
+				// Start the server.
+				logger.info("Starting work server (" + state.getConf().getNodeId() + "), listening on port = "
+						+ state.getConf().getWorkPort());
+				ChannelFuture f = b.bind(state.getConf().getWorkPort()).syncUninterruptibly();
+
+				logger.info(f.channel().localAddress() + " -> open: " + f.channel().isOpen() + ", write: "
+						+ f.channel().isWritable() + ", act: " + f.channel().isActive());
+
+				// block until the server socket is closed.
+				f.channel().closeFuture().sync();
+			} catch (Exception ex) {
+				// on bind().sync()
+				logger.error("Failed to setup handler.", ex);
+			} finally {
+				// Shut down all event loops to terminate all threads.
+				bossGroup.shutdownGracefully();
+				workerGroup.shutdownGracefully();
+
+				// shutdown monitor
+				EdgeMonitor emon = state.getEmon();
+				if (emon != null)
+					emon.shutdown();
+				
+				if (monitorThread != null && monitorThread.isAlive()) {
+					monitorThread.shutdown();
+				}
+			}
+		}
+	}
 	/**
 	 * help with processing the configuration information
 	 * 

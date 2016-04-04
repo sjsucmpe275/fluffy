@@ -1,0 +1,24 @@
+
+option optimize_for = SPEED;
+option java_package = "global";
+
+import "common.proto";
+import "storage.proto";
+
+message GlobalCommandMessage {
+   required Header header = 1;
+
+    oneof payload {
+      // a client (external) sanity check for testing
+      bool ping = 3;
+
+      string message = 4;
+      
+      Failure err = 5;
+
+	  Query query = 6;
+	  
+	  Response response = 7;
+
+   }
+}

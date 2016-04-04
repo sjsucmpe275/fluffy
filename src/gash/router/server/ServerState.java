@@ -3,6 +3,7 @@ package gash.router.server;
 import election.*;
 import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
+import gash.router.server.edges.AdaptorEdgeMonitor;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
 import gash.router.container.Observer;
@@ -10,6 +11,7 @@ import gash.router.container.Observer;
 public class ServerState implements Observer{
 	private final RoutingConf conf;
 	private EdgeMonitor emon;
+	private AdaptorEdgeMonitor adapEmon;
 	private TaskList tasks;
 	private INodeState leader;
 	private INodeState candidate;
@@ -38,6 +40,9 @@ public class ServerState implements Observer{
 
 	public void setEmon(EdgeMonitor emon) {
 		this.emon = emon;
+	}
+	public void setAdaptorEmon(AdaptorEdgeMonitor emon) {
+		this.adapEmon = emon;
 	}
 
 	public TaskList getTasks() {

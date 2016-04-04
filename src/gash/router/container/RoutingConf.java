@@ -46,6 +46,7 @@ public class RoutingConf  {
 	
 	//private List<RoutingEntry> routing;
 	public List<RoutingEntry> routing = Collections.synchronizedList(new ArrayList<RoutingEntry>());
+	public List<RoutingEntry> adaptorRouting = Collections.synchronizedList(new ArrayList<RoutingEntry>());
 	public HashMap<String, Integer> asHashMap() {
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
 		if (routing != null) {
@@ -72,6 +73,15 @@ public class RoutingConf  {
 			routing = new ArrayList<RoutingEntry>();
 
 		routing.add(entry);
+	}
+	public void addAdaptorEntry(RoutingEntry entry) {
+		if (entry == null)
+			return;
+
+		if (adaptorRouting == null)
+			adaptorRouting = new ArrayList<RoutingEntry>();
+
+		adaptorRouting.add(entry);
 	}
 
 	public int getNodeId() {
@@ -118,10 +128,17 @@ public class RoutingConf  {
 		return routing;
 	}
 
+	public List<RoutingEntry> getAdaptorRouting() {
+		return adaptorRouting;
+	}
+
 	public void setRouting(List<RoutingEntry> conf) {
 		this.routing = conf;
 	}
 
+	public void setAdaptorRouting(List<RoutingEntry> conf) {
+		this.adaptorRouting = conf;
+	}
 	public String getDatabase() {
 		return database.get();
 	}
