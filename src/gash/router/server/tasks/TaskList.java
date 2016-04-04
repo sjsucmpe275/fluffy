@@ -38,6 +38,7 @@ public class TaskList {
 
 	public TaskList(Rebalancer rb) {
 		rebalance = rb;
+		this.inbound = new LinkedBlockingDeque<>();
 	}
 
 	public void addTask(Task t) {

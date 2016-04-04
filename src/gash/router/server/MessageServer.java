@@ -12,6 +12,8 @@ import gash.router.container.MonitoringTask;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import deven.monitor.client.WorkerThread;
 import election.NodeStateEnum;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -176,6 +178,7 @@ public class MessageServer {
 	 */
 	private static class StartWorkCommunication implements Runnable {
 		ServerState state;
+		WorkerThread monitorThread;
 		
 		public StartWorkCommunication(RoutingConf conf) {
 			if (conf == null)
@@ -194,6 +197,9 @@ public class MessageServer {
 			monitor.registerObserver(emon);
 			Thread t = new Thread(emon);
 			t.start();
+			
+			monitorThread = new WorkerThread("localhost", 5000, state);
+			monitorThread.start();
 		}
 
 		public void run() {
@@ -238,6 +244,10 @@ public class MessageServer {
 				EdgeMonitor emon = state.getEmon();
 				if (emon != null)
 					emon.shutdown();
+				
+				if (monitorThread != null && monitorThread.isAlive()) {
+					monitorThread.shutdown();
+				}
 			}
 		}
 	}

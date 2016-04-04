@@ -33,6 +33,8 @@ public class MonitorHandler extends SimpleChannelInboundHandler<ClusterMonitor> 
 	protected void channelRead0(ChannelHandlerContext arg0, ClusterMonitor arg1) throws Exception {
 		// TODO Auto-generated method stub
 		
+		System.out.println("Listener for monitor messages...");
+		
 	}
 	
 	public void addListener(MonitorListener listener) {

@@ -42,6 +42,8 @@ public class RoutingConf  {
 	private AtomicInteger heartbeatDt;
 	private AtomicReference<String> database;
 	private AtomicInteger electionTimeout;
+	private AtomicInteger secret;
+	
 	//private List<RoutingEntry> routing;
 	public List<RoutingEntry> routing = Collections.synchronizedList(new ArrayList<RoutingEntry>());
 	public HashMap<String, Integer> asHashMap() {
@@ -136,6 +138,14 @@ public class RoutingConf  {
 		this.electionTimeout.getAndSet(electionTimeout);
 	}
 
+	public int getSecret() {
+		return secret.get();
+	}
+	
+	public void setSecret(int secret) {
+		this.secret.set(secret);
+	}
+	
 	@XmlRootElement(name = "entry")
 	@XmlAccessorType(XmlAccessType.PROPERTY)
 	public static final class RoutingEntry {

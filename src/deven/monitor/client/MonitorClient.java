@@ -17,7 +17,8 @@ package deven.monitor.client;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import gash.router.server.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -35,8 +36,7 @@ public class MonitorClient {
 	private int port;
 	private ChannelFuture channel; // do not use directly call connect()!
 	private EventLoopGroup group;
-	
-	
+	private static Logger logger = LoggerFactory.getLogger("MonitorCLient");
 	/*
 	 * Point the host and port to Monitor Server
 	 */
@@ -96,8 +96,10 @@ public class MonitorClient {
 		System.out.println("--> initializing connection to " + host + ":" + port);
 
 		group = new NioEventLoopGroup();
+		boolean forever=true;
+		while(forever){
 		try {
-			CommandInit si = new CommandInit(null, false);
+			MonitorServiceInitializer si = new MonitorServiceInitializer(false);
 			Bootstrap b = new Bootstrap();
 			b.group(group).channel(NioSocketChannel.class).handler(si);
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -116,10 +118,18 @@ public class MonitorClient {
 					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 		} catch (Throwable ex) {
-			System.out.println("failed to initialize the client connection "+ex.toString());
-			ex.printStackTrace();
+			logger.error("failed to initialize the client connection ");
+			logger.info("Trying to connect to monitor server ");
+			//ex.printStackTrace();
 		}
-
+		
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e) {
+			
+			e.printStackTrace();
+		}
+		}
 	}
 	
 	/**
