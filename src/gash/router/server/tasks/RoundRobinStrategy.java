@@ -35,7 +35,7 @@ public class RoundRobinStrategy implements IReplicationStrategy {
 		int temp = 0;
 		index++;
 		while (output.size() < size && activeNodes.size() >= size) {
-			output.add(activeNodes.get(activeNodes.size() % (index + temp)));
+			output.add(activeNodes.get((index + temp) % activeNodes.size()));
 			temp++;
 		}
 		return output;
