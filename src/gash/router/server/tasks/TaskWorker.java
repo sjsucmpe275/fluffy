@@ -53,7 +53,7 @@ public class TaskWorker extends Thread {
 
 	@Override
 	public void run() {
-
+		logger.info("Starting task worker : " + Thread.currentThread());
 		while (forever) {
 			if (state.getTasks().shouldSteal()) {
 				startStealing();
@@ -97,8 +97,8 @@ public class TaskWorker extends Thread {
 								e.printStackTrace();
 							}
 						} else {
-							rb.setData(ByteString.copyFrom(
-								dataMap.get(sequenceNo)));
+							rb.setData(
+								ByteString.copyFrom(dataMap.get(sequenceNo)));
 						}
 						rb.setKey(key);
 						rb.setSequenceNo(sequenceNo);
@@ -208,7 +208,7 @@ public class TaskWorker extends Thread {
 	}
 
 	private void startStealing() {
-		
+
 	}
 
 	public void shutdown() {

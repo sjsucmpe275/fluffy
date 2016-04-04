@@ -4,6 +4,7 @@ import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.NoOpBalancer;
 import gash.router.server.tasks.TaskList;
+import gash.router.server.tasks.TaskWorker;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -19,6 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MessageServer {
 	protected static Logger logger = LoggerFactory.getLogger("server");
@@ -181,6 +184,15 @@ public class MessageServer {
 			EdgeMonitor emon = new EdgeMonitor(state);
 			Thread t = new Thread(emon);
 			t.start();
+			
+			int workerCount = 4;
+			
+			ExecutorService executors = Executors.newFixedThreadPool(workerCount);
+			for(int i = 0; i < workerCount; i++) {
+				TaskWorker taskWorker = new TaskWorker(state);
+				executors.execute(taskWorker);
+			}
+			executors.shutdown();
 		}
 
 		public void run() {
