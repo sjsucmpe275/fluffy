@@ -15,6 +15,8 @@
  */
 package gash.router.server.edges;
 
+import gash.router.container.Observer;
+import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
 import gash.router.server.ServerState;
@@ -36,7 +38,7 @@ import pipe.work.Work.WorkMessage;
 
 import java.util.Timer;
 
-public class EdgeMonitor implements EdgeListener, Runnable {
+public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private static Logger logger = LoggerFactory.getLogger("edge monitor");
 	private static final boolean debug = false;
 	
@@ -187,5 +189,17 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 
 	public Logger getLogger()  {
 		return logger;
+	}
+
+	
+
+	@Override
+	public void onFileChanged(RoutingConf configuration) {
+		logger.info("in edge monitor ");
+		outboundEdges = new EdgeList();
+		for (RoutingEntry e : configuration.getRouting()) {
+			outboundEdges.addNode(e.getId(), e.getHost(), e.getPort());
+		}
+		
 	}
 }

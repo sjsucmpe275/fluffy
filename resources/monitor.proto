@@ -1,0 +1,16 @@
+option optimize_for = SPEED;
+option java_package = "pipe.monitor";
+
+/**
+ * the accompanying information for all messages. Provides origination,
+ * security, authentication, and tracking information
+ */
+message ClusterMonitor{
+   required int64 cluster_id = 1;
+   required int32 num_nodes = 2;
+   repeated int32 process_id = 3;
+   repeated int32 enqueued = 4;
+   repeated int32 processed = 5;
+   repeated int32 stolen = 6;
+   required int64 tick = 7;
+}
