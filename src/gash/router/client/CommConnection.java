@@ -160,8 +160,7 @@ public class CommConnection {
 
 			// want to monitor the connection to the server s.t. if we loose the
 			// connection, we can try to re-establish it.
-			ClientClosedListener ccl = new ClientClosedListener(this);
-			channel.channel().closeFuture().addListener(ccl);
+			channel.channel().closeFuture();
 
 			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
@@ -192,32 +191,5 @@ public class CommConnection {
 			return channel.channel();
 		else
 			throw new RuntimeException("Not able to establish connection to server");
-	}
-
-	/**
-	 * usage:
-	 * 
-	 * <pre>
-	 * channel.getCloseFuture().addListener(new ClientClosedListener(queue));
-	 * </pre>
-	 * 
-	 * @author gash
-	 * 
-	 */
-	public static class ClientClosedListener implements ChannelFutureListener {
-		CommConnection cc;
-
-		public ClientClosedListener(CommConnection cc) {
-			this.cc = cc;
-		}
-
-		@Override
-		public void operationComplete(ChannelFuture future) throws Exception {
-			// we lost the connection or have shutdown.
-			System.out.println("--> client lost connection to the server");
-			System.out.flush();
-
-			// @TODO if lost, try to re-establish the connection
-		}
 	}
 }

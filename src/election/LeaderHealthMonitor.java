@@ -1,11 +1,11 @@
 package election;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author: codepenman.
@@ -19,23 +19,31 @@ public class LeaderHealthMonitor {
 	private AtomicBoolean stop;
 	private HealthMonitorTask task;
 	private AtomicLong beatTime;
-	private Object lock;
+	private AtomicBoolean isRunning;
 
-	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout, String identifier) {
+	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout) {
 		this.healthListener = healthListener;
 		task = new HealthMonitorTask(timeout);
 		stop = new AtomicBoolean(false);
+		isRunning = new AtomicBoolean (false);
 		beatTime = new AtomicLong(System.currentTimeMillis());
-		lock = new Object();
-		System.out.println(Thread.currentThread() + ":" + identifier);
 	}
 
 	public void start() {
-		task.start();
+		/* Start the task, only if it is not started */
+		if(!isRunning.get ())   {
+			task.start();
+			isRunning.getAndSet (true);
+		}
 	}
 
 	public void cancel() {
-		stop.getAndSet(true);
+		/* Cancel the task, only if it not stopped before */
+		if(stop.get ()) {
+			stop.getAndSet(true);
+			task.interrupt ();
+			System.out.println("~~~~~~~~Follower - Cancelled Leader Monitor");
+		}
 	}
 
 	public void onBeat(long beatTime) {
@@ -55,20 +63,21 @@ public class LeaderHealthMonitor {
 			try {
 				while (!stop.get()) {
 					if (debug)
-						logger.info("********Started: " + new Date(System.currentTimeMillis()));
+						System.out.println("********Started: " + new Date(System.currentTimeMillis()));
 
 					long currentTime = System.currentTimeMillis();
 
+					System.out.println("*****Last heart beat received from Leader: " + (currentTime - beatTime.get()));
 					if ((currentTime - beatTime.get()) > timeout) {
 						healthListener.onLeaderBadHealth();
 						break;
 					}
-					synchronized (lock) {
-						lock.wait(timeout);
+					synchronized (this) {
+						wait(timeout);
 					}
 				}
 			} catch (InterruptedException e) {
-				logger.info("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
+				System.out.println("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
 			}
 		}
 	}

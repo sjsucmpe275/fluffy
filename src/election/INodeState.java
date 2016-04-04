@@ -11,12 +11,6 @@ public interface INodeState {
 
 	void afterStateChange();
 
-	void onNewOrHigherTerm();
-
-	void onLeaderDiscovery();
-
-	void onHigherTerm();
-
 	void handleGetClusterSize(WorkMessage workMessage, Channel channel);
 
 	void handleSizeIs(WorkMessage workMessage, Channel channel);
@@ -36,25 +30,27 @@ public interface INodeState {
 	default void handleMessage(WorkMessage workMessage, Channel channel) {
 		LeaderStatus leaderStatus = workMessage.getLeader();
 		switch (leaderStatus.getAction()) {
-		case GETCLUSTERSIZE:
-			handleGetClusterSize(workMessage, channel);
-			break;
-		case SIZEIS:
-			handleSizeIs(workMessage, channel);
-			break;
-		case THELEADERIS:
-			handleWhoIsTheLeader(workMessage, channel);
-			break;
-		case VOTEREQUEST:
-			handleVoteRequest(workMessage, channel);
-			break;
-		case VOTERESPONSE:
-			handleVoteResponse(workMessage, channel);
-			break;
-		case WHOISTHELEADER:
-			handleWhoIsTheLeader(workMessage, channel);
-			break;
-		default:
+			case WHOISTHELEADER:
+				handleWhoIsTheLeader(workMessage, channel);
+				break;
+			case THELEADERIS:
+				handleWhoIsTheLeader(workMessage, channel);
+				break;
+			case GETCLUSTERSIZE:
+				handleGetClusterSize(workMessage, channel);
+				break;
+			case SIZEIS:
+				handleSizeIs(workMessage, channel);
+				break;
+			case VOTEREQUEST:
+				handleVoteRequest(workMessage, channel);
+				break;
+			case VOTERESPONSE:
+				handleVoteResponse(workMessage, channel);
+				break;
+			case BEAT:
+				handleBeat (workMessage, channel);
+			default:
 		}
 	}
 }

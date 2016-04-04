@@ -42,13 +42,13 @@ public class ElectionUtil {
 		return wb.build();
 	}
 
-	public WorkMessage createVoteRequest(ServerState state) {
+	public WorkMessage createVoteRequest(ServerState state, int electionId) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		Header.Builder header = createHeader(state.getConf().getNodeId(), -1);
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.VOTEREQUEST);
-		leaderStatus.setElectionId(state.getElectionId() + 1);
+		leaderStatus.setElectionId(electionId);
 		leaderStatus.setLeaderId(state.getConf().getNodeId());
 
 		wb.setHeader(header);
@@ -65,7 +65,6 @@ public class ElectionUtil {
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.THELEADERIS);
-		System.out.println(state.getElectionId());
 		leaderStatus.setElectionId(state.getElectionId());
 		leaderStatus.setLeaderId(state.getConf().getNodeId());
 		leaderStatus.setState(LeaderState.LEADERALIVE);

@@ -55,8 +55,7 @@ import routing.Pipe.CommandMessage;
  * @author gash
  * 
  */
-public class CommandChannelHandler
-	extends SimpleChannelInboundHandler<CommandMessage> {
+public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMessage> {
 	protected static Logger logger = LoggerFactory.getLogger("cmd");
 	private RoutingConf conf;
 	private ICmdMessageHandler cmdMessageHandler;
@@ -64,8 +63,7 @@ public class CommandChannelHandler
 	private Worker worker;
 	private EventLoopGroup group;
 	private ChannelFuture channel;
-	private static HashMap<SocketAddress, Channel> channelMap = new HashMap<SocketAddress, Channel>();
-
+	private static HashMap<SocketAddress,Channel> channelMap= new HashMap<SocketAddress,Channel>();
 	public CommandChannelHandler(RoutingConf conf) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
@@ -77,8 +75,7 @@ public class CommandChannelHandler
 
 	private void initializeMessageHandlers() throws Exception {
 		// Define Handlers
-		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler(conf,
-			logger);
+		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler(conf, logger);
 		ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler(this);
 		ICmdMessageHandler msgHandler = new CmdMsgHandler(conf, logger);
 		ICmdMessageHandler queryHandler = new CmdQueryMsgHandler(this);
@@ -99,7 +96,7 @@ public class CommandChannelHandler
 	public void enqueue(CommandMessage req) throws Exception {
 		// enqueue message
 		outbound.put(req);
-
+		
 	}
 
 	/**
@@ -110,7 +107,7 @@ public class CommandChannelHandler
 	 * @param msg
 	 */
 	public void handleMessage(CommandMessage msg, Channel channel) {
-
+		
 		channelMap.put(channel.remoteAddress(), channel);
 		if (msg == null) {
 			// TODO add logging
@@ -176,7 +173,7 @@ public class CommandChannelHandler
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 			b.option(ChannelOption.TCP_NODELAY, true);
 			b.option(ChannelOption.SO_KEEPALIVE, true);
-
+			
 			// Make the connection attempt.
 
 			channel = b.connect("localhost", conf.getWorkPort())
@@ -203,14 +200,12 @@ public class CommandChannelHandler
 	}
 
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, CommandMessage msg)
-		throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, CommandMessage msg) throws Exception {
 		handleMessage(msg, ctx.channel());
 	}
 
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-		throws Exception {
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
 	}
@@ -218,8 +213,7 @@ public class CommandChannelHandler
 	public static class ClientClosedListener implements ChannelFutureListener {
 		CommandChannelHandler cc;
 
-		public ClientClosedListener(
-			CommandChannelHandler commandChannelHandler) {
+		public ClientClosedListener(CommandChannelHandler commandChannelHandler) {
 			this.cc = commandChannelHandler;
 		}
 
