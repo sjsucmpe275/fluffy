@@ -19,8 +19,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Routing information for the server - internal use only
@@ -30,16 +34,18 @@ import java.util.List;
  */
 @XmlRootElement(name = "conf")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class RoutingConf {
-	private int nodeId;
-	private int commandPort;
-	private int workPort;
-	private boolean internalNode = true;
-	private int heartbeatDt = 2000;
-	private String database;
-	private int electionTimeout;
-	private List<RoutingEntry> routing;
-
+public class RoutingConf  {
+	private AtomicInteger nodeId;
+	private AtomicInteger commandPort;
+	private AtomicInteger workPort;
+	private AtomicBoolean internalNode;
+	private AtomicInteger heartbeatDt;
+	private AtomicReference<String> database;
+	private AtomicInteger electionTimeout;
+	private AtomicInteger secret;
+	
+	//private List<RoutingEntry> routing;
+	public List<RoutingEntry> routing = Collections.synchronizedList(new ArrayList<RoutingEntry>());
 	public HashMap<String, Integer> asHashMap() {
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
 		if (routing != null) {
@@ -49,7 +55,15 @@ public class RoutingConf {
 		}
 		return map;
 	}
-
+	public RoutingConf(){
+		this.nodeId=new AtomicInteger();
+		this.internalNode=new AtomicBoolean(true);
+		this.heartbeatDt=new AtomicInteger(2000);
+		this.workPort=new AtomicInteger();
+		this.commandPort=new AtomicInteger();
+		this.database=new AtomicReference<String>("");
+		this.electionTimeout=new AtomicInteger();
+	}
 	public void addEntry(RoutingEntry entry) {
 		if (entry == null)
 			return;
@@ -61,43 +75,43 @@ public class RoutingConf {
 	}
 
 	public int getNodeId() {
-		return nodeId;
+		return nodeId.get();
 	}
 
 	public void setNodeId(int nodeId) {
-		this.nodeId = nodeId;
+		this.nodeId.getAndSet(nodeId);
 	}
 
 	public int getCommandPort() {
-		return commandPort;
+		return commandPort.get();
 	}
 
 	public void setCommandPort(int commandPort) {
-		this.commandPort = commandPort;
+		this.commandPort.getAndSet(commandPort) ;
 	}
 
 	public int getWorkPort() {
-		return workPort;
+		return workPort.get();
 	}
 
 	public void setWorkPort(int workPort) {
-		this.workPort = workPort;
+		this.workPort.getAndSet(workPort) ;
 	}
 
 	public boolean isInternalNode() {
-		return internalNode;
+		return internalNode.get();
 	}
 
 	public void setInternalNode(boolean internalNode) {
-		this.internalNode = internalNode;
+		this.internalNode.getAndSet(internalNode);
 	}
 
 	public int getHeartbeatDt() {
-		return heartbeatDt;
+		return heartbeatDt.get();
 	}
 
 	public void setHeartbeatDt(int heartbeatDt) {
-		this.heartbeatDt = heartbeatDt;
+		this.heartbeatDt.getAndSet(heartbeatDt);
 	}
 
 	public List<RoutingEntry> getRouting() {
@@ -109,21 +123,29 @@ public class RoutingConf {
 	}
 
 	public String getDatabase() {
-		return database;
+		return database.get();
 	}
 
 	public void setDatabase(String database) {
-		this.database = database;
+		this.database.getAndSet(database);
 	}
 
 	public int getElectionTimeout() {
-		return electionTimeout;
+		return electionTimeout.get();
 	}
 
 	public void setElectionTimeout(int electionTimeout) {
-		this.electionTimeout = electionTimeout;
+		this.electionTimeout.getAndSet(electionTimeout);
 	}
 
+	public int getSecret() {
+		return secret.get();
+	}
+	
+	public void setSecret(int secret) {
+		this.secret.set(secret);
+	}
+	
 	@XmlRootElement(name = "entry")
 	@XmlAccessorType(XmlAccessType.PROPERTY)
 	public static final class RoutingEntry {
@@ -165,4 +187,7 @@ public class RoutingConf {
 		}
 
 	}
+
+
+	
 }
