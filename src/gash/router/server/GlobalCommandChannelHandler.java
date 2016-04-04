@@ -17,6 +17,9 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import pipe.common.Common.Header;
+import pipe.work.Work.Task;
+import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
 
@@ -63,23 +66,49 @@ public class GlobalCommandChannelHandler extends SimpleChannelInboundHandler<Glo
 			System.out.println("ERROR: Unexpected content - " + msg);
 			return;
 		}
-		if(msg.hasHeader())
+		if(msg.hasHeader()){
 			cmdMsg.setHeader(msg.getHeader());
-		else if(msg.hasErr())
+			logger.info("Received header");
+		}
+		if(msg.hasErr()){
 			cmdMsg.setErr(msg.getErr());
-		else if(msg.hasMessage())
+			logger.info("Received global error");
+		}
+		if(msg.hasMessage()){
 			cmdMsg.setMessage(msg.getMessage());
-		else if(msg.hasPing())
+			logger.info("Received global message");
+		}
+		if(msg.hasPing()){
 			cmdMsg.setPing(msg.getPing());
-		else if(msg.hasQuery())
+			logger.info("Received global ping");
+		}
+		if(msg.hasQuery()){
 			cmdMsg.setQuery(msg.getQuery());
-		else if(msg.hasResponse())
+			logger.info("Received global query");
+		}
+		if(msg.hasResponse()){
 			cmdMsg.setResponse(msg.getResponse());
+			logger.info("Received global Response");
+		}
 		
-		write(cmdMsg.build());
+		WorkMessage.Builder wrkMsg = WorkMessage.newBuilder();
+		Task.Builder task = Task.newBuilder();
+		Header.Builder header = Header.newBuilder();
+		header.setDestination(-1);
+		header.setNodeId(-1);
+		header.setTime(System.currentTimeMillis());
+		
+		task.setTaskMessage(cmdMsg);
+		task.setSeqId(cmdMsg.getQuery().getSequenceNo());
+		task.setSeriesId(cmdMsg.getQuery().getKey().hashCode());
+		wrkMsg.setTask(task);
+		wrkMsg.setSecret(1);
+		wrkMsg.setHeader(header);
+		
+		write(wrkMsg.build());
 	}
 	
-	public boolean write(CommandMessage msg) {
+	public boolean write(WorkMessage msg) {
 		if (msg == null)
 			return false;
 		else if (channel == null)

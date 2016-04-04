@@ -34,7 +34,7 @@ public class MessageServer {
 	// public static final String sPort = "port";
 	// public static final String sPoolSize = "pool.size";
 
-	protected RoutingConf conf;
+	protected static RoutingConf conf;
 	protected boolean background = false;
 	public static MonitoringTask monitor = new MonitoringTask();
 	public static File confFile;
@@ -266,6 +266,7 @@ public class MessageServer {
 				throw new RuntimeException("missing conf");
 			
 			//final Path path = FileSystems.getDefault().getPath();
+			state = new ServerState(conf);
 			
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);
@@ -286,7 +287,7 @@ public class MessageServer {
 
 			try {
 				ServerBootstrap b = new ServerBootstrap();
-				bootstrap.put(state.getConf().getWorkPort(), b);
+				bootstrap.put(state.getConf().getAdaptorPort(), b);
 
 				b.group(bossGroup, workerGroup);
 				b.channel(NioServerSocketChannel.class);
@@ -296,12 +297,12 @@ public class MessageServer {
 
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
-				b.childHandler(new WorkChannelInitializer (state, false));
+				b.childHandler(new GlobalCommandChannelInitializer(conf, false));
 
 				// Start the server.
 				logger.info("Starting work server (" + state.getConf().getNodeId() + "), listening on port = "
-						+ state.getConf().getWorkPort());
-				ChannelFuture f = b.bind(state.getConf().getWorkPort()).syncUninterruptibly();
+						+ state.getConf().getAdaptorPort());
+				ChannelFuture f = b.bind(state.getConf().getAdaptorPort()).syncUninterruptibly();
 
 				logger.info(f.channel().localAddress() + " -> open: " + f.channel().isOpen() + ", write: "
 						+ f.channel().isWritable() + ", act: " + f.channel().isActive());

@@ -102,7 +102,9 @@ public class ServerState implements Observer{
 			for(int i=0;i<configuration.routing.size();i++){
 				this.conf.routing.add(configuration.routing.get(i));
 			}
-			
+			for(int i=0;i<configuration.adaptorRouting.size();i++){
+				this.conf.adaptorRouting.add(configuration.adaptorRouting.get(i));
+			}
 			
 		}
 		

@@ -38,6 +38,7 @@ public class RoutingConf  {
 	private AtomicInteger nodeId;
 	private AtomicInteger commandPort;
 	private AtomicInteger workPort;
+	private AtomicInteger adaptorPort;
 	private AtomicBoolean internalNode;
 	private AtomicInteger heartbeatDt;
 	private AtomicReference<String> database;
@@ -56,12 +57,22 @@ public class RoutingConf  {
 		}
 		return map;
 	}
+	public HashMap<String, Integer> asAdaptorHashMap() {
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		if (adaptorRouting != null) {
+			for (RoutingEntry entry : routing) {
+				map.put(entry.host, entry.port);
+			}
+		}
+		return map;
+	}
 	public RoutingConf(){
 		this.nodeId=new AtomicInteger();
 		this.internalNode=new AtomicBoolean(true);
 		this.heartbeatDt=new AtomicInteger(2000);
 		this.workPort=new AtomicInteger();
 		this.commandPort=new AtomicInteger();
+		this.adaptorPort =  new AtomicInteger();
 		this.database=new AtomicReference<String>("");
 		this.electionTimeout=new AtomicInteger();
 	}
@@ -87,7 +98,12 @@ public class RoutingConf  {
 	public int getNodeId() {
 		return nodeId.get();
 	}
-
+	public int getAdaptorPort() {
+		return adaptorPort.get();
+	}
+	public void setAdaptorPort(int adaptorPort) {
+		this.adaptorPort.getAndSet(adaptorPort);
+	}
 	public void setNodeId(int nodeId) {
 		this.nodeId.getAndSet(nodeId);
 	}

@@ -15,12 +15,19 @@
  */
 package gash.router.client;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import gash.router.container.RoutingConf;
+import gash.router.server.GlobalCommandChannelInitializer;
+import gash.router.server.MessageServer.JsonUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -139,16 +146,18 @@ public class CommConnection {
 		if (handler != null)
 			handler.addListener(listener);
 	}
+	
 
 	private void init() {
 		System.out.println("--> initializing connection to " + host + ":" + port);
-
+		RoutingConf conf = init(new File("runtime/route-2.conf"));
 		// the queue to support client-side surging
 		outbound = new LinkedBlockingDeque<CommandMessage>();
 
 		group = new NioEventLoopGroup();
 		try {
-			CommInit si = new CommInit(false);
+			GlobalCommandChannelInitializer si = new GlobalCommandChannelInitializer(conf,false);
+			//CommInit si = new CommInit(false);
 			Bootstrap b = new Bootstrap();
 			b.group(group).channel(NioSocketChannel.class).handler(si);
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -175,6 +184,36 @@ public class CommConnection {
 		worker = new CommWorker(this);
 		worker.setDaemon(true);
 		worker.start();
+	}
+	private RoutingConf init(File cfg) {
+		RoutingConf conf=null;
+		if (!cfg.exists())
+			throw new RuntimeException(cfg.getAbsolutePath() + " not found");
+		// resource initialization - how message are processed
+		BufferedInputStream br = null;
+		try {
+			byte[] raw = new byte[(int) cfg.length()];
+			br = new BufferedInputStream(new FileInputStream(cfg));
+			br.read(raw);
+			conf = JsonUtil.decode(new String(raw), RoutingConf.class);
+			System.out.println(conf.getNodeId());
+			if (!verifyConf(conf))
+				throw new RuntimeException("verification of configuration failed");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return conf;
+	}
+	private boolean verifyConf(RoutingConf conf) {
+		return (conf != null);
 	}
 
 	/**
