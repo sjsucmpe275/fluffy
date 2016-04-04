@@ -15,6 +15,7 @@
  */
 package gash.router.server;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -40,6 +41,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import pipe.common.Common;
+import pipe.common.Common.Header;
+import pipe.work.Work.Task;
+import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
 /**
@@ -115,7 +120,26 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 		// TODO How can you implement this without if-else statements? - With
 		// COR
 		try {
-			cmdMessageHandler.handleMessage(msg, channel);
+			// cmdMessageHandler.handleMessage(msg, channel);
+
+			WorkMessage.Builder wb = WorkMessage.newBuilder();
+
+			Header.Builder header = Common.Header.newBuilder();
+			header.setNodeId(-1);
+			header.setDestination(-1);
+			header.setMaxHops(10);
+			header.setTime(System.currentTimeMillis());
+
+			Task.Builder t = Task.newBuilder();
+			t.setSeqId(msg.getQuery().getSequenceNo());
+			t.setSeriesId(msg.getQuery().getKey().hashCode());
+			t.setTaskMessage(msg);
+
+			wb.setHeader(header);
+			wb.setSecret(1);
+			wb.setTask(t);
+
+			this.channel.channel().writeAndFlush(wb.build());
 		} catch (Exception e) {
 			// TODO add logging
 			logger.error("Got an exception in command", e);
@@ -143,7 +167,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 		group = new NioEventLoopGroup();
 		try {
-			CommInit si = new CommInit (false);
+			CommInit si = new CommInit(false);
 			Bootstrap b = new Bootstrap();
 			b.group(group).channel(NioSocketChannel.class).handler(si);
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -151,8 +175,9 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			b.option(ChannelOption.SO_KEEPALIVE, true);
 			
 			// Make the connection attempt.
-			
-			channel = b.connect("localhost", conf.getWorkPort ()).syncUninterruptibly();
+
+			channel = b.connect("localhost", conf.getWorkPort())
+				.syncUninterruptibly();
 
 			// want to monitor the connection to the server s.t. if we loose the
 			// connection, we can try to re-establish it.
@@ -160,8 +185,10 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			ClientClosedListener ccl = new ClientClosedListener(this);
 			channel.channel().closeFuture().addListener(ccl);
 
-			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
-					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
+			System.out.println(channel.channel().localAddress() + " -> open: "
+				+ channel.channel().isOpen() + ", write: "
+				+ channel.channel().isWritable() + ", reg: "
+				+ channel.channel().isRegistered());
 
 		} catch (Throwable ex) {
 			logger.error("failed to initialize the client connection", ex);
@@ -195,10 +222,11 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			// we lost the connection or have shutdown.
 			System.out.println("--> client lost connection to the server");
 			System.out.flush();
-			boolean result=channelMap.remove(future.channel().remoteAddress(),future.channel());
-			if(!result){
+			boolean result = channelMap.remove(future.channel().remoteAddress(),
+				future.channel());
+			if (!result) {
 				System.out.println("Error while deleting entry from Hash Map");
-			}	
+			}
 		}
 	}
 
@@ -211,7 +239,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			init();
 		}
 
-		if (channel != null && channel.isSuccess() && channel.channel().isWritable())
+		if (channel != null && channel.isSuccess()
+			&& channel.channel().isWritable())
 			return channel.channel();
 		else
 			throw new RuntimeException("Not able to establish connection ");

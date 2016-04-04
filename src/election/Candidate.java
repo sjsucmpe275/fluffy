@@ -65,6 +65,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
+	//	validateTermAndUpdateStateIfRequired (workMessage);
 		System.out.println("~~~~~~~~Candidate - Handle LeaderIs Event");
 
 		int inComingTerm = workMessage.getLeader().getElectionId();
@@ -256,5 +257,11 @@ public class Candidate implements INodeState, TimeoutListener {
 		sizeOfCluster = 0;
 		requiredVotes = 0;
 		visitedNodes.clear();
+	}
+
+	@Override
+	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -1,12 +1,17 @@
 package election;
 
-import gash.router.server.ServerState;
-import io.netty.channel.Channel;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.work.Work.WorkMessage;
 
-import java.util.concurrent.ConcurrentHashMap;
+import gash.router.server.ServerState;
+import gash.router.server.tasks.IReplicationStrategy;
+import gash.router.server.tasks.RoundRobinStrategy;
+import io.netty.channel.Channel;
+import pipe.common.Common;
+import pipe.common.Common.Header;
+import pipe.work.Work.WorkMessage;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -18,6 +23,7 @@ public class Leader implements INodeState, FollowerListener {
 	private final ConcurrentHashMap<Integer, Object> activeNodes;
 	private FollowerHealthMonitor followerMonitor;
 	private ElectionUtil util;
+	private IReplicationStrategy strategy;
 
 	public Leader(ServerState state) {
 		this.state = state;
@@ -26,6 +32,37 @@ public class Leader implements INodeState, FollowerListener {
 		followerMonitor = new FollowerHealthMonitor(this, state,
 				state.getConf().getElectionTimeout());
 		this.util = new ElectionUtil();
+		this.strategy = new RoundRobinStrategy(2);
+	}
+
+	private Common.Header.Builder buildHeader(int destinationId) {
+		Common.Header.Builder hb = Common.Header.newBuilder();
+		hb.setNodeId(nodeId);
+		hb.setTime(System.currentTimeMillis());
+		hb.setDestination(destinationId);
+		return hb;
+	}
+
+	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
+			List<Integer> activeNodeIds = new ArrayList<>();
+			for (Integer i : activeNodes.keySet()) {
+				activeNodeIds.add(i);
+			}
+
+			List<Integer> replicationNodes = strategy
+				.getNodeIds(new ArrayList<>());
+			for (Integer destinationId : replicationNodes) {
+				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
+				Header.Builder hb = Header.newBuilder(wrkMessage.getHeader());
+				hb.setDestination(destinationId);
+				wb.setHeader(hb);
+				wb.setSecret(1);
+				state.getEmon().broadcastMessage(wb.build());
+			}
+		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+
+		}
 	}
 
 	/*
