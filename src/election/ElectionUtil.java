@@ -98,7 +98,7 @@ public class ElectionUtil {
 		Header.Builder header = Common.Header.newBuilder();
 		header.setNodeId(nodeId);
 		header.setDestination(destination);
-		header.setMaxHops(1);
+		header.setMaxHops(3);
 		header.setTime(System.currentTimeMillis());
 		return header;
 	}

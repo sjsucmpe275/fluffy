@@ -110,14 +110,14 @@
 	<target name="ring-3" depends="init">
 		<java fork="yes" classname="gash.router.server.MessageApp">
 			<classpath refid="project.classpath" />
-			<arg value="runtime/ring/route-5.conf" />
+			<arg value="runtime/ring/route-3.conf" />
 		</java>
 	</target>
 
 	<target name="ring-4" depends="init">
 		<java fork="yes" classname="gash.router.server.MessageApp">
 			<classpath refid="project.classpath" />
-			<arg value="runtime/ring/route-6.conf" />
+			<arg value="runtime/ring/route-4.conf" />
 		</java>
 	</target>
 </project>

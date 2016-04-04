@@ -29,7 +29,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
 
@@ -156,13 +155,23 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 			System.out.println("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
 		}
 
-		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
+		broadCastOutBound (msg);
+
+		broadCastInBound (msg);
+	}
+
+	public void broadCastInBound(WorkMessage msg) {
+		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
+			System.out.println("**********Broadcasting to inbound edges********");
+
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}
 		}
-		
-		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
+	}
+
+	public void broadCastOutBound(WorkMessage msg) {
+		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}

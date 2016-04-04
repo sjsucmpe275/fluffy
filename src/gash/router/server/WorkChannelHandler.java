@@ -83,7 +83,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			logger.info ("ERROR: Null message is received");
 			return;
 		}
-		
+
 		if (debug)
 			PrintUtil.printWork(msg);
 
@@ -93,7 +93,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 */
 		
 		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-			getLogger ().info ("Same message received by source! Dropping message...");
+			System.out.println("Same message received by source! Dropping message...");
 			return;
 		}
 
@@ -103,7 +103,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 				if (msg.getHeader().getMaxHops() > 0) {
 					broadcast(msg);
 				}else {
-					getLogger().info("MAX HOPS is Zero! Dropping message...");
+					System.out.println("MAX HOPS is Zero! Dropping message...");
 					return;
 				}
 			} else {
@@ -111,16 +111,17 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 					broadcast(msg);
 					return;
 				} else {
-					getLogger().info("MAX HOPS is Zero! Dropping message...");
+					System.out.println("MAX HOPS is Zero! Dropping message...");
 					return;
 				}
 			}
 		}
+/*
 
 		if (debug)
 			PrintUtil.printWork(msg);
+*/
 
-		
 		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
@@ -149,7 +150,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	}
 
 	private void broadcast(WorkMessage msg) {
-		getLogger().info("Forwarding message...");
+		System.out.println("Forwarding message...");
 		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
 		Header.Builder hb = Header.newBuilder(wb.getHeader());
 		hb.setMaxHops(hb.getMaxHops() - 1);
