@@ -27,7 +27,7 @@ public class LeaderStatusMessage {
 		header = Common.Header.newBuilder ();
 		header.setNodeId (nodeId);
 		header.setDestination (destination);
-		header.setMaxHops (1);
+		header.setMaxHops (3);
 		header.setTime (System.currentTimeMillis ());
 		leaderStatus = Election.LeaderStatus.newBuilder ();
 	}

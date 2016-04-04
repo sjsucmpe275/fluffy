@@ -29,7 +29,7 @@ public class VoteMessage {
 		header = Common.Header.newBuilder();
 		header.setNodeId(nodeId);
 		header.setDestination(destination);
-		header.setMaxHops(1);
+		header.setMaxHops(3);
 		header.setTime(System.currentTimeMillis());
 		this.electionId = electionId;
 		leaderStatus = Election.LeaderStatus.newBuilder();

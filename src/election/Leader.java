@@ -1,12 +1,13 @@
 package election;
 
-import gash.router.server.ServerState;
-import io.netty.channel.Channel;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pipe.work.Work.WorkMessage;
 
-import java.util.concurrent.ConcurrentHashMap;
+import gash.router.server.ServerState;
+import io.netty.channel.Channel;
+import pipe.work.Work.WorkMessage;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -77,10 +78,11 @@ public class Leader implements INodeState, FollowerListener {
 		/*
 		* If there is another node which is leader in new term, then I update myself and go back to election state
 		* */
-		if (inComingTerm >= currentTerm) {
+		if (inComingTerm > currentTerm) {
 			System.out.println("LEADER IS: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(workMessage.getLeader().getElectionId());
 			state.setLeaderId(workMessage.getLeader().getLeaderId());
+			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 			state.setState(NodeStateEnum.FOLLOWER);
 		}
 
@@ -89,7 +91,7 @@ public class Leader implements INodeState, FollowerListener {
 		* This scenario might happen because we dont have constant cluster size and we evaluate dynamically and it need not be
 		* that in 2 seconds we get entire cluster size and split votes might occur, to be on the safe side its better to go to CANDIDATE
 		* */
-		if(state.getElectionId () == workMessage.getLeader ().getElectionId ()) {
+		if(inComingTerm == currentTerm) {
 			state.setState (NodeStateEnum.CANDIDATE);
 		}
 	}
@@ -109,10 +111,23 @@ public class Leader implements INodeState, FollowerListener {
 
 		if (inComingTerm > currentTerm) {
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
+			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
+
 			VoteMessage vote = new VoteMessage(nodeId,
 					workMessage.getLeader().getElectionId(),
 					workMessage.getLeader().getLeaderId());
-			state.getEmon().broadcastMessage(vote.getMessage());
+
+			vote.setDestination (workMessage.getHeader ().getNodeId ());
+
+			//Reply to the person who sent request
+			channel.writeAndFlush (vote.getMessage ());
+
+			// Broadcast the message to outbound edges.
+			// Because if my in bound edge is down, I am trying to reach my candidate in different path..
+			state.getEmon().broadCastOutBound (vote.getMessage());
+			state.setVotedFor (workMessage.getHeader ().getNodeId ());
+
+			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 			state.setState (NodeStateEnum.FOLLOWER);
 		}
 	}
@@ -156,15 +171,19 @@ public class Leader implements INodeState, FollowerListener {
 			return;
 		}
 
+		long currentTime = System.currentTimeMillis ();
+		state.setLeaderHeartBeatdt (currentTime);
+
 		int followerId = workMessage.getHeader ().getNodeId ();
 		addFollower (followerId); // Add follower Id
-		followerMonitor.onBeat (followerId, System.currentTimeMillis ()); // notify follower monitor about heart beat
+		followerMonitor.onBeat (followerId, currentTime); // notify follower monitor about heart beat
 	}
 
 	/* Release all the resources. In this case it is only followerMonitor */
 	@Override
 	public void beforeStateChange() {
 		System.out.println("~~~~~~~~Leader - Handle Before State Change Event");
+		activeNodes.clear ();
 		followerMonitor.cancel ();
 	}
 
