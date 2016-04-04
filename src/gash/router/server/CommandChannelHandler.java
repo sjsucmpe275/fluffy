@@ -15,7 +15,6 @@
  */
 package gash.router.server;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -144,7 +143,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 		group = new NioEventLoopGroup();
 		try {
-			CommInit si = new CommInit(false);
+			CommInit si = new CommInit (false);
 			Bootstrap b = new Bootstrap();
 			b.group(group).channel(NioSocketChannel.class).handler(si);
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -153,7 +152,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 			
 			// Make the connection attempt.
 			
-			channel = b.connect("localhost", conf.getCommandPort()).syncUninterruptibly();
+			channel = b.connect("localhost", conf.getWorkPort ()).syncUninterruptibly();
 
 			// want to monitor the connection to the server s.t. if we loose the
 			// connection, we can try to re-establish it.

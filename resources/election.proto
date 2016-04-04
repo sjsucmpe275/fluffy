@@ -10,6 +10,7 @@ message LeaderStatus {
    optional int32 election_id = 5;
    optional int32 votedFor = 6;
    optional bool voteGranted = 7;
+   repeated int32 path = 8; // This will be the list which contains path from current node to leader
    
    enum LeaderState {
       LEADERUNKNOWN = 1;
@@ -24,6 +25,7 @@ message LeaderStatus {
       SIZEIS = 4;
       VOTEREQUEST = 5;
       VOTERESPONSE = 6;
+      BEAT = 7; // Heart Beat between Leader and Followers.
    }
    
    // Request: WHOISTHELEADER

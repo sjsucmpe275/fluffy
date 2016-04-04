@@ -83,7 +83,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			logger.info ("ERROR: Null message is received");
 			return;
 		}
-		
+
 		if (debug)
 			PrintUtil.printWork(msg);
 
@@ -93,7 +93,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 */
 		
 		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-			getLogger ().info ("Same message received by source! Dropping message...");
+			System.out.println("Same message received by source! Dropping message...");
 			return;
 		}
 
@@ -102,22 +102,26 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			if (msg.getHeader().getDestination() == -1) {
 				if (msg.getHeader().getMaxHops() > 0) {
 					broadcast(msg);
+				}else {
+					System.out.println("MAX HOPS is Zero! Dropping message...");
+					return;
 				}
 			} else {
 				if (msg.getHeader().getMaxHops() > 0) {
 					broadcast(msg);
 					return;
 				} else {
-					getLogger().info("MAX HOPS is Zero! Dropping message...");
+					System.out.println("MAX HOPS is Zero! Dropping message...");
 					return;
 				}
 			}
 		}
+/*
 
 		if (debug)
 			PrintUtil.printWork(msg);
+*/
 
-		
 		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
@@ -136,6 +140,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		} catch (Exception e) {
 			// TODO add logging
 			getLogger ().info ("Got an exception in work");
+			e.printStackTrace ();
 			FailureMessage failureMessage = new FailureMessage (msg, e);
 			failureMessage.setNodeId (state.getConf ().getNodeId ());
 			channel.write(failureMessage.getWorkMessage ());
@@ -145,7 +150,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	}
 
 	private void broadcast(WorkMessage msg) {
-		getLogger().info("Forwarding message...");
+		System.out.println("Forwarding message...");
 		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
 		Header.Builder hb = Header.newBuilder(wb.getHeader());
 		hb.setMaxHops(hb.getMaxHops() - 1);
@@ -172,7 +177,6 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
-		throw new Exception (cause);
 	}
 
 	public ServerState getServerState() {
