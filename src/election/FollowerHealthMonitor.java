@@ -43,13 +43,15 @@ public class FollowerHealthMonitor {
 	private FollowerListener followerListener;
 	private HealthMonitorTask task;
 	private AtomicBoolean stop;
+	private final long timeout;
 
 	public FollowerHealthMonitor(FollowerListener followerListener, ServerState state, long timeout) {
 		this.followerListener = followerListener;
 		this.state = state;
 		// this.interval = timeout - (long)(0.1 * timeout); // 10% lesser than
 		// the original timeout
-		task = new HealthMonitorTask(timeout);
+		this.timeout = timeout;
+		task = new HealthMonitorTask();
 		stop = new AtomicBoolean(false);
 		this.follower2BeatTimeMap = new ConcurrentHashMap<>();
 	}
@@ -68,21 +70,18 @@ public class FollowerHealthMonitor {
 
 		state.getEmon().broadcastMessage(beat.getMessage());
 
+		stop.getAndSet (false);
 		task.start();
 	}
 
 	public void cancel() {
 		stop.getAndSet(true);
+		task = new HealthMonitorTask ();
 	}
 
 	private class HealthMonitorTask extends Thread {
 
-		private final long timeout;
 		private boolean broadCastBeat = false;
-
-		public HealthMonitorTask(long timeout) {
-			this.timeout = timeout;
-		}
 
 		@Override
 		public void run() {
@@ -121,7 +120,7 @@ public class FollowerHealthMonitor {
 						broadCastBeat = true;
 					}
 					synchronized (this) {
-						wait(timeout);
+						wait((long)(timeout * 0.1));
 					}
 				}
 			} catch (InterruptedException e) {

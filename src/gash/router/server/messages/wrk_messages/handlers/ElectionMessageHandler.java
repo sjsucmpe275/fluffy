@@ -31,7 +31,9 @@ public class ElectionMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 		logger.info ("Election Message Received forwarding to state");
-		state.getCurrentState().handleMessage(workMessage, channel);
+		synchronized (state)    {
+			state.getCurrentState().handleMessage(workMessage, channel);
+		}
 	}
 
 	@Override

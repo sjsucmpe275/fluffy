@@ -54,7 +54,6 @@ public class Timer {
 			System.out.println ("********" + identifier + ", Request to cancel timer: " + Thread.currentThread ().getName ());
 
 		timerThread.interrupt ();
-		timerThread = null;
 	}
 
 	private class TimerThread extends Thread{

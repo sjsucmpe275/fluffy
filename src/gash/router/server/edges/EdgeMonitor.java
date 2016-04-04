@@ -15,11 +15,8 @@
  */
 package gash.router.server.edges;
 
-import java.util.Timer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import gash.router.container.Observer;
+import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
 import gash.router.server.ServerState;
@@ -32,10 +29,15 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
 
-public class EdgeMonitor implements EdgeListener, Runnable {
+import java.util.Timer;
+
+public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private static Logger logger = LoggerFactory.getLogger("edge monitor");
 	private static final boolean debug = false;
 	
@@ -156,13 +158,23 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 			System.out.println("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
 		}
 
-		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
+		broadCastOutBound (msg);
+
+		broadCastInBound (msg);
+	}
+
+	public void broadCastInBound(WorkMessage msg) {
+		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
+			System.out.println("**********Broadcasting to inbound edges********");
+
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}
 		}
-		
-		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
+	}
+
+	public void broadCastOutBound(WorkMessage msg) {
+		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}
@@ -195,4 +207,17 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	public Logger getLogger()  {
 		return logger;
 	}
+
+	
+
+	@Override
+	public void onFileChanged(RoutingConf configuration) {
+		logger.info("in edge monitor ");
+		outboundEdges = new EdgeList();
+		for (RoutingEntry e : configuration.getRouting()) {
+			outboundEdges.addNode(e.getId(), e.getHost(), e.getPort());
+		}
+		
+	}
+
 }

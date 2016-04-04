@@ -1,20 +1,5 @@
 package gash.router.server;
 
-import gash.router.container.RoutingConf;
-import gash.router.server.edges.EdgeMonitor;
-import gash.router.server.tasks.NoOpBalancer;
-import gash.router.server.tasks.TaskList;
-import gash.router.server.tasks.TaskWorker;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import election.NodeStateEnum;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,6 +7,24 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.codehaus.jackson.map.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import deven.monitor.client.WorkerThread;
+import gash.router.container.MonitoringTask;
+import gash.router.container.RoutingConf;
+import gash.router.server.edges.EdgeMonitor;
+import gash.router.server.tasks.NoOpBalancer;
+import gash.router.server.tasks.TaskList;
+import gash.router.server.tasks.TaskWorker;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class MessageServer {
 	protected static Logger logger = LoggerFactory.getLogger("server");
@@ -33,18 +36,22 @@ public class MessageServer {
 
 	protected RoutingConf conf;
 	protected boolean background = false;
-
+	public static MonitoringTask monitor = new MonitoringTask();
+	public static File confFile;
+	
 	/**
 	 * initialize the server with a configuration of it's resources
 	 * 
 	 * @param cfg
 	 */
 	public MessageServer(File cfg) {
+		this.confFile = cfg;
 		init(cfg);
 	}
 
 	public MessageServer(RoutingConf conf) {
 		this.conf = conf;
+		
 	}
 
 	public void release() {
@@ -89,6 +96,7 @@ public class MessageServer {
 			br = new BufferedInputStream(new FileInputStream(cfg));
 			br.read(raw);
 			conf = JsonUtil.decode(new String(raw), RoutingConf.class);
+			System.out.println(conf.getNodeId());
 			if (!verifyConf(conf))
 				throw new RuntimeException("verification of configuration failed");
 		} catch (Exception ex) {
@@ -171,28 +179,36 @@ public class MessageServer {
 	 */
 	private static class StartWorkCommunication implements Runnable {
 		ServerState state;
-
+		WorkerThread monitorThread;
+		
 		public StartWorkCommunication(RoutingConf conf) {
 			if (conf == null)
 				throw new RuntimeException("missing conf");
-
+			
+			//final Path path = FileSystems.getDefault().getPath();
+			monitor.monitorFile(confFile.getPath());
+			logger.info("in message server");
 			state = new ServerState(conf);
-
+			monitor.registerObserver(state);
+			
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);
 
 			EdgeMonitor emon = new EdgeMonitor(state);
+			monitor.registerObserver(emon);
 			Thread t = new Thread(emon);
 			t.start();
-			
+
+			monitorThread = new WorkerThread("localhost", 5000, state);
+			monitorThread.start();
+
 			int workerCount = 4;
-			
 			ExecutorService executors = Executors.newFixedThreadPool(workerCount);
 			for(int i = 0; i < workerCount; i++) {
 				TaskWorker taskWorker = new TaskWorker(state);
 				executors.execute(taskWorker);
 			}
-			executors.shutdown();
+			executors.shutdown();	
 		}
 
 		public void run() {
@@ -237,6 +253,10 @@ public class MessageServer {
 				EdgeMonitor emon = state.getEmon();
 				if (emon != null)
 					emon.shutdown();
+				
+				if (monitorThread != null && monitorThread.isAlive()) {
+					monitorThread.shutdown();
+				}
 			}
 		}
 	}

@@ -29,7 +29,7 @@ public class BeatMessage {
 		header = Common.Header.newBuilder ();
 		header.setNodeId (nodeId);
 		header.setDestination (destination);
-		header.setMaxHops (10);
+		header.setMaxHops (3);
 		header.setTime (System.currentTimeMillis ());
 		beat = Heartbeat.newBuilder();
 		workMessage = WorkMessage.newBuilder ();

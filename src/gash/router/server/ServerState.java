@@ -1,14 +1,19 @@
 package gash.router.server;
 
-import election.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+import election.Candidate;
+import election.Follower;
+import election.INodeState;
+import election.Leader;
+import election.NodeStateEnum;
+import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-public class ServerState {
+public class ServerState implements Observer{
 	private final RoutingConf conf;
 	private EdgeMonitor emon;
 	private TaskList tasks;
@@ -102,7 +107,6 @@ public class ServerState {
 		//new Exception().printStackTrace ();
 		this.electionId.getAndSet (electionId);
 	}
-
 	public long getLeaderHeartBeatdt() {
 		System.out.println("------------------- Fetching Leader Heart Beat ----------------- " + leaderHeartBeatdt.get ()  + " Thread: " + Thread.currentThread ().getName ());
 		return leaderHeartBeatdt.get ();
@@ -112,4 +116,18 @@ public class ServerState {
 		System.out.println("------------------- Leader Heart Beat Updated ----------------- " + leaderHeartBeatdt  + " Thread: " + Thread.currentThread ().getName ());
 		this.leaderHeartBeatdt.getAndSet (leaderHeartBeatdt);
 	}
+	@Override
+	public void onFileChanged(RoutingConf configuration) {
+		System.out.println("in server state");
+			this.conf.setNodeId(configuration.getNodeId());;
+			this.conf.setCommandPort(configuration.getCommandPort());
+			this.conf.setWorkPort(configuration.getWorkPort());
+			this.conf.setInternalNode(configuration.isInternalNode());
+			this.conf.setHeartbeatDt(configuration.getHeartbeatDt());
+			this.conf.setDatabase(configuration.getDatabase());
+			this.conf.setElectionTimeout(configuration.getElectionTimeout());
+			for(int i=0;i<configuration.routing.size();i++){
+				this.conf.routing.add(configuration.routing.get(i));
+			}
+		}
 }
