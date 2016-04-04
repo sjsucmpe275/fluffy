@@ -79,6 +79,31 @@ public final class Election {
      * <code>optional bool voteGranted = 7;</code>
      */
     boolean getVoteGranted();
+
+    /**
+     * <code>repeated int32 path = 8;</code>
+     *
+     * <pre>
+     * This will be the list which contains path from current node to leader
+     * </pre>
+     */
+    java.util.List<java.lang.Integer> getPathList();
+    /**
+     * <code>repeated int32 path = 8;</code>
+     *
+     * <pre>
+     * This will be the list which contains path from current node to leader
+     * </pre>
+     */
+    int getPathCount();
+    /**
+     * <code>repeated int32 path = 8;</code>
+     *
+     * <pre>
+     * This will be the list which contains path from current node to leader
+     * </pre>
+     */
+    int getPath(int index);
   }
   /**
    * Protobuf type {@code LeaderStatus}
@@ -184,6 +209,27 @@ public final class Election {
               voteGranted_ = input.readBool();
               break;
             }
+            case 64: {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+                path_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000080;
+              }
+              path_.add(input.readInt32());
+              break;
+            }
+            case 66: {
+              int length = input.readRawVarint32();
+              int limit = input.pushLimit(length);
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080) && input.getBytesUntilLimit() > 0) {
+                path_ = new java.util.ArrayList<java.lang.Integer>();
+                mutable_bitField0_ |= 0x00000080;
+              }
+              while (input.getBytesUntilLimit() > 0) {
+                path_.add(input.readInt32());
+              }
+              input.popLimit(limit);
+              break;
+            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -192,6 +238,9 @@ public final class Election {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
+        if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
+          path_ = java.util.Collections.unmodifiableList(path_);
+        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -343,6 +392,14 @@ public final class Election {
        * <code>VOTERESPONSE = 6;</code>
        */
       VOTERESPONSE(5, 6),
+      /**
+       * <code>BEAT = 7;</code>
+       *
+       * <pre>
+       * Heart Beat between Leader and Followers.
+       * </pre>
+       */
+      BEAT(6, 7),
       ;
 
       /**
@@ -369,6 +426,14 @@ public final class Election {
        * <code>VOTERESPONSE = 6;</code>
        */
       public static final int VOTERESPONSE_VALUE = 6;
+      /**
+       * <code>BEAT = 7;</code>
+       *
+       * <pre>
+       * Heart Beat between Leader and Followers.
+       * </pre>
+       */
+      public static final int BEAT_VALUE = 7;
 
 
       public final int getNumber() { return value; }
@@ -381,6 +446,7 @@ public final class Election {
           case 4: return SIZEIS;
           case 5: return VOTEREQUEST;
           case 6: return VOTERESPONSE;
+          case 7: return BEAT;
           default: return null;
         }
       }
@@ -565,6 +631,40 @@ public final class Election {
       return voteGranted_;
     }
 
+    public static final int PATH_FIELD_NUMBER = 8;
+    private java.util.List<java.lang.Integer> path_;
+    /**
+     * <code>repeated int32 path = 8;</code>
+     *
+     * <pre>
+     * This will be the list which contains path from current node to leader
+     * </pre>
+     */
+    public java.util.List<java.lang.Integer>
+        getPathList() {
+      return path_;
+    }
+    /**
+     * <code>repeated int32 path = 8;</code>
+     *
+     * <pre>
+     * This will be the list which contains path from current node to leader
+     * </pre>
+     */
+    public int getPathCount() {
+      return path_.size();
+    }
+    /**
+     * <code>repeated int32 path = 8;</code>
+     *
+     * <pre>
+     * This will be the list which contains path from current node to leader
+     * </pre>
+     */
+    public int getPath(int index) {
+      return path_.get(index);
+    }
+
     private void initFields() {
       action_ = pipe.election.Election.LeaderStatus.LeaderQuery.WHOISTHELEADER;
       state_ = pipe.election.Election.LeaderStatus.LeaderState.LEADERUNKNOWN;
@@ -573,6 +673,7 @@ public final class Election {
       electionId_ = 0;
       votedFor_ = 0;
       voteGranted_ = false;
+      path_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -612,6 +713,9 @@ public final class Election {
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         output.writeBool(7, voteGranted_);
       }
+      for (int i = 0; i < path_.size(); i++) {
+        output.writeInt32(8, path_.get(i));
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -648,6 +752,15 @@ public final class Election {
       if (((bitField0_ & 0x00000040) == 0x00000040)) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(7, voteGranted_);
+      }
+      {
+        int dataSize = 0;
+        for (int i = 0; i < path_.size(); i++) {
+          dataSize += com.google.protobuf.CodedOutputStream
+            .computeInt32SizeNoTag(path_.get(i));
+        }
+        size += dataSize;
+        size += 1 * getPathList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -784,6 +897,8 @@ public final class Election {
         bitField0_ = (bitField0_ & ~0x00000020);
         voteGranted_ = false;
         bitField0_ = (bitField0_ & ~0x00000040);
+        path_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000080);
         return this;
       }
 
@@ -840,6 +955,11 @@ public final class Election {
           to_bitField0_ |= 0x00000040;
         }
         result.voteGranted_ = voteGranted_;
+        if (((bitField0_ & 0x00000080) == 0x00000080)) {
+          path_ = java.util.Collections.unmodifiableList(path_);
+          bitField0_ = (bitField0_ & ~0x00000080);
+        }
+        result.path_ = path_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -878,6 +998,16 @@ public final class Election {
         }
         if (other.hasVoteGranted()) {
           setVoteGranted(other.getVoteGranted());
+        }
+        if (!other.path_.isEmpty()) {
+          if (path_.isEmpty()) {
+            path_ = other.path_;
+            bitField0_ = (bitField0_ & ~0x00000080);
+          } else {
+            ensurePathIsMutable();
+            path_.addAll(other.path_);
+          }
+          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1184,6 +1314,100 @@ public final class Election {
         return this;
       }
 
+      private java.util.List<java.lang.Integer> path_ = java.util.Collections.emptyList();
+      private void ensurePathIsMutable() {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
+          path_ = new java.util.ArrayList<java.lang.Integer>(path_);
+          bitField0_ |= 0x00000080;
+         }
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public java.util.List<java.lang.Integer>
+          getPathList() {
+        return java.util.Collections.unmodifiableList(path_);
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public int getPathCount() {
+        return path_.size();
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public int getPath(int index) {
+        return path_.get(index);
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public Builder setPath(
+          int index, int value) {
+        ensurePathIsMutable();
+        path_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public Builder addPath(int value) {
+        ensurePathIsMutable();
+        path_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public Builder addAllPath(
+          java.lang.Iterable<? extends java.lang.Integer> values) {
+        ensurePathIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, path_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated int32 path = 8;</code>
+       *
+       * <pre>
+       * This will be the list which contains path from current node to leader
+       * </pre>
+       */
+      public Builder clearPath() {
+        path_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000080);
+        onChanged();
+        return this;
+      }
+
       // @@protoc_insertion_point(builder_scope:LeaderStatus)
     }
 
@@ -1209,17 +1433,18 @@ public final class Election {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\016election.proto\"\201\003\n\014LeaderStatus\022)\n\006act" +
+      "\n\016election.proto\"\231\003\n\014LeaderStatus\022)\n\006act" +
       "ion\030\001 \002(\0162\031.LeaderStatus.LeaderQuery\022(\n\005" +
       "state\030\002 \001(\0162\031.LeaderStatus.LeaderState\022\023" +
       "\n\013leader_host\030\003 \001(\t\022\021\n\tleader_id\030\004 \001(\005\022\023" +
       "\n\013election_id\030\005 \001(\005\022\020\n\010votedFor\030\006 \001(\005\022\023\n" +
-      "\013voteGranted\030\007 \001(\010\"A\n\013LeaderState\022\021\n\rLEA" +
-      "DERUNKNOWN\020\001\022\017\n\013LEADERALIVE\020\002\022\016\n\nLEADERD" +
-      "EAD\020\003\"u\n\013LeaderQuery\022\022\n\016WHOISTHELEADER\020\001" +
-      "\022\017\n\013THELEADERIS\020\002\022\022\n\016GETCLUSTERSIZE\020\003\022\n\n" +
-      "\006SIZEIS\020\004\022\017\n\013VOTEREQUEST\020\005\022\020\n\014VOTERESPON",
-      "SE\020\006B\021\n\rpipe.electionH\001"
+      "\013voteGranted\030\007 \001(\010\022\014\n\004path\030\010 \003(\005\"A\n\013Lead" +
+      "erState\022\021\n\rLEADERUNKNOWN\020\001\022\017\n\013LEADERALIV" +
+      "E\020\002\022\016\n\nLEADERDEAD\020\003\"\177\n\013LeaderQuery\022\022\n\016WH" +
+      "OISTHELEADER\020\001\022\017\n\013THELEADERIS\020\002\022\022\n\016GETCL" +
+      "USTERSIZE\020\003\022\n\n\006SIZEIS\020\004\022\017\n\013VOTEREQUEST\020\005",
+      "\022\020\n\014VOTERESPONSE\020\006\022\010\n\004BEAT\020\007B\021\n\rpipe.ele" +
+      "ctionH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -1238,7 +1463,7 @@ public final class Election {
     internal_static_LeaderStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_LeaderStatus_descriptor,
-        new java.lang.String[] { "Action", "State", "LeaderHost", "LeaderId", "ElectionId", "VotedFor", "VoteGranted", });
+        new java.lang.String[] { "Action", "State", "LeaderHost", "LeaderId", "ElectionId", "VotedFor", "VoteGranted", "Path", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

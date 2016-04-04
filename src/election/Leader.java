@@ -35,8 +35,9 @@ public class Leader implements INodeState, FollowerListener {
 	* */
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
+		System.out.println("~~~~~~~~Leader - Handle Cluster Size Event");
 
-		logger.info("Replying to :" + workMessage.getHeader().getNodeId());
+		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
 		state.getEmon().broadcastMessage(util.createSizeIsMessage(
 			nodeId, workMessage.getHeader().getNodeId()));
 		
@@ -65,11 +66,19 @@ public class Leader implements INodeState, FollowerListener {
 	* */
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
+		System.out.println("~~~~~~~~Leader - Handle Leader Size Event");
+
+		int inComingTerm = workMessage.getLeader ().getElectionId ();
+		int currentTerm = state.getElectionId ();
+
+		System.out.println("Leader - New Term: " + inComingTerm);
+		System.out.println("Leader - Current Term: " + currentTerm);
+
 		/*
 		* If there is another node which is leader in new term, then I update myself and go back to election state
 		* */
-		if (workMessage.getLeader().getElectionId() >= state.getElectionId()) {
-			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
+		if (inComingTerm >= currentTerm) {
+			System.out.println("LEADER IS: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(workMessage.getLeader().getElectionId());
 			state.setLeaderId(workMessage.getLeader().getLeaderId());
 			state.setState(NodeStateEnum.FOLLOWER);
@@ -90,7 +99,15 @@ public class Leader implements INodeState, FollowerListener {
 	* */
 	@Override
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
-		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
+		System.out.println("~~~~~~~~Leader - Handle Vote Request Event");
+
+		int inComingTerm = workMessage.getLeader ().getElectionId ();
+		int currentTerm = state.getElectionId ();
+
+		System.out.println("Leader - New Term: " + inComingTerm);
+		System.out.println("Leader - Current Term: " + currentTerm);
+
+		if (inComingTerm > currentTerm) {
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			VoteMessage vote = new VoteMessage(nodeId,
 					workMessage.getLeader().getElectionId(),
@@ -120,16 +137,21 @@ public class Leader implements INodeState, FollowerListener {
 	* */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
+		System.out.println("~~~~~~~~Leader - Handle Beat Event");
 
-		int newTerm = workMessage.getLeader ().getElectionId ();
+		int inComingTerm = workMessage.getLeader ().getElectionId ();
 		int currentTerm = state.getElectionId ();
 
-		if(newTerm > currentTerm)   {
+		System.out.println("Leader - New Term: " + inComingTerm);
+		System.out.println("Leader - Current Term: " + currentTerm);
+
+		if(inComingTerm > currentTerm)   {
+			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 			state.setState (NodeStateEnum.FOLLOWER);
 			return;
 		}
 
-		if(newTerm == currentTerm)   {
+		if(inComingTerm == currentTerm)   {
 			state.setState (NodeStateEnum.CANDIDATE);
 			return;
 		}
@@ -142,21 +164,25 @@ public class Leader implements INodeState, FollowerListener {
 	/* Release all the resources. In this case it is only followerMonitor */
 	@Override
 	public void beforeStateChange() {
+		System.out.println("~~~~~~~~Leader - Handle Before State Change Event");
 		followerMonitor.cancel ();
 	}
 
 	@Override
 	public void afterStateChange() {
+		System.out.println("~~~~~~~~Leader - Handle After State Change Event");
 		followerMonitor.start();
 	}
 
 	@Override
 	public void addFollower(int followerId) {
-			activeNodes.put(followerId, theObject);
+		System.out.println("~~~~~~~~Leader - Follower Added");
+		activeNodes.put(followerId, theObject);
 	}
 
 	@Override
 	public void removeFollower(int followerId) {
-			activeNodes.remove(followerId);
+		System.out.println("~~~~~~~~Leader - Handle Remove Follower");
+		activeNodes.remove(followerId);
 	}
 }

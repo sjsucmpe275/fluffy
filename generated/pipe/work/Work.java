@@ -515,48 +515,6 @@ public final class Work {
      * <code>required .WorkState state = 1;</code>
      */
     pipe.work.Work.WorkStateOrBuilder getStateOrBuilder();
-
-    /**
-     * <code>optional bool isLeader = 2;</code>
-     *
-     * <pre>
-     * This parameter will be set to true only by leader.
-     * </pre>
-     */
-    boolean hasIsLeader();
-    /**
-     * <code>optional bool isLeader = 2;</code>
-     *
-     * <pre>
-     * This parameter will be set to true only by leader.
-     * </pre>
-     */
-    boolean getIsLeader();
-
-    /**
-     * <code>repeated int32 path = 3;</code>
-     *
-     * <pre>
-     * This will be the list which contains path from current node to leader
-     * </pre>
-     */
-    java.util.List<java.lang.Integer> getPathList();
-    /**
-     * <code>repeated int32 path = 3;</code>
-     *
-     * <pre>
-     * This will be the list which contains path from current node to leader
-     * </pre>
-     */
-    int getPathCount();
-    /**
-     * <code>repeated int32 path = 3;</code>
-     *
-     * <pre>
-     * This will be the list which contains path from current node to leader
-     * </pre>
-     */
-    int getPath(int index);
   }
   /**
    * Protobuf type {@code Heartbeat}
@@ -623,32 +581,6 @@ public final class Work {
               bitField0_ |= 0x00000001;
               break;
             }
-            case 16: {
-              bitField0_ |= 0x00000002;
-              isLeader_ = input.readBool();
-              break;
-            }
-            case 24: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                path_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              path_.add(input.readInt32());
-              break;
-            }
-            case 26: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
-                path_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000004;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                path_.add(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
           }
         }
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
@@ -657,9 +589,6 @@ public final class Work {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-          path_ = java.util.Collections.unmodifiableList(path_);
-        }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
       }
@@ -713,67 +642,8 @@ public final class Work {
       return state_;
     }
 
-    public static final int ISLEADER_FIELD_NUMBER = 2;
-    private boolean isLeader_;
-    /**
-     * <code>optional bool isLeader = 2;</code>
-     *
-     * <pre>
-     * This parameter will be set to true only by leader.
-     * </pre>
-     */
-    public boolean hasIsLeader() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional bool isLeader = 2;</code>
-     *
-     * <pre>
-     * This parameter will be set to true only by leader.
-     * </pre>
-     */
-    public boolean getIsLeader() {
-      return isLeader_;
-    }
-
-    public static final int PATH_FIELD_NUMBER = 3;
-    private java.util.List<java.lang.Integer> path_;
-    /**
-     * <code>repeated int32 path = 3;</code>
-     *
-     * <pre>
-     * This will be the list which contains path from current node to leader
-     * </pre>
-     */
-    public java.util.List<java.lang.Integer>
-        getPathList() {
-      return path_;
-    }
-    /**
-     * <code>repeated int32 path = 3;</code>
-     *
-     * <pre>
-     * This will be the list which contains path from current node to leader
-     * </pre>
-     */
-    public int getPathCount() {
-      return path_.size();
-    }
-    /**
-     * <code>repeated int32 path = 3;</code>
-     *
-     * <pre>
-     * This will be the list which contains path from current node to leader
-     * </pre>
-     */
-    public int getPath(int index) {
-      return path_.get(index);
-    }
-
     private void initFields() {
       state_ = pipe.work.Work.WorkState.getDefaultInstance();
-      isLeader_ = false;
-      path_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -799,12 +669,6 @@ public final class Work {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         output.writeMessage(1, state_);
       }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeBool(2, isLeader_);
-      }
-      for (int i = 0; i < path_.size(); i++) {
-        output.writeInt32(3, path_.get(i));
-      }
       getUnknownFields().writeTo(output);
     }
 
@@ -817,19 +681,6 @@ public final class Work {
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, state_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(2, isLeader_);
-      }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < path_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(path_.get(i));
-        }
-        size += dataSize;
-        size += 1 * getPathList().size();
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -955,10 +806,6 @@ public final class Work {
           stateBuilder_.clear();
         }
         bitField0_ = (bitField0_ & ~0x00000001);
-        isLeader_ = false;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        path_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -995,15 +842,6 @@ public final class Work {
         } else {
           result.state_ = stateBuilder_.build();
         }
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.isLeader_ = isLeader_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          path_ = java.util.Collections.unmodifiableList(path_);
-          bitField0_ = (bitField0_ & ~0x00000004);
-        }
-        result.path_ = path_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -1022,19 +860,6 @@ public final class Work {
         if (other == pipe.work.Work.Heartbeat.getDefaultInstance()) return this;
         if (other.hasState()) {
           mergeState(other.getState());
-        }
-        if (other.hasIsLeader()) {
-          setIsLeader(other.getIsLeader());
-        }
-        if (!other.path_.isEmpty()) {
-          if (path_.isEmpty()) {
-            path_ = other.path_;
-            bitField0_ = (bitField0_ & ~0x00000004);
-          } else {
-            ensurePathIsMutable();
-            path_.addAll(other.path_);
-          }
-          onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -1185,148 +1010,6 @@ public final class Work {
           state_ = null;
         }
         return stateBuilder_;
-      }
-
-      private boolean isLeader_ ;
-      /**
-       * <code>optional bool isLeader = 2;</code>
-       *
-       * <pre>
-       * This parameter will be set to true only by leader.
-       * </pre>
-       */
-      public boolean hasIsLeader() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional bool isLeader = 2;</code>
-       *
-       * <pre>
-       * This parameter will be set to true only by leader.
-       * </pre>
-       */
-      public boolean getIsLeader() {
-        return isLeader_;
-      }
-      /**
-       * <code>optional bool isLeader = 2;</code>
-       *
-       * <pre>
-       * This parameter will be set to true only by leader.
-       * </pre>
-       */
-      public Builder setIsLeader(boolean value) {
-        bitField0_ |= 0x00000002;
-        isLeader_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional bool isLeader = 2;</code>
-       *
-       * <pre>
-       * This parameter will be set to true only by leader.
-       * </pre>
-       */
-      public Builder clearIsLeader() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        isLeader_ = false;
-        onChanged();
-        return this;
-      }
-
-      private java.util.List<java.lang.Integer> path_ = java.util.Collections.emptyList();
-      private void ensurePathIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          path_ = new java.util.ArrayList<java.lang.Integer>(path_);
-          bitField0_ |= 0x00000004;
-         }
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public java.util.List<java.lang.Integer>
-          getPathList() {
-        return java.util.Collections.unmodifiableList(path_);
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public int getPathCount() {
-        return path_.size();
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public int getPath(int index) {
-        return path_.get(index);
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public Builder setPath(
-          int index, int value) {
-        ensurePathIsMutable();
-        path_.set(index, value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public Builder addPath(int value) {
-        ensurePathIsMutable();
-        path_.add(value);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public Builder addAllPath(
-          java.lang.Iterable<? extends java.lang.Integer> values) {
-        ensurePathIsMutable();
-        com.google.protobuf.AbstractMessageLite.Builder.addAll(
-            values, path_);
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>repeated int32 path = 3;</code>
-       *
-       * <pre>
-       * This will be the list which contains path from current node to leader
-       * </pre>
-       */
-      public Builder clearPath() {
-        path_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
-        onChanged();
-        return this;
       }
 
       // @@protoc_insertion_point(builder_scope:Heartbeat)
@@ -3812,16 +3495,15 @@ public final class Work {
     java.lang.String[] descriptorData = {
       "\n\nwork.proto\032\014common.proto\032\016election.pro" +
       "to\"0\n\tWorkState\022\020\n\010enqueued\030\001 \002(\005\022\021\n\tpro" +
-      "cessed\030\002 \002(\005\"F\n\tHeartbeat\022\031\n\005state\030\001 \002(\013" +
-      "2\n.WorkState\022\020\n\010isLeader\030\002 \001(\010\022\014\n\004path\030\003" +
-      " \003(\005\")\n\004Task\022\021\n\tseries_id\030\001 \002(\003\022\016\n\006seq_i" +
-      "d\030\002 \002(\005\"\333\001\n\013WorkMessage\022\027\n\006header\030\001 \002(\0132" +
-      "\007.Header\022\016\n\006secret\030\002 \002(\003\022\027\n\003err\030\003 \001(\0132\010." +
-      "FailureH\000\022\016\n\004ping\030\004 \001(\010H\000\022\032\n\004beat\030\005 \001(\0132" +
-      "\n.HeartbeatH\000\022\025\n\004task\030\006 \001(\0132\005.TaskH\000\022\033\n\005" +
-      "state\030\007 \001(\0132\n.WorkStateH\000\022\037\n\006leader\030\010 \001(",
-      "\0132\r.LeaderStatusH\000B\t\n\007payloadB\r\n\tpipe.wo" +
-      "rkH\001"
+      "cessed\030\002 \002(\005\"&\n\tHeartbeat\022\031\n\005state\030\001 \002(\013" +
+      "2\n.WorkState\")\n\004Task\022\021\n\tseries_id\030\001 \002(\003\022" +
+      "\016\n\006seq_id\030\002 \002(\005\"\333\001\n\013WorkMessage\022\027\n\006heade" +
+      "r\030\001 \002(\0132\007.Header\022\016\n\006secret\030\002 \002(\003\022\027\n\003err\030" +
+      "\003 \001(\0132\010.FailureH\000\022\016\n\004ping\030\004 \001(\010H\000\022\032\n\004bea" +
+      "t\030\005 \001(\0132\n.HeartbeatH\000\022\025\n\004task\030\006 \001(\0132\005.Ta" +
+      "skH\000\022\033\n\005state\030\007 \001(\0132\n.WorkStateH\000\022\037\n\006lea" +
+      "der\030\010 \001(\0132\r.LeaderStatusH\000B\t\n\007payloadB\r\n",
+      "\tpipe.workH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -3848,7 +3530,7 @@ public final class Work {
     internal_static_Heartbeat_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_Heartbeat_descriptor,
-        new java.lang.String[] { "State", "IsLeader", "Path", });
+        new java.lang.String[] { "State", });
     internal_static_Task_descriptor =
       getDescriptor().getMessageTypes().get(2);
     internal_static_Task_fieldAccessorTable = new
