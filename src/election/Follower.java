@@ -10,11 +10,13 @@ import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
 import io.netty.channel.Channel;
 import pipe.election.Election;
+import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
 
-public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
+public class Follower
+	implements INodeState, TimeoutListener, LeaderHealthListener {
 
 	private static final Logger logger = LoggerFactory.getLogger("Follower");
 	private static final Random random = new Random();
@@ -23,9 +25,9 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	private LeaderHealthMonitor leaderMonitor;
 	private ServerState state;
 	private EdgeMonitor edgeMonitor;
-	//private ConcurrentHashMap<Integer, Object> visitedNodesMap;
-	private ElectionUtil util;
 	private int nodeId;
+	// private ConcurrentHashMap<Integer, Object> visitedNodesMap;
+	private ElectionUtil util;
 
 	public Follower(ServerState serverState) {
 		this.state = serverState;
@@ -44,6 +46,26 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	private int getElectionTimeout() {
 		return state.getConf().getElectionTimeout() + 150 + random.nextInt(150);
+	}
+
+	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+		
+		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
+			
+			if (wrkMessage.getHeader().getDestination() == nodeId) {
+				System.out.println("Carrying out command:" + wrkMessage
+					.getTask().getTaskMessage().getQuery().getKey());
+				Task.Builder t = Task.newBuilder();
+				t.setSeqId(wrkMessage.getTask().getTaskMessage().getQuery()
+					.getSequenceNo());
+				t.setSeriesId(wrkMessage.getTask().getTaskMessage().getQuery()
+					.getKey().hashCode());
+				t.setTaskMessage(wrkMessage.getTask().getTaskMessage());
+				state.getTasks().addTask(t.build());
+			}
+		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+
+		}
 	}
 
 	@Override

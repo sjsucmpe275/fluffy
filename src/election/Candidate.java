@@ -8,10 +8,14 @@ import org.slf4j.LoggerFactory;
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election.LeaderStatus;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
 	private final Logger logger = LoggerFactory.getLogger("Candidate");
@@ -66,6 +70,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
+	//	validateTermAndUpdateStateIfRequired (workMessage);
 		System.out.println("~~~~~~~~Candidate - Handle LeaderIs Event");
 
 		int inComingTerm = workMessage.getLeader().getElectionId();
@@ -255,5 +260,11 @@ public class Candidate implements INodeState, TimeoutListener {
 		sizeOfCluster = 0;
 		requiredVotes = 0;
 		visitedNodes.clear();
+	}
+
+	@Override
+	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
+		// TODO Auto-generated method stub
+		
 	}
 }

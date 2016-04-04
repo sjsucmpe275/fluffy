@@ -31,6 +31,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
 
@@ -218,4 +219,5 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 		}
 		
 	}
+
 }
