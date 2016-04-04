@@ -1,18 +1,17 @@
 package election;
 
-import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.Random;
 
 public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
 
@@ -51,7 +50,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
 
-		state.getEmon ().broadcastMessage(util.createSizeIsMessage(state.getConf ().getNodeId (),
+		state.getEmon ().broadcastMessage(util.createSizeIsMessage(state,
 				workMessage.getHeader().getNodeId()));
 	}
 
@@ -105,19 +104,21 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
 
-			VoteMessage vote = new VoteMessage(state.getConf ().getNodeId (),
+			VoteResponse vote = new VoteResponse (state.getConf ().getNodeId (),
 				workMessage.getLeader().getElectionId(),
 				workMessage.getLeader().getLeaderId());
 
 			//Forward to the destination node who requested for the vote..
 			vote.setDestination (workMessage.getHeader ().getNodeId ());
+			vote.setMaxHops (state.getConf ().getMaxHops ());
+
 			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 
 			//Reply to the person who sent request
 			channel.writeAndFlush (vote.getMessage ());
 
 			// Broadcast the message to outbound edges.
-			// Because if my in bound edge is down, I am trying to reach my candidate in different path..
+			// Because if my in bound edge is down, I am trying to reach my candidate in different path - saying I have voted for him
 			state.getEmon().broadCastOutBound (vote.getMessage());
 			state.setVotedFor (workMessage.getHeader ().getNodeId ());
 
@@ -177,11 +178,15 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 			LeaderStatusMessage leaderBeatResponse = new LeaderStatusMessage (state.getConf ().getNodeId ());
 			leaderBeatResponse.setLeaderId (newLeaderId);
 			leaderBeatResponse.setDestination (newLeaderId);
+			leaderBeatResponse.setMaxHops (state.getConf ().getMaxHops ());
 			leaderBeatResponse.setLeaderAction (Election.LeaderStatus.LeaderQuery.BEAT);
 			leaderBeatResponse.setLeaderState (Election.LeaderStatus.LeaderState.LEADERALIVE);
 
 			//Write it back to the channel from where I received it...
 			channel.writeAndFlush (leaderBeatResponse.getMessage ());
+
+			//Also update other nodes in outbound about the leader heart beat..
+			state.getEmon ().broadCastOutBound (leaderBeatResponse.getMessage ());
 
 			return;
 		}
@@ -208,11 +213,15 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 			LeaderStatusMessage leaderBeatResponse = new LeaderStatusMessage (state.getConf ().getNodeId ());
 			leaderBeatResponse.setLeaderId (newLeaderId);
 			leaderBeatResponse.setDestination (newLeaderId);
+			leaderBeatResponse.setMaxHops (state.getConf ().getMaxHops ());
 			leaderBeatResponse.setLeaderAction (Election.LeaderStatus.LeaderQuery.BEAT);
 			leaderBeatResponse.setLeaderState (Election.LeaderStatus.LeaderState.LEADERALIVE);
 
 			//Write it back to the channel from where I received it...
 			channel.writeAndFlush (leaderBeatResponse.getMessage ());
+
+			//Also update other nodes in outbound about the leader heart beat..
+			state.getEmon ().broadCastOutBound (leaderBeatResponse.getMessage ());
 
 			return;
 		}

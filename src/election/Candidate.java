@@ -1,17 +1,16 @@
 package election;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election.LeaderStatus;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
 	private final Logger logger = LoggerFactory.getLogger("Candidate");
@@ -40,7 +39,7 @@ public class Candidate implements INodeState, TimeoutListener {
 		System.out.println("~~~~~~~~Candidate - Handle Cluster Size Event");
 
 		state.getEmon().broadcastMessage(util.createSizeIsMessage(
-				nodeId, workMessage.getHeader().getNodeId()));
+				state, workMessage.getHeader().getNodeId()));
 
 		/*channel.writeAndFlush(util.createSizeIsMessage(nodeId,
 			workMessage.getHeader().getNodeId()));
@@ -91,11 +90,12 @@ public class Candidate implements INodeState, TimeoutListener {
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 		System.out.println("~~~~~~~~~~~Candidate - Handle Vote Request Event");
 		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
-			VoteMessage vote = new VoteMessage(nodeId,
+			VoteResponse vote = new VoteResponse (nodeId,
 					workMessage.getLeader().getElectionId(),
 					workMessage.getLeader().getLeaderId());
-			vote.setDestination (workMessage.getHeader ().getNodeId ());
 
+			vote.setDestination (workMessage.getHeader ().getNodeId ());
+			vote.setMaxHops (state.getConf ().getMaxHops ());
 			//Update the term Id I participated in
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
@@ -226,10 +226,11 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-						nodeId, destinationId));
+						state, destinationId));
 			}
 		}
 
+		//Broadcast on each in-bound edge
 		edgeMap = state.getEmon()
 				.getInboundEdges().getEdgesMap();
 
@@ -238,7 +239,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-						nodeId, destinationId));
+						state, destinationId));
 			}
 		}
 

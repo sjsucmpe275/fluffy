@@ -8,7 +8,7 @@ import pipe.work.Work;
  * @author: codepenman.
  * @date: 4/2/16
  */
-public class VoteMessage {
+public class VoteResponse {
 
 	private Work.WorkState.Builder workState;
 	private Election.LeaderStatus.LeaderState leaderState;
@@ -20,7 +20,7 @@ public class VoteMessage {
 	private int secret = 1;
 	private int electionId;
 
-	public VoteMessage(int nodeId, int electionId, int VoteFor) {
+	public VoteResponse(int nodeId, int electionId, int VoteFor) {
 		this.nodeId = nodeId;
 		workState = Work.WorkState.newBuilder();
 		workState.setEnqueued(-1);
