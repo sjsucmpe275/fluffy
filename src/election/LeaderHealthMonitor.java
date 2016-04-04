@@ -42,6 +42,7 @@ public class LeaderHealthMonitor {
 		if(stop.get ()) {
 			stop.getAndSet(true);
 			task.interrupt ();
+			System.out.println("~~~~~~~~Follower - Cancelled Leader Monitor");
 		}
 	}
 
@@ -62,10 +63,11 @@ public class LeaderHealthMonitor {
 			try {
 				while (!stop.get()) {
 					if (debug)
-						logger.info("********Started: " + new Date(System.currentTimeMillis()));
+						System.out.println("********Started: " + new Date(System.currentTimeMillis()));
 
 					long currentTime = System.currentTimeMillis();
 
+					System.out.println("*****Last heart beat received from Leader: " + (currentTime - beatTime.get()));
 					if ((currentTime - beatTime.get()) > timeout) {
 						healthListener.onLeaderBadHealth();
 						break;
@@ -75,7 +77,7 @@ public class LeaderHealthMonitor {
 					}
 				}
 			} catch (InterruptedException e) {
-				logger.info("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
+				System.out.println("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
 			}
 		}
 	}

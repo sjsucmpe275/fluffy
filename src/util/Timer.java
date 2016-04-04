@@ -3,8 +3,6 @@ package util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
-
 /*
 * Gets a request to start election timer.
 * Know about the owner(person who starts it) of timer.
@@ -16,39 +14,47 @@ public class Timer {
 
 	private static final Logger logger = LoggerFactory.getLogger ("Timer");
 	private static final boolean debug = true;
+	private final String identifier;
 	private long timeout;
 	private TimeoutListener listener;
 	private TimerThread timerThread;
 	//private AtomicBoolean stop;
 	private Object lock;
 
-	public Timer(TimeoutListener listener, long timeout) {
+	public Timer(TimeoutListener listener, long timeout, String identifier) {
 		this.listener = listener;
 		this.timeout = timeout;
-		this.lock = new Object();
-		//stop = new AtomicBoolean (false);
-		timerThread = new TimerThread ();
+		this.identifier = identifier;
 	}
 
-	public void startTimer()   {
+	public void start()   {
 		if(debug)
-			logger.info ("********Request to start timer: " + new Date (System.currentTimeMillis ()));
+			System.out.println ("******** " + identifier+ ", Request to start timer: " + Thread.currentThread ().getName ());
+
+		timerThread = new TimerThread ();
 		timerThread.start ();
 	}
 
-	public void resetTimer(TimeoutListener listener, long timeout)    {
+	public void start(long timeout) {
 		this.timeout = timeout;
+		start ();
+	}
+
+	public void start(TimeoutListener listener, long timeout) {
 		this.listener = listener;
-		timerThread.interrupt ();
-		//stop.getAndSet (false);
-		timerThread.run ();
+		this.timeout = timeout;
+		start ();
 	}
 
 	public void cancel()    {
+		if(timerThread == null) {
+			return;
+		}
 		if(debug)
-			logger.info ("********Request to cancel timer: " + new Date (System.currentTimeMillis ()));
-		//stop.getAndSet (true);
+			System.out.println ("********" + identifier + ", Request to cancel timer: " + Thread.currentThread ().getName ());
+
 		timerThread.interrupt ();
+		timerThread = null;
 	}
 
 	private class TimerThread extends Thread{
@@ -57,19 +63,19 @@ public class Timer {
 		public void run(){
 			try {
 				if(debug)
-					logger.info ("********Timer started: " + new Date (System.currentTimeMillis ()));
+					System.out.println ("********Timer started: " + Thread.currentThread ().getName ());
 
 				synchronized (this) {
 					wait(timeout);
 				}
 
 				if(debug)
-					logger.info ("********Timed out: " + new Date (System.currentTimeMillis ()));
+					System.out.println ("********Timed out: " + Thread.currentThread ().getName ());
 
 				listener.notifyTimeout ();
 
 			} catch (InterruptedException e) {
-				logger.info ("********Timer was interrupted: " + new Date (System.currentTimeMillis ()));
+				System.out.println ("********Timer was interrupted: " + Thread.currentThread ().getName ());
 			}
 		}
 	}

@@ -30,6 +30,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
 
 import java.util.Timer;
@@ -147,6 +148,14 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	}
 	
 	public void broadcastMessage(WorkMessage msg) {
+		if(msg.hasLeader () && msg.getLeader ().getAction () == Election.LeaderStatus.LeaderQuery.THELEADERIS)  {
+			int termIdBroadCasting = msg.getLeader ().getElectionId ();
+			int leaderIdBroadCasting = msg.getLeader ().getLeaderId ();
+
+			System.out.println("Edge Monitor - Term: " + termIdBroadCasting + ", " + Thread.currentThread ().getName ());
+			System.out.println("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
+		}
+
 		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
@@ -180,7 +189,7 @@ public class EdgeMonitor implements EdgeListener, Runnable {
 	}
 
 	public long getDelayTime() {
-		return 10000;
+		return dt;
 	}
 
 	public Logger getLogger()  {

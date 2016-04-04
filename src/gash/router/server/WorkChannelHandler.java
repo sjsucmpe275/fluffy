@@ -102,6 +102,9 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			if (msg.getHeader().getDestination() == -1) {
 				if (msg.getHeader().getMaxHops() > 0) {
 					broadcast(msg);
+				}else {
+					getLogger().info("MAX HOPS is Zero! Dropping message...");
+					return;
 				}
 			} else {
 				if (msg.getHeader().getMaxHops() > 0) {
@@ -136,6 +139,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		} catch (Exception e) {
 			// TODO add logging
 			getLogger ().info ("Got an exception in work");
+			e.printStackTrace ();
 			FailureMessage failureMessage = new FailureMessage (msg, e);
 			failureMessage.setNodeId (state.getConf ().getNodeId ());
 			channel.write(failureMessage.getWorkMessage ());
@@ -172,7 +176,6 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
-		throw new Exception (cause);
 	}
 
 	public ServerState getServerState() {

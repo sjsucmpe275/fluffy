@@ -36,7 +36,6 @@ public class ElectionMessageHandler implements IWrkMessageHandler {
 
 	@Override
 	public void setNextHandler(IWrkMessageHandler nextHandler) {
-
 		this.nextHandler = nextHandler;
 	}
 }
