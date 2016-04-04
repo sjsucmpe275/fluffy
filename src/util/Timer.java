@@ -1,7 +1,5 @@
 package util;
 
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,27 +14,45 @@ public class Timer {
 
 	private static final Logger logger = LoggerFactory.getLogger ("Timer");
 	private static final boolean debug = true;
-	private final long timeout;
+	private final String identifier;
+	private long timeout;
 	private TimeoutListener listener;
 	private TimerThread timerThread;
+	//private AtomicBoolean stop;
 	private Object lock;
 
-	public Timer(TimeoutListener listener, long timeout) {
+	public Timer(TimeoutListener listener, long timeout, String identifier) {
 		this.listener = listener;
 		this.timeout = timeout;
-		this.lock = new Object();
-		timerThread = new TimerThread ();
+		this.identifier = identifier;
 	}
 
-	public void startTimer()   {
+	public void start()   {
 		if(debug)
-			logger.info ("********Request to start timer: " + new Date (System.currentTimeMillis ()));
+			System.out.println ("******** " + identifier+ ", Request to start timer: " + Thread.currentThread ().getName ());
+
+		timerThread = new TimerThread ();
 		timerThread.start ();
 	}
 
+	public void start(long timeout) {
+		this.timeout = timeout;
+		start ();
+	}
+
+	public void start(TimeoutListener listener, long timeout) {
+		this.listener = listener;
+		this.timeout = timeout;
+		start ();
+	}
+
 	public void cancel()    {
+		if(timerThread == null) {
+			return;
+		}
 		if(debug)
-			logger.info ("********Request to cancel timer: " + new Date (System.currentTimeMillis ()));
+			System.out.println ("********" + identifier + ", Request to cancel timer: " + Thread.currentThread ().getName ());
+
 		timerThread.interrupt ();
 	}
 
@@ -46,15 +62,19 @@ public class Timer {
 		public void run(){
 			try {
 				if(debug)
-					logger.info ("********Timer started: " + new Date (System.currentTimeMillis ()));
-				synchronized (lock) {
-					lock.wait(timeout);
+					System.out.println ("********Timer started: " + Thread.currentThread ().getName ());
+
+				synchronized (this) {
+					wait(timeout);
 				}
+
 				if(debug)
-					logger.info ("********Timed out: " + new Date (System.currentTimeMillis ()));
+					System.out.println ("********Timed out: " + Thread.currentThread ().getName ());
+
 				listener.notifyTimeout ();
+
 			} catch (InterruptedException e) {
-				logger.info ("********Timer was interrupted: " + new Date (System.currentTimeMillis ()));
+				System.out.println ("********Timer was interrupted: " + Thread.currentThread ().getName ());
 			}
 		}
 	}

@@ -1,12 +1,18 @@
 package gash.router.server;
 
-import election.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+import election.Candidate;
+import election.Follower;
+import election.INodeState;
+import election.Leader;
+import election.NodeStateEnum;
+import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
-import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.edges.AdaptorEdgeMonitor;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
-import gash.router.container.Observer;
 
 public class ServerState implements Observer{
 	private final RoutingConf conf;
@@ -17,17 +23,21 @@ public class ServerState implements Observer{
 	private INodeState candidate;
 	private INodeState follower;
 	private INodeState currentState;
-	private int leaderId;
-	private int electionId;// termId
+	private AtomicInteger leaderId;
+	private AtomicLong leaderHeartBeatdt;
+	private AtomicInteger electionId;   // termId
+	private AtomicInteger votedFor;
 
 	public ServerState(RoutingConf conf) {
 		this.conf = conf;
-		this.leader = new Leader(this);
-		this.candidate = new Candidate(this);
-		this.follower = new Follower(this);
-		this.currentState = follower;
-		this.leaderId = -1;
-		this.electionId = 0;
+		leader = new Leader(this);
+		candidate = new Candidate(this);
+		follower = new Follower(this);
+		currentState = follower;
+		leaderId = new AtomicInteger (-1);
+		leaderHeartBeatdt = new AtomicLong (Long.MAX_VALUE); // To ensure that I will wait for heart beat timeout
+		electionId = new AtomicInteger (0);
+		votedFor = new AtomicInteger (-1);
 	}
 
 	public RoutingConf getConf() {
@@ -50,19 +60,21 @@ public class ServerState implements Observer{
 	}
 
 	public void setState(NodeStateEnum state) {
-		currentState.beforeStateChange();
+		synchronized (this) {
+			currentState.beforeStateChange();
 
-		if (state == NodeStateEnum.CANDIDATE) {
-			currentState = candidate;
-		}
-		if (state == NodeStateEnum.FOLLOWER) {
-			currentState = follower;
-		}
-		if (state == NodeStateEnum.LEADER) {
-			currentState = leader;
-		}
+			if (state == NodeStateEnum.CANDIDATE) {
+				currentState = candidate;
+			}
+			if (state == NodeStateEnum.FOLLOWER) {
+				currentState = follower;
+			}
+			if (state == NodeStateEnum.LEADER) {
+				currentState = leader;
+			}
 
-		currentState.afterStateChange();
+			currentState.afterStateChange();
+		}
 	}
 
 	public void setTasks(TaskList tasks) {
@@ -74,21 +86,41 @@ public class ServerState implements Observer{
 	}
 
 	public int getLeaderId() {
-		return leaderId;
+		return leaderId.get ();
 	}
 
 	public void setLeaderId(int leaderId) {
-		this.leaderId = leaderId;
+		this.leaderId.getAndSet (leaderId);
+	}
+
+	public void setVotedFor(int votedFor)   {
+		this.votedFor.getAndSet (votedFor);
+	}
+
+	public int getVotedFor()   {
+		return votedFor.get ();
 	}
 
 	public int getElectionId() {
-		return electionId;
+		System.out.println("------------------- Fetching Election Id ----------------- " + electionId.get () + " Thread: " + Thread.currentThread ().getName ());
+		//new Exception().printStackTrace ();
+		return electionId.get ();
 	}
 
 	public void setElectionId(int electionId) {
-		this.electionId = electionId;
+		System.out.println("------------------- Election Id Updated ----------------- " + electionId  + " Thread: " + Thread.currentThread ().getName ());
+		//new Exception().printStackTrace ();
+		this.electionId.getAndSet (electionId);
+	}
+	public long getLeaderHeartBeatdt() {
+		System.out.println("------------------- Fetching Leader Heart Beat ----------------- " + leaderHeartBeatdt.get ()  + " Thread: " + Thread.currentThread ().getName ());
+		return leaderHeartBeatdt.get ();
 	}
 
+	public void setLeaderHeartBeatdt(long leaderHeartBeatdt) {
+		System.out.println("------------------- Leader Heart Beat Updated ----------------- " + leaderHeartBeatdt  + " Thread: " + Thread.currentThread ().getName ());
+		this.leaderHeartBeatdt.getAndSet (leaderHeartBeatdt);
+	}
 	@Override
 	public void onFileChanged(RoutingConf configuration) {
 		System.out.println("in server state");
@@ -102,11 +134,10 @@ public class ServerState implements Observer{
 			for(int i=0;i<configuration.routing.size();i++){
 				this.conf.routing.add(configuration.routing.get(i));
 			}
-			for(int i=0;i<configuration.adaptorRouting.size();i++){
-				this.conf.adaptorRouting.add(configuration.adaptorRouting.get(i));
+
+			for(int j=0;j<configuration.adaptorRouting.size();j++){
+				this.conf.adaptorRouting.add(configuration.adaptorRouting.get(j));
 			}
 			
 		}
-		
-	
 }

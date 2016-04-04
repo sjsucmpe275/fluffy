@@ -28,12 +28,9 @@ public class WorkerThread extends Thread {
 				ch = mcc.connect();
 			} catch (Exception e) {
 				System.out.println("Client is not available! Try again later...");
-				System.exit(0);
-				;
 			}
 			if (ch == null || !ch.isOpen() || !ch.isActive()) {
 				System.out.println("connection missing, no outbound communication");
-				return;
 			}
 			ClusterMonitor.Builder cm = ClusterMonitor.newBuilder();
 			cm.setClusterId(1); //TODO add secret in conf file and update this code to state.getConf().getSecret()
@@ -45,13 +42,13 @@ public class WorkerThread extends Thread {
 			cm.setTick(tick++);
 			cm.build();
 
-			if (ch.isActive() && ch.isWritable()) {
+			if (ch != null && ch.isActive() && ch.isWritable()) {
 				mcc.write(cm.build());
 			} else {
 				System.out.println("Channel not writable");
 			}
 			try {
-				sleep(3);
+				sleep(3000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

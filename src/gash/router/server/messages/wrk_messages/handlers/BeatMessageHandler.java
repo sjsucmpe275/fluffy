@@ -6,8 +6,6 @@ import gash.router.server.edges.EdgeList;
 import gash.router.server.messages.wrk_messages.BeatMessage;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
-
-import election.Candidate;
 import pipe.work.Work.WorkMessage;
 
 /**
@@ -50,11 +48,6 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 			logger.info("Destination is: " + workMessage.getHeader().getDestination());
 		}
 
-		if (workMessage.getBeat().hasIsLeader() && workMessage.getBeat().getIsLeader()) {
-			state.getCurrentState().handleBeat(workMessage, channel);
-			return;
-		}
-
 		/*
 		 * Update out-bound edges with time when heart beat was received as a
 		 * reply sent. I consider heart beat as a reply when source node is in
@@ -87,10 +80,6 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 		BeatMessage beatMessage = new BeatMessage(state.getConf().getNodeId());
 		beatMessage.setDestination(workMessage.getHeader().getNodeId());
 
-		// todo:Harish This piece of code should be removed
-		if (state.getCurrentState() instanceof Candidate) {
-			((Candidate) state.getCurrentState()).getClusterSize();
-		}
 		channel.writeAndFlush(beatMessage.getMessage());
 	}
 

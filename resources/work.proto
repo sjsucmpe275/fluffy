@@ -5,6 +5,7 @@ option java_package = "pipe.work";
 import "common.proto";
 import "election.proto";
 import "pipe.proto";
+
 message WorkState {
    required int32 enqueued = 1;
    required int32 processed = 2;
@@ -12,8 +13,6 @@ message WorkState {
 
 message Heartbeat {
    required WorkState state = 1;
-   optional bool isLeader = 2; // This parameter will be set to true only by leader.
-   repeated int32 path = 3; // This will be the list which contains path from current node to leader
 }
 
 /**

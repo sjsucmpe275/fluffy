@@ -101,7 +101,7 @@ public class MonitoringTask implements Subject {
 				while (!isStopped()) {
 					WatchKey key;
 					try {
-						key = watcher.poll(1, TimeUnit.MILLISECONDS);
+						key = watcher.poll(200, TimeUnit.MILLISECONDS);
 					} catch (InterruptedException e) {
 						return;
 					}

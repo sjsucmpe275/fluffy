@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 
-
 /**
  * @author: codepenman
  * @date: 28/03/2016
@@ -24,12 +23,12 @@ public class TaskMessageHandler implements IWrkMessageHandler {
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if(workMessage.hasTask ())  {
+		if (workMessage.hasTask()) {
 			handle(workMessage, channel);
-		}else   {
-			if(nextHandler != null) {
-				nextHandler.handleMessage (workMessage, channel);
-			}else   {
+		} else {
+			if (nextHandler != null) {
+				nextHandler.handleMessage(workMessage, channel);
+			} else {
 				System.out.println("*****No Handler available*****");
 			}
 		}
@@ -37,6 +36,7 @@ public class TaskMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 		Task t = workMessage.getTask();
+		state.getCurrentState().handleCmdQuery(workMessage, channel);
 	}
 
 	@Override

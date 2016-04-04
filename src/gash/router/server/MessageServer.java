@@ -1,30 +1,31 @@
 package gash.router.server;
 
-import gash.router.container.RoutingConf;
-import gash.router.server.edges.AdaptorEdgeMonitor;
-import gash.router.server.edges.EdgeMonitor;
-import gash.router.server.tasks.NoOpBalancer;
-import gash.router.server.tasks.TaskList;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import gash.router.container.MonitoringTask;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import deven.monitor.client.WorkerThread;
-import election.NodeStateEnum;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.HashMap;
-
-import javax.management.monitor.Monitor;
+import gash.router.container.MonitoringTask;
+import gash.router.container.RoutingConf;
+import gash.router.server.edges.AdaptorEdgeMonitor;
+import gash.router.server.edges.EdgeMonitor;
+import gash.router.server.tasks.NoOpBalancer;
+import gash.router.server.tasks.TaskList;
+import gash.router.server.tasks.TaskWorker;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 public class MessageServer {
 	protected static Logger logger = LoggerFactory.getLogger("server");
@@ -203,9 +204,17 @@ public class MessageServer {
 			monitor.registerObserver(emon);
 			Thread t = new Thread(emon);
 			t.start();
-			
+
 			monitorThread = new WorkerThread("localhost", 5000, state);
 			monitorThread.start();
+
+			int workerCount = 4;
+			ExecutorService executors = Executors.newFixedThreadPool(workerCount);
+			for(int i = 0; i < workerCount; i++) {
+				TaskWorker taskWorker = new TaskWorker(state);
+				executors.execute(taskWorker);
+			}
+			executors.shutdown();	
 		}
 
 		public void run() {
