@@ -167,7 +167,7 @@ public class TaskWorker extends Thread {
 					dbHandler.put(key, 0, mb.build().toByteArray());
 				}
 
-				logger.info("Data saved at: ", key);
+				System.out.println("Data saved at: " + key);
 
 				rb.setAction(query.getAction());
 				rb.setKey(key);
@@ -201,8 +201,10 @@ public class TaskWorker extends Thread {
 			}
 
 			// Send reply to the leader
-			Task.Builder returnTask = Task.newBuilder(task);
+			Task.Builder returnTask = Task.newBuilder();
 			returnTask.setTaskMessage(cb);
+			returnTask.setSeqId(task.getSeqId());
+			returnTask.setSeriesId(task.getSeriesId());
 			state.getEmon().broadcastMessage(wrapMessage(task));
 		}
 	}

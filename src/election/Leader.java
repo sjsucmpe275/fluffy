@@ -31,6 +31,7 @@ public class Leader implements INodeState, FollowerListener {
 		this.state = state;
 		this.nodeId = state.getConf().getNodeId();
 		this.activeNodes = new ConcurrentHashMap<> ();
+		
 		followerMonitor = new FollowerHealthMonitor(this, state,
 				state.getConf().getElectionTimeout());
 		this.util = new ElectionUtil();
@@ -46,24 +47,70 @@ public class Leader implements INodeState, FollowerListener {
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+		
 		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
+
 			List<Integer> activeNodeIds = new ArrayList<>();
 			for (Integer i : activeNodes.keySet()) {
 				activeNodeIds.add(i);
 			}
+//			activeNodeIds.add(wrkMessage.getHeader().getDestination());
+			state.getTasks().addTask(wrkMessage.getTask());
+			switch (wrkMessage.getTask().getTaskMessage().getQuery()
+				.getAction()) {
+			case GET:
+				System.out.println("Do Things");
+				break;
+			case STORE:
+				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				System.out.println(wrkMessage);
+				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				List<Integer> replicationNodes = strategy
+					.getNodeIds(activeNodeIds);
+				for (Integer destinationId : replicationNodes) {
+					WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
+					Header.Builder hb = Header
+						.newBuilder(wrkMessage.getHeader());
+					hb.setNodeId(nodeId);
+					hb.setDestination(destinationId);
+					wb.setHeader(hb);
+					wb.setSecret(1);
+					state.getEmon().broadcastMessage(wb.build());
+				}
+				break;
+			case DELETE:
+				break;
+			case UPDATE:
+				break;
+			default:
+				break;
+			}
 
-			List<Integer> replicationNodes = strategy
-				.getNodeIds(new ArrayList<>());
-			for (Integer destinationId : replicationNodes) {
+		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+			switch (wrkMessage.getTask().getTaskMessage().getQuery()
+				.getAction()) {
+			case GET:
+				System.out.println("Do Things");
+				break;
+			case STORE:
+				System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+				System.out.println(wrkMessage);
+				System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
-				Header.Builder hb = Header.newBuilder(wrkMessage.getHeader());
-				hb.setDestination(destinationId);
+				Header.Builder hb = Header
+					.newBuilder(wrkMessage.getHeader());
+				hb.setDestination(-1);
 				wb.setHeader(hb);
 				wb.setSecret(1);
 				state.getEmon().broadcastMessage(wb.build());
+				break;
+			case DELETE:
+				break;
+			case UPDATE:
+				break;
+			default:
+				break;
 			}
-		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
-
 		}
 	}
 

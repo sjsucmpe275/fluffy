@@ -73,7 +73,7 @@ message Metadata {
 message Query {
 	
 	// Action to be performed
-	required Action action = 5;
+	optional Action action = 5;
 	
 	// Key to store; optional 
 	optional string key = 6;
@@ -100,7 +100,7 @@ message Query {
 message Response {
 
 	// Action for which response is being sent
-	required Action action = 10;
+	optional Action action = 10;
 	
 	// Was that action successful?
 	optional bool success = 11;

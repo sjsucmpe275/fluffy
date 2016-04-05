@@ -49,7 +49,6 @@ public class Follower
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
-		
 		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
 			
 			if (wrkMessage.getHeader().getDestination() == nodeId) {

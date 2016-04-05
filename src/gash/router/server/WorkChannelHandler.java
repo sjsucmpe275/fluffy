@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
 
 import java.net.InetSocketAddress;
 
@@ -40,6 +41,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	private ServerState state;
 	private boolean debug = true;
 	private IWrkMessageHandler wrkMessageHandler;
+	private Channel commandChannel;
 
 	public WorkChannelHandler(ServerState state) {
 		if (state != null) {
@@ -87,6 +89,9 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		if (debug)
 			PrintUtil.printWork(msg);
 
+		if(msg.getHeader().getNodeId()==-1){
+			commandChannel=channel;
+		}
 /*
 		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
 		logger.info ("Destination is: " + msg.getHeader ().getDestination ());
@@ -102,9 +107,15 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			if (msg.getHeader().getDestination() == -1) {
 				if (msg.getHeader().getMaxHops() > 0) {
 					if(msg.hasTask()){
+						if(msg.getTask().getTaskMessage().hasResponse()){
+							CommandMessage.Builder cb = CommandMessage.newBuilder(msg.getTask().getTaskMessage());
+							commandChannel.writeAndFlush(cb.build());
+							return;
+						}
 						WorkMessage.Builder wb=WorkMessage.newBuilder(msg);
 						Header.Builder hb = Header.newBuilder(msg.getHeader()); 
-						hb.setDestination(5);
+						hb.setDestination(state.getLeaderId());
+						hb.setNodeId(state.getConf().getNodeId());
 						wb.setHeader(hb);
 						msg=wb.build();
 					}
@@ -134,17 +145,18 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
 
-			/*
-			* Create in-bound edge's if it is not created/if it was removed when connection was down.
-			* */
-			InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress ();
-//			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
-//			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
-
-			getServerState ().getEmon ().createInboundIfNew (msg.getHeader ().getNodeId (),
-					socketAddress.getHostName (),
-					socketAddress.getPort (),
-					channel);
+			if (msg.getHeader().getNodeId()!=-1) {
+				/*
+						* Create in-bound edge's if it is not created/if it was removed when connection was down.
+						* */
+				InetSocketAddress socketAddress = (InetSocketAddress) channel
+					.remoteAddress();
+				//			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
+				//			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
+				getServerState().getEmon().createInboundIfNew(
+					msg.getHeader().getNodeId(), socketAddress.getHostName(),
+					socketAddress.getPort(), channel);
+			}
 		} catch (Exception e) {
 			// TODO add logging
 			getLogger ().info ("Got an exception in work");
