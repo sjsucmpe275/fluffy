@@ -31,7 +31,6 @@ public class Leader implements INodeState, FollowerListener {
 		this.state = state;
 		this.nodeId = state.getConf().getNodeId();
 		this.activeNodes = new ConcurrentHashMap<> ();
-		
 		followerMonitor = new FollowerHealthMonitor(this, state,
 				state.getConf().getElectionTimeout());
 		this.util = new ElectionUtil();
@@ -111,6 +110,8 @@ public class Leader implements INodeState, FollowerListener {
 			default:
 				break;
 			}
+		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+
 		}
 	}
 
@@ -198,11 +199,12 @@ public class Leader implements INodeState, FollowerListener {
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
 
-			VoteMessage vote = new VoteMessage(nodeId,
+			VoteResponse vote = new VoteResponse (nodeId,
 					workMessage.getLeader().getElectionId(),
 					workMessage.getLeader().getLeaderId());
 
 			vote.setDestination (workMessage.getHeader ().getNodeId ());
+			vote.setMaxHops (state.getConf ().getMaxHops ());
 
 			//Reply to the person who sent request
 			channel.writeAndFlush (vote.getMessage ());

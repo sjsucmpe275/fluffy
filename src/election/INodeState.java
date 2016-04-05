@@ -3,7 +3,6 @@ package election;
 import io.netty.channel.Channel;
 import pipe.election.Election.LeaderStatus;
 import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
 
 public interface INodeState {
 
@@ -34,7 +33,7 @@ public interface INodeState {
 				handleWhoIsTheLeader(workMessage, channel);
 				break;
 			case THELEADERIS:
-				handleWhoIsTheLeader(workMessage, channel);
+				handleLeaderIs(workMessage, channel);
 				break;
 			case GETCLUSTERSIZE:
 				handleGetClusterSize(workMessage, channel);
