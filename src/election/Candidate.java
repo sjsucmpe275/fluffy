@@ -1,7 +1,6 @@
 package election;
 
 import gash.router.server.ServerState;
-import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,11 +214,14 @@ public class Candidate implements INodeState, TimeoutListener {
 		}, state.getConf ().getElectionTimeout ());
 	}
 
-	/* Todo: Currently I am broadcasting only to Out Bound edges, based on the progress will decide about in-bound
-	* edges as well*/
 	private void getClusterSize() {
-		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
+
+		state.getEmon ().broadcastMessage (util.createGetClusterSizeMessage(
+				state, -1));
+
+/*		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
 				.getOutboundEdges().getEdgesMap();
+
 
 		//Broad Cast on Each outbound edge
 		for (Integer destinationId : edgeMap.keySet()) {
@@ -243,6 +245,7 @@ public class Candidate implements INodeState, TimeoutListener {
 						state, destinationId));
 			}
 		}
+*/
 
 		timer.start ();
 	}
