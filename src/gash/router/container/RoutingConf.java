@@ -38,6 +38,7 @@ public class RoutingConf  {
 	private AtomicInteger nodeId;
 	private AtomicInteger commandPort;
 	private AtomicInteger workPort;
+	private AtomicInteger adaptorPort;
 	private AtomicBoolean internalNode;
 	private AtomicInteger heartbeatDt;
 	private AtomicReference<String> database;
@@ -58,9 +59,19 @@ public class RoutingConf  {
 
 	//private List<RoutingEntry> routing;
 	public List<RoutingEntry> routing = Collections.synchronizedList(new ArrayList<RoutingEntry>());
+	public List<RoutingEntry> adaptorRouting = Collections.synchronizedList(new ArrayList<RoutingEntry>());
 	public HashMap<String, Integer> asHashMap() {
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
 		if (routing != null) {
+			for (RoutingEntry entry : routing) {
+				map.put(entry.host, entry.port);
+			}
+		}
+		return map;
+	}
+	public HashMap<String, Integer> asAdaptorHashMap() {
+		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		if (adaptorRouting != null) {
 			for (RoutingEntry entry : routing) {
 				map.put(entry.host, entry.port);
 			}
@@ -77,11 +88,25 @@ public class RoutingConf  {
 
 		routing.add(entry);
 	}
+	public void addAdaptorEntry(RoutingEntry entry) {
+		if (entry == null)
+			return;
+
+		if (adaptorRouting == null)
+			adaptorRouting = new ArrayList<RoutingEntry>();
+
+		adaptorRouting.add(entry);
+	}
 
 	public int getNodeId() {
 		return nodeId.get();
 	}
-
+	public int getAdaptorPort() {
+		return adaptorPort.get();
+	}
+	public void setAdaptorPort(int adaptorPort) {
+		this.adaptorPort.getAndSet(adaptorPort);
+	}
 	public void setNodeId(int nodeId) {
 		this.nodeId.getAndSet(nodeId);
 	}
@@ -122,10 +147,17 @@ public class RoutingConf  {
 		return routing;
 	}
 
+	public List<RoutingEntry> getAdaptorRouting() {
+		return adaptorRouting;
+	}
+
 	public void setRouting(List<RoutingEntry> conf) {
 		this.routing = conf;
 	}
 
+	public void setAdaptorRouting(List<RoutingEntry> conf) {
+		this.adaptorRouting = conf;
+	}
 	public String getDatabase() {
 		return database.get();
 	}
@@ -199,4 +231,7 @@ public class RoutingConf  {
 		}
 
 	}
+
+
+	
 }

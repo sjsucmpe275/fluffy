@@ -714,7 +714,7 @@ public final class Storage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required .Action action = 5;</code>
+     * <code>optional .Action action = 5;</code>
      *
      * <pre>
      * Action to be performed
@@ -722,7 +722,7 @@ public final class Storage {
      */
     boolean hasAction();
     /**
-     * <code>required .Action action = 5;</code>
+     * <code>optional .Action action = 5;</code>
      *
      * <pre>
      * Action to be performed
@@ -940,7 +940,7 @@ public final class Storage {
     public static final int ACTION_FIELD_NUMBER = 5;
     private storage.Storage.Action action_;
     /**
-     * <code>required .Action action = 5;</code>
+     * <code>optional .Action action = 5;</code>
      *
      * <pre>
      * Action to be performed
@@ -950,7 +950,7 @@ public final class Storage {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .Action action = 5;</code>
+     * <code>optional .Action action = 5;</code>
      *
      * <pre>
      * Action to be performed
@@ -1086,10 +1086,6 @@ public final class Storage {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasAction()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       if (hasMetadata()) {
         if (!getMetadata().isInitialized()) {
           memoizedIsInitialized = 0;
@@ -1379,10 +1375,6 @@ public final class Storage {
       }
 
       public final boolean isInitialized() {
-        if (!hasAction()) {
-          
-          return false;
-        }
         if (hasMetadata()) {
           if (!getMetadata().isInitialized()) {
             
@@ -1413,7 +1405,7 @@ public final class Storage {
 
       private storage.Storage.Action action_ = storage.Storage.Action.GET;
       /**
-       * <code>required .Action action = 5;</code>
+       * <code>optional .Action action = 5;</code>
        *
        * <pre>
        * Action to be performed
@@ -1423,7 +1415,7 @@ public final class Storage {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .Action action = 5;</code>
+       * <code>optional .Action action = 5;</code>
        *
        * <pre>
        * Action to be performed
@@ -1433,7 +1425,7 @@ public final class Storage {
         return action_;
       }
       /**
-       * <code>required .Action action = 5;</code>
+       * <code>optional .Action action = 5;</code>
        *
        * <pre>
        * Action to be performed
@@ -1449,7 +1441,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>required .Action action = 5;</code>
+       * <code>optional .Action action = 5;</code>
        *
        * <pre>
        * Action to be performed
@@ -1777,7 +1769,7 @@ public final class Storage {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required .Action action = 10;</code>
+     * <code>optional .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -1785,7 +1777,7 @@ public final class Storage {
      */
     boolean hasAction();
     /**
-     * <code>required .Action action = 10;</code>
+     * <code>optional .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -2132,7 +2124,7 @@ public final class Storage {
     public static final int ACTION_FIELD_NUMBER = 10;
     private storage.Storage.Action action_;
     /**
-     * <code>required .Action action = 10;</code>
+     * <code>optional .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -2142,7 +2134,7 @@ public final class Storage {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>required .Action action = 10;</code>
+     * <code>optional .Action action = 10;</code>
      *
      * <pre>
      * Action for which response is being sent
@@ -2403,10 +2395,6 @@ public final class Storage {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasAction()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
       if (hasFailure()) {
         if (!getFailure().isInitialized()) {
           memoizedIsInitialized = 0;
@@ -2756,10 +2744,6 @@ public final class Storage {
       }
 
       public final boolean isInitialized() {
-        if (!hasAction()) {
-          
-          return false;
-        }
         if (hasFailure()) {
           if (!getFailure().isInitialized()) {
             
@@ -2811,7 +2795,7 @@ public final class Storage {
 
       private storage.Storage.Action action_ = storage.Storage.Action.GET;
       /**
-       * <code>required .Action action = 10;</code>
+       * <code>optional .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -2821,7 +2805,7 @@ public final class Storage {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>required .Action action = 10;</code>
+       * <code>optional .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -2831,7 +2815,7 @@ public final class Storage {
         return action_;
       }
       /**
-       * <code>required .Action action = 10;</code>
+       * <code>optional .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -2847,7 +2831,7 @@ public final class Storage {
         return this;
       }
       /**
-       * <code>required .Action action = 10;</code>
+       * <code>optional .Action action = 10;</code>
        *
        * <pre>
        * Action for which response is being sent
@@ -3544,10 +3528,10 @@ public final class Storage {
     java.lang.String[] descriptorData = {
       "\n\rstorage.proto\032\014common.proto\"8\n\010Metadat" +
       "a\022\020\n\010seq_size\030\023 \002(\005\022\014\n\004size\030\024 \001(\003\022\014\n\004tim" +
-      "e\030\025 \001(\003\"m\n\005Query\022\027\n\006action\030\005 \002(\0162\007.Actio" +
+      "e\030\025 \001(\003\"m\n\005Query\022\027\n\006action\030\005 \001(\0162\007.Actio" +
       "n\022\013\n\003key\030\006 \001(\t\022\023\n\013sequence_no\030\010 \001(\005\022\014\n\004d" +
       "ata\030\007 \001(\014\022\033\n\010metadata\030\026 \001(\0132\t.Metadata\"\302" +
-      "\001\n\010Response\022\027\n\006action\030\n \002(\0162\007.Action\022\017\n\007" +
+      "\001\n\010Response\022\027\n\006action\030\n \001(\0162\007.Action\022\017\n\007" +
       "success\030\013 \001(\010\022\013\n\003key\030\014 \001(\t\022\023\n\013sequence_n" +
       "o\030\016 \001(\005\022\023\n\013infomessage\030\017 \001(\t\022\033\n\007failure\030" +
       "\020 \001(\0132\010.FailureH\000\022\016\n\004data\030\021 \001(\014H\000\022\035\n\010met" +

@@ -1,18 +1,19 @@
 package election;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gash.router.server.ServerState;
 import gash.router.server.tasks.IReplicationStrategy;
 import gash.router.server.tasks.RoundRobinStrategy;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -45,21 +46,69 @@ public class Leader implements INodeState, FollowerListener {
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+		
 		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
+
 			List<Integer> activeNodeIds = new ArrayList<>();
 			for (Integer i : activeNodes.keySet()) {
 				activeNodeIds.add(i);
 			}
+//			activeNodeIds.add(wrkMessage.getHeader().getDestination());
+			state.getTasks().addTask(wrkMessage.getTask());
+			switch (wrkMessage.getTask().getTaskMessage().getQuery()
+				.getAction()) {
+			case GET:
+				System.out.println("Do Things");
+				break;
+			case STORE:
+				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				System.out.println(wrkMessage);
+				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				List<Integer> replicationNodes = strategy
+					.getNodeIds(activeNodeIds);
+				for (Integer destinationId : replicationNodes) {
+					WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
+					Header.Builder hb = Header
+						.newBuilder(wrkMessage.getHeader());
+					hb.setNodeId(nodeId);
+					hb.setDestination(destinationId);
+					wb.setHeader(hb);
+					wb.setSecret(1);
+					state.getEmon().broadcastMessage(wb.build());
+				}
+				break;
+			case DELETE:
+				break;
+			case UPDATE:
+				break;
+			default:
+				break;
+			}
 
-			List<Integer> replicationNodes = strategy
-				.getNodeIds(new ArrayList<> ());
-			for (Integer destinationId : replicationNodes) {
+		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+			switch (wrkMessage.getTask().getTaskMessage().getQuery()
+				.getAction()) {
+			case GET:
+				System.out.println("Do Things");
+				break;
+			case STORE:
+				System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+				System.out.println(wrkMessage);
+				System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
-				Header.Builder hb = Header.newBuilder(wrkMessage.getHeader());
-				hb.setDestination(destinationId);
+				Header.Builder hb = Header
+					.newBuilder(wrkMessage.getHeader());
+				hb.setDestination(-1);
 				wb.setHeader(hb);
 				wb.setSecret(1);
 				state.getEmon().broadcastMessage(wb.build());
+				break;
+			case DELETE:
+				break;
+			case UPDATE:
+				break;
+			default:
+				break;
 			}
 		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
 
@@ -76,7 +125,8 @@ public class Leader implements INodeState, FollowerListener {
 		System.out.println("~~~~~~~~Leader - Handle Cluster Size Event");
 
 		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
-		state.getEmon().broadcastMessage(util.createSizeIsMessage(state, workMessage.getHeader().getNodeId()));
+		state.getEmon().broadcastMessage(util.createSizeIsMessage(
+			state, workMessage.getHeader().getNodeId()));
 		
 /*
 		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()

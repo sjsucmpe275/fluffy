@@ -48,7 +48,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
-		
 		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
 			
 			if (wrkMessage.getHeader().getDestination() == nodeId) {

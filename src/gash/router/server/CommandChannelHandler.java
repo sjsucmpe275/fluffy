@@ -23,7 +23,11 @@ import java.util.concurrent.LinkedBlockingDeque;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
+import gash.router.client.CommHandler;
 import gash.router.client.CommInit;
+import gash.router.client.CommListener;
 import gash.router.container.RoutingConf;
 import gash.router.server.messages.FailureMessage;
 import gash.router.server.messages.cmd_messages.handlers.CmdFailureMsgHandler;
@@ -46,6 +50,8 @@ import pipe.common.Common.Header;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
+import storage.Storage.Query;
+import storage.Storage.Response;
 
 /**
  * The message handler processes json messages that are delimited by a 'newline'
@@ -64,6 +70,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	private EventLoopGroup group;
 	private ChannelFuture channel;
 	private static HashMap<SocketAddress,Channel> channelMap= new HashMap<SocketAddress,Channel>();
+	private static HashMap<String,SocketAddress> clientToChannelMap= new HashMap<String,SocketAddress>();
 	public CommandChannelHandler(RoutingConf conf) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
@@ -87,6 +94,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 		// Define the start of Chain
 		cmdMessageHandler = failureMsgHandler;
+		
+		
 	}
 
 	public Logger getLogger() {
@@ -107,8 +116,9 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	 * @param msg
 	 */
 	public void handleMessage(CommandMessage msg, Channel channel) {
-		
+		clientToChannelMap.put(msg.getQuery().getKey(), channel.remoteAddress());
 		channelMap.put(channel.remoteAddress(), channel);
+		
 		if (msg == null) {
 			// TODO add logging
 			System.out.println("ERROR: Unexpected content - " + msg);
@@ -178,6 +188,36 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 			channel = b.connect("localhost", conf.getWorkPort())
 				.syncUninterruptibly();
+			
+			CommHandler handler = connect().pipeline().get(CommHandler.class);
+			handler.addListener(new CommListener() {
+				
+				@Override
+				public void onMessage(CommandMessage msg) {
+					System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&");
+					System.out.println(msg);
+					System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&");
+					
+					/*System.out.println(msg.hasQuery());
+					System.out.println(msg.hasResponse());
+					try {
+						Query query = Query.parseFrom(msg.getQuery().getData());
+						Response response = Response.parseFrom(msg.getResponse().getData());
+						System.out.println(query);
+					} catch (InvalidProtocolBufferException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					SocketAddress sockAddress= clientToChannelMap.get(msg.getQuery().getKey());
+					Channel channel=channelMap.get(sockAddress);
+					channel.writeAndFlush(msg);
+				*/}
+				
+				@Override
+				public String getListenerID() {
+					return "commandListener";
+				}
+			});
 
 			// want to monitor the connection to the server s.t. if we loose the
 			// connection, we can try to re-establish it.
