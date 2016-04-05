@@ -1,12 +1,6 @@
 package election;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
-import gash.router.server.edges.EdgeInfo;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +38,7 @@ public class Candidate implements INodeState, TimeoutListener {
 		System.out.println("~~~~~~~~Candidate - Handle Cluster Size Event");
 
 		state.getEmon().broadcastMessage(util.createSizeIsMessage(
-				nodeId, workMessage.getHeader().getNodeId()));
+				state, workMessage.getHeader().getNodeId()));
 
 		/*channel.writeAndFlush(util.createSizeIsMessage(nodeId,
 			workMessage.getHeader().getNodeId()));
@@ -96,11 +90,12 @@ public class Candidate implements INodeState, TimeoutListener {
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 		System.out.println("~~~~~~~~~~~Candidate - Handle Vote Request Event");
 		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
-			VoteMessage vote = new VoteMessage(nodeId,
+			VoteResponse vote = new VoteResponse (nodeId,
 					workMessage.getLeader().getElectionId(),
 					workMessage.getLeader().getLeaderId());
-			vote.setDestination (workMessage.getHeader ().getNodeId ());
 
+			vote.setDestination (workMessage.getHeader ().getNodeId ());
+			vote.setMaxHops (state.getConf ().getMaxHops ());
 			//Update the term Id I participated in
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
@@ -219,11 +214,14 @@ public class Candidate implements INodeState, TimeoutListener {
 		}, state.getConf ().getElectionTimeout ());
 	}
 
-	/* Todo: Currently I am broadcasting only to Out Bound edges, based on the progress will decide about in-bound
-	* edges as well*/
 	private void getClusterSize() {
-		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
+
+		state.getEmon ().broadcastMessage (util.createGetClusterSizeMessage(
+				state, -1));
+
+/*		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
 				.getOutboundEdges().getEdgesMap();
+
 
 		//Broad Cast on Each outbound edge
 		for (Integer destinationId : edgeMap.keySet()) {
@@ -231,10 +229,11 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-						nodeId, destinationId));
+						state, destinationId));
 			}
 		}
 
+		//Broadcast on each in-bound edge
 		edgeMap = state.getEmon()
 				.getInboundEdges().getEdgesMap();
 
@@ -243,9 +242,10 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-						nodeId, destinationId));
+						state, destinationId));
 			}
 		}
+*/
 
 		timer.start ();
 	}

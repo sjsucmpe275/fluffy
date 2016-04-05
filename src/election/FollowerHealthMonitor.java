@@ -65,6 +65,7 @@ public class FollowerHealthMonitor {
 		LeaderStatusMessage beat = new LeaderStatusMessage (state.getConf().getNodeId());
 		beat.setElectionId (state.getElectionId ());
 		beat.setLeaderId (state.getLeaderId ());
+		beat.setMaxHops (state.getConf ().getMaxHops ());
 		beat.setLeaderAction(LeaderQuery.BEAT);
 		beat.setLeaderState(LeaderState.LEADERALIVE);
 
@@ -99,6 +100,7 @@ public class FollowerHealthMonitor {
 						LeaderStatusMessage beat = new LeaderStatusMessage (state.getConf().getNodeId());
 						beat.setElectionId (state.getElectionId ());
 						beat.setLeaderId (state.getLeaderId ());
+						beat.setMaxHops (state.getConf ().getMaxHops ());
 						beat.setLeaderAction(LeaderQuery.BEAT);
 						beat.setLeaderState(LeaderState.LEADERALIVE);
 

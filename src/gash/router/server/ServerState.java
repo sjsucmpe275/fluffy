@@ -1,17 +1,13 @@
 package gash.router.server;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import election.Candidate;
-import election.Follower;
-import election.INodeState;
-import election.Leader;
-import election.NodeStateEnum;
+import election.*;
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerState implements Observer{
 	private final RoutingConf conf;
@@ -119,15 +115,18 @@ public class ServerState implements Observer{
 	@Override
 	public void onFileChanged(RoutingConf configuration) {
 		System.out.println("in server state");
-			this.conf.setNodeId(configuration.getNodeId());;
-			this.conf.setCommandPort(configuration.getCommandPort());
-			this.conf.setWorkPort(configuration.getWorkPort());
-			this.conf.setInternalNode(configuration.isInternalNode());
-			this.conf.setHeartbeatDt(configuration.getHeartbeatDt());
-			this.conf.setDatabase(configuration.getDatabase());
-			this.conf.setElectionTimeout(configuration.getElectionTimeout());
+
+			conf.setNodeId(configuration.getNodeId());;
+			conf.setCommandPort(configuration.getCommandPort());
+			conf.setWorkPort(configuration.getWorkPort());
+			conf.setInternalNode(configuration.isInternalNode());
+			conf.setHeartbeatDt(configuration.getHeartbeatDt());
+			conf.setDatabase(configuration.getDatabase());
+			conf.setElectionTimeout(configuration.getElectionTimeout());
+			conf.setMaxHops (configuration.getMaxHops ());
+
 			for(int i=0;i<configuration.routing.size();i++){
-				this.conf.routing.add(configuration.routing.get(i));
+				conf.routing.add(configuration.routing.get(i));
 			}
 		}
 }

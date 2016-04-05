@@ -79,7 +79,7 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 		// construct the message to reply heart beat - notifying I am alive
 		BeatMessage beatMessage = new BeatMessage(state.getConf().getNodeId());
 		beatMessage.setDestination(workMessage.getHeader().getNodeId());
-
+		//beatMessage.setMaxHops (state.getConf ().getMaxHops ());
 		channel.writeAndFlush(beatMessage.getMessage());
 	}
 

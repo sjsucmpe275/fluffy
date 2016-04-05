@@ -1,19 +1,18 @@
 package election;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.tasks.IReplicationStrategy;
 import gash.router.server.tasks.RoundRobinStrategy;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -53,7 +52,7 @@ public class Leader implements INodeState, FollowerListener {
 			}
 
 			List<Integer> replicationNodes = strategy
-				.getNodeIds(new ArrayList<>());
+				.getNodeIds(new ArrayList<> ());
 			for (Integer destinationId : replicationNodes) {
 				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
 				Header.Builder hb = Header.newBuilder(wrkMessage.getHeader());
@@ -77,8 +76,7 @@ public class Leader implements INodeState, FollowerListener {
 		System.out.println("~~~~~~~~Leader - Handle Cluster Size Event");
 
 		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
-		state.getEmon().broadcastMessage(util.createSizeIsMessage(
-			nodeId, workMessage.getHeader().getNodeId()));
+		state.getEmon().broadcastMessage(util.createSizeIsMessage(state, workMessage.getHeader().getNodeId()));
 		
 /*
 		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
@@ -151,11 +149,12 @@ public class Leader implements INodeState, FollowerListener {
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
 
-			VoteMessage vote = new VoteMessage(nodeId,
+			VoteResponse vote = new VoteResponse (nodeId,
 					workMessage.getLeader().getElectionId(),
 					workMessage.getLeader().getLeaderId());
 
 			vote.setDestination (workMessage.getHeader ().getNodeId ());
+			vote.setMaxHops (state.getConf ().getMaxHops ());
 
 			//Reply to the person who sent request
 			channel.writeAndFlush (vote.getMessage ());

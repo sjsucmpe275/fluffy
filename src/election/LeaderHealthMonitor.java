@@ -1,11 +1,11 @@
 package election;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author: codepenman.
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class LeaderHealthMonitor {
 
 	private final LeaderHealthListener healthListener;
-	private boolean debug = true;
+	private boolean debug = false;
 	private final Logger logger = LoggerFactory.getLogger("Leader Health Monitor");
 	private AtomicBoolean stop;
 	private HealthMonitorTask task;
@@ -40,13 +40,16 @@ public class LeaderHealthMonitor {
 		isRunning.getAndSet (true);
 		//}
 	}
+/*
 
 	public boolean isRunning() {
 		return isRunning.get ();
 	}
 
 	public void cancel() {
-		/* Cancel the task, only if it is not stopped before */
+		*/
+/* Cancel the task, only if it is not stopped before *//*
+
 		//if(stop.get ()) {
 		task.interrupt ();
 		stop.getAndSet(true);
@@ -56,6 +59,7 @@ public class LeaderHealthMonitor {
 		System.out.println("~~~~~~~~Follower - Cancelled Leader Monitor");
 		//}
 	}
+*/
 
 	public void onBeat(long beatTime) {
 		this.beatTime.getAndSet(beatTime);
@@ -72,7 +76,7 @@ public class LeaderHealthMonitor {
 
 					long currentTime = System.currentTimeMillis();
 
-					System.out.println("*****Last heart beat received from Leader: " + (currentTime - beatTime.get()));
+					//System.out.println("*****Last heart beat received from Leader: " + (currentTime - beatTime.get()));
 					if ((currentTime - beatTime.get()) > timeout) {
 						healthListener.onLeaderBadHealth();
 						//break;

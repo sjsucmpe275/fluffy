@@ -42,8 +42,20 @@ public class RoutingConf  {
 	private AtomicInteger heartbeatDt;
 	private AtomicReference<String> database;
 	private AtomicInteger electionTimeout;
+	private AtomicInteger maxHops;
 	private AtomicInteger secret;
-	
+
+	public RoutingConf(){
+		nodeId=new AtomicInteger();
+		internalNode=new AtomicBoolean(true);
+		heartbeatDt=new AtomicInteger(2000);
+		workPort=new AtomicInteger();
+		commandPort=new AtomicInteger();
+		database= new AtomicReference<> ("redis");
+		electionTimeout=new AtomicInteger();
+		maxHops = new AtomicInteger ();
+	}
+
 	//private List<RoutingEntry> routing;
 	public List<RoutingEntry> routing = Collections.synchronizedList(new ArrayList<RoutingEntry>());
 	public HashMap<String, Integer> asHashMap() {
@@ -55,15 +67,7 @@ public class RoutingConf  {
 		}
 		return map;
 	}
-	public RoutingConf(){
-		this.nodeId=new AtomicInteger();
-		this.internalNode=new AtomicBoolean(true);
-		this.heartbeatDt=new AtomicInteger(2000);
-		this.workPort=new AtomicInteger();
-		this.commandPort=new AtomicInteger();
-		this.database=new AtomicReference<String>("");
-		this.electionTimeout=new AtomicInteger();
-	}
+
 	public void addEntry(RoutingEntry entry) {
 		if (entry == null)
 			return;
@@ -145,7 +149,15 @@ public class RoutingConf  {
 	public void setSecret(int secret) {
 		this.secret.set(secret);
 	}
-	
+
+	public int getMaxHops() {
+		return maxHops.get ();
+	}
+
+	public void setMaxHops(int maxHops) {
+		this.maxHops.getAndSet (maxHops);
+	}
+
 	@XmlRootElement(name = "entry")
 	@XmlAccessorType(XmlAccessType.PROPERTY)
 	public static final class RoutingEntry {
@@ -187,7 +199,4 @@ public class RoutingConf  {
 		}
 
 	}
-
-
-	
 }

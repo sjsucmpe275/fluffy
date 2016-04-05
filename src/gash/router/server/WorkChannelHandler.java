@@ -110,7 +110,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 					}
 					broadcast(msg);
 				}else {
-					System.out.println("MAX HOPS is Zero! Dropping message...");
+					System.out.println("MAX HOPS is Zro! Dropping message...");
 					return;
 				}
 			} else {
@@ -160,7 +160,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	private void broadcast(WorkMessage msg) {
 		System.out.println("Forwarding message...");
 		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
-		Header.Builder hb = Header.newBuilder(wb.getHeader());
+		Header.Builder hb = Header.newBuilder(msg.getHeader());
 		hb.setMaxHops(hb.getMaxHops() - 1);
 		wb.setHeader(hb);
 		state.getEmon().broadcastMessage(wb.build());

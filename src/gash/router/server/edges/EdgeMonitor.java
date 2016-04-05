@@ -97,6 +97,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 							logger.info ("*******Sending Heartbeat to: " + ei.getRef ());
 						BeatMessage beatMessage = new BeatMessage (state.getConf ().getNodeId ());
 						beatMessage.setDestination (ei.getRef ());
+						//beatMessage.setMaxHops (state.getConf ().getMaxHops ());
 						ei.getChannel().writeAndFlush(beatMessage.getMessage ());
 					} else {
 						// TODO create a client to the node
