@@ -126,7 +126,7 @@ public class Leader implements INodeState, FollowerListener {
 
 		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
 		state.getEmon().broadcastMessage(util.createSizeIsMessage(
-			nodeId, workMessage.getHeader().getNodeId()));
+			state, workMessage.getHeader().getNodeId()));
 		
 /*
 		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()

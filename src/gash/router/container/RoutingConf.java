@@ -78,16 +78,7 @@ public class RoutingConf  {
 		}
 		return map;
 	}
-	public RoutingConf(){
-		this.nodeId=new AtomicInteger();
-		this.internalNode=new AtomicBoolean(true);
-		this.heartbeatDt=new AtomicInteger(2000);
-		this.workPort=new AtomicInteger();
-		this.commandPort=new AtomicInteger();
-		this.adaptorPort =  new AtomicInteger();
-		this.database=new AtomicReference<String>("");
-		this.electionTimeout=new AtomicInteger();
-	}
+
 	public void addEntry(RoutingEntry entry) {
 		if (entry == null)
 			return;
