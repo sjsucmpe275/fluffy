@@ -16,6 +16,7 @@
 			<arg value="${resources.dir}/work.proto"/>			
 			<arg value="${resources.dir}/storage.proto"/>	
 			<arg value="${resources.dir}/monitor.proto"/>		
+			<arg value="${resources.dir}/global.proto"/>		
 		    </exec>
 	  </target>
 </project>

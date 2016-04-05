@@ -72,7 +72,10 @@ public class PrintUtil {
 		else if(msg.hasLeader()) {
 			System.out.println("Election");
 			System.out.println(msg);
-		} else
+		}else if(msg.hasTask()){
+			System.out.println("Task");
+		} 
+		else
 			System.out.println("Unknown");
 
 //		System.out.println(PrintUtil.gap + "Secret:  " + msg.getSecret());
