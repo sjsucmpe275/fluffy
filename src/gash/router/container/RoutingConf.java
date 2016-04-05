@@ -56,6 +56,7 @@ public class RoutingConf  {
 		database= new AtomicReference<> ("redis");
 		electionTimeout=new AtomicInteger();
 		maxHops = new AtomicInteger ();
+		adaptorPort = new AtomicInteger(0);
 	}
 
 	//private List<RoutingEntry> routing;
