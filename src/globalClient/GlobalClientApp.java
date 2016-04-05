@@ -1,10 +1,6 @@
 package globalClient;
 
-import gash.router.app.DemoApp;
 import gash.router.client.CommConnection;
-import gash.router.client.MessageClient;
-import pipe.common.Common.Header;
-import routing.Pipe.CommandMessage;
 
 public class GlobalClientApp {
 	private GlobalMessageClient gc;

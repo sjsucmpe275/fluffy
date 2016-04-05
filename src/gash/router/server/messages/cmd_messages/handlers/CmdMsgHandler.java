@@ -1,8 +1,9 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
+import org.slf4j.Logger;
+
 import gash.router.container.RoutingConf;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
 import routing.Pipe.CommandMessage;
 
 /**

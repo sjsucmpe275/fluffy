@@ -1,18 +1,19 @@
 package election;
 
-import gash.router.server.ServerState;
-import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pipe.election.Election.LeaderStatus.LeaderQuery;
-import pipe.election.Election.LeaderStatus.LeaderState;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gash.router.server.ServerState;
+import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
+import pipe.election.Election.LeaderStatus.LeaderQuery;
+import pipe.election.Election.LeaderStatus.LeaderState;
 
 /**
  * @author: codepenman.

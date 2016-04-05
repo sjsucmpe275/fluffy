@@ -15,15 +15,12 @@
  */
 package gash.router.server;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.protobuf.InvalidProtocolBufferException;
 
 import gash.router.client.CommHandler;
 import gash.router.client.CommInit;
@@ -50,8 +47,6 @@ import pipe.common.Common.Header;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
-import storage.Storage.Query;
-import storage.Storage.Response;
 
 /**
  * The message handler processes json messages that are delimited by a 'newline'

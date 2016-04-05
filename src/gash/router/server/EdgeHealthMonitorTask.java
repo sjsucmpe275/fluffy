@@ -1,8 +1,8 @@
 package gash.router.server;
 
-import gash.router.server.edges.EdgeMonitor;
-
 import java.util.TimerTask;
+
+import gash.router.server.edges.EdgeMonitor;
 
 /*
 *   @author: codepenman
