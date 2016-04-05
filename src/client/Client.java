@@ -14,7 +14,6 @@ import com.google.protobuf.ByteString;
 
 import gash.router.client.CommListener;
 import gash.router.client.MessageClient;
-import globalClient.GlobalMessageClient;
 import routing.Pipe.CommandMessage;
 import storage.Storage.Action;
 import storage.Storage.Response;

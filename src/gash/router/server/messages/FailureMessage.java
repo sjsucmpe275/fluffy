@@ -1,9 +1,10 @@
 package gash.router.server.messages;
 
 import com.google.protobuf.GeneratedMessage;
+
 import pipe.common.Common;
 import pipe.common.Common.Failure;
-import pipe.work.Work.*;
+import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
 /**

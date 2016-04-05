@@ -1,14 +1,18 @@
 package gash.router.server;
 
-import election.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+import election.Candidate;
+import election.Follower;
+import election.INodeState;
+import election.Leader;
+import election.NodeStateEnum;
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.AdaptorEdgeMonitor;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerState implements Observer{
 	private final RoutingConf conf;

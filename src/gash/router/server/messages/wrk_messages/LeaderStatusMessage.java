@@ -2,8 +2,8 @@ package gash.router.server.messages.wrk_messages;
 
 import pipe.common.Common;
 import pipe.election.Election;
-import pipe.election.Election.LeaderStatus.LeaderState;
 import pipe.election.Election.LeaderStatus.LeaderQuery;
+import pipe.election.Election.LeaderStatus.LeaderState;
 import pipe.work.Work;
 
 /**

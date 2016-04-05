@@ -4,7 +4,6 @@
 package gash.router.server;
 
 import gash.router.client.CommHandler;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -15,7 +14,6 @@ import io.netty.handler.codec.compression.ZlibWrapper;
 import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
 
 /**
  * @author Prasanna
