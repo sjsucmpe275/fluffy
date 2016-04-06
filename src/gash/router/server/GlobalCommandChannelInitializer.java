@@ -1,4 +1,4 @@
-package gash.router.server;
+/*package gash.router.server;
 
 import gash.router.container.RoutingConf;
 import global.Global.GlobalCommandMessage;
@@ -44,3 +44,4 @@ public class GlobalCommandChannelInitializer extends ChannelInitializer<SocketCh
 	}
 
 }
+*/

@@ -11,7 +11,6 @@ import gash.router.server.ServerState;
 import gash.router.server.tasks.IReplicationStrategy;
 import gash.router.server.tasks.RoundRobinStrategy;
 import io.netty.channel.Channel;
-import pipe.common.Common;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
 
@@ -37,16 +36,10 @@ public class Leader implements INodeState, FollowerListener {
 		this.strategy = new RoundRobinStrategy(2);
 	}
 
-	private Common.Header.Builder buildHeader(int destinationId) {
-		Common.Header.Builder hb = Common.Header.newBuilder();
-		hb.setNodeId(nodeId);
-		hb.setTime(System.currentTimeMillis());
-		hb.setDestination(destinationId);
-		return hb;
-	}
-
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
 		
+		System.out.println("LEADER RECEIVED MESSAGE");
+		System.out.println(wrkMessage);
 		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
 
 			List<Integer> activeNodeIds = new ArrayList<>();

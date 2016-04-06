@@ -1,4 +1,4 @@
-package gash.router.server;
+/*package gash.router.server;
 
 
 import org.slf4j.Logger;
@@ -143,3 +143,4 @@ public class GlobalCommandChannelHandler extends SimpleChannelInboundHandler<Glo
 	}
 
 }
+*/

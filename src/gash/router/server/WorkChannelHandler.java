@@ -48,12 +48,13 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	private ServerState state;
 	private boolean debug = true;
 	private IWrkMessageHandler wrkMessageHandler;
-	private Channel commandChannel;
-
+	private Router router;
+	
 	public WorkChannelHandler(ServerState state) {
 		if (state != null) {
 			this.state = state;
 		}
+		this.router = new Router();
 		initializeMessageHandlers();
 	}
 
@@ -89,100 +90,45 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void handleMessage(WorkMessage msg, Channel channel) {
 		
 		if (msg == null) {
-			logger.info ("ERROR: Null message is received");
+			logger.info("ERROR: Null message is received");
 			return;
 		}
 
 		if (debug)
 			PrintUtil.printWork(msg);
 
-		if(msg.getHeader().getNodeId()==-1){
-			commandChannel=channel;
-		}
-/*
-		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
-		logger.info ("Destination is: " + msg.getHeader ().getDestination ());
-*/
+		// TODO Error here.. need to access queues here. Think better design.
+		msg = router.route(msg, queues, state);
 		
-		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-			System.out.println("Same message received by source! Dropping message...");
+		if (msg == null) {
+			System.out.println("No need to handle message.. ");
 			return;
 		}
-
-		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
-
-			if (msg.getHeader().getDestination() == -1) {
-				if (msg.getHeader().getMaxHops() > 0) {
-					if(msg.hasTask()){
-						if(msg.getTask().getTaskMessage().hasResponse()){
-							CommandMessage.Builder cb = CommandMessage.newBuilder(msg.getTask().getTaskMessage());
-							commandChannel.writeAndFlush(cb.build());
-							return;
-						}
-						WorkMessage.Builder wb=WorkMessage.newBuilder(msg);
-						Header.Builder hb = Header.newBuilder(msg.getHeader()); 
-						hb.setDestination(state.getLeaderId());
-						hb.setNodeId(state.getConf().getNodeId());
-						wb.setHeader(hb);
-						msg=wb.build();
-					}
-					broadcast(msg);
-				}else {
-					System.out.println("MAX HOPS is Zro! Dropping message...");
-					return;
-				}
-			} else {
-				if (msg.getHeader().getMaxHops() > 0) {
-					broadcast(msg);
-					return;
-				} else {
-					System.out.println("MAX HOPS is Zero! Dropping message...");
-					return;
-				}
-			}
-		}
-/*
-
-		if (debug)
-			PrintUtil.printWork(msg);
-*/
-
 		
 		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
 
-			if (msg.getHeader().getNodeId()!=-1) {
+			//TODO we need this map in command side. Since messages will be replied to client from there.
+			if (msg.getHeader().getNodeId() != -1) {
 				/*
-						* Create in-bound edge's if it is not created/if it was removed when connection was down.
-						* */
+				 * Create in-bound edge's if it is not created/if it was removed
+				 * when connection was down.
+				 */
 				InetSocketAddress socketAddress = (InetSocketAddress) channel
 					.remoteAddress();
-				//			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
-				//			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
-				getServerState().getEmon().createInboundIfNew(
+				state.getEmon().createInboundIfNew(
 					msg.getHeader().getNodeId(), socketAddress.getHostName(),
 					socketAddress.getPort(), channel);
 			}
 		} catch (Exception e) {
-			// TODO add logging
 			getLogger ().info ("Got an exception in work");
 			e.printStackTrace ();
 			FailureMessage failureMessage = new FailureMessage (msg, e);
 			failureMessage.setNodeId (state.getConf ().getNodeId ());
 			channel.write(failureMessage.getWorkMessage ());
 		}
-
 		System.out.flush();
-	}
-
-	private void broadcast(WorkMessage msg) {
-		System.out.println("Forwarding message...");
-		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
-		Header.Builder hb = Header.newBuilder(msg.getHeader());
-		hb.setMaxHops(hb.getMaxHops() - 1);
-		wb.setHeader(hb);
-		state.getEmon().broadcastMessage(wb.build());
 	}
 
 	/**

@@ -20,11 +20,13 @@ import routing.Pipe.CommandMessage;
 public class CommandChannelInitializer extends ChannelInitializer<SocketChannel> {
 	boolean compress = false;
 	RoutingConf conf;
+	private QueueManager queues;
 
-	public CommandChannelInitializer(RoutingConf conf, boolean enableCompression) {
+	public CommandChannelInitializer(RoutingConf conf, boolean enableCompression, QueueManager queues) {
 		super();
 		compress = enableCompression;
 		this.conf = conf;
+		this.queues = queues;
 	}
 
 	@Override
@@ -53,6 +55,6 @@ public class CommandChannelInitializer extends ChannelInitializer<SocketChannel>
 
 
 		// our server processor (new instance for each connection)
-		pipeline.addLast("handler", new CommandChannelHandler (conf));
+		pipeline.addLast("handler", new CommandChannelHandler (conf, queues));
 	}
 }

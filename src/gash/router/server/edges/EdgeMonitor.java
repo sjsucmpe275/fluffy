@@ -24,6 +24,7 @@ import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
+import gash.router.server.QueueManager;
 import gash.router.server.ServerState;
 import gash.router.server.WorkChannelInitializer;
 import gash.router.server.messages.wrk_messages.BeatMessage;
@@ -49,7 +50,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private EventLoopGroup group;
 	private EdgeHealthMonitorTask edgeHealthMonitorTask;
 	
-	public EdgeMonitor(ServerState state) {
+	public EdgeMonitor(ServerState state, QueueManager queues) {
 		if (state == null)
 			throw new RuntimeException("state is null");
 
