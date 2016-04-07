@@ -1,23 +1,18 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import org.slf4j.Logger;
-
-import gash.router.container.RoutingConf;
+import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
 import routing.Pipe.CommandMessage;
 
 /**
- * Created by codepenman on 3/27/16.
+ * @author: codepenman.
+ * @date: 3/27/16
  */
 public class CmdMsgHandler implements ICmdMessageHandler {
 
-	private final RoutingConf conf;
-	private final Logger logger;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdMsgHandler(RoutingConf conf, Logger logger)   {
-		this.conf = conf;
-		this.logger = logger;
+	public CmdMsgHandler(CommandChannelHandler commandChannelHandler)   {
 	}
 
 	@Override
@@ -34,7 +29,7 @@ public class CmdMsgHandler implements ICmdMessageHandler {
 	}
 
 	private void handle(CommandMessage cmdMessage, Channel channel) {
-
+		channel.writeAndFlush (cmdMessage);
 	}
 
 	@Override

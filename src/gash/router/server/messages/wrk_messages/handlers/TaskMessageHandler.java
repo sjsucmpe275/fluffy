@@ -37,6 +37,7 @@ public class TaskMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 		Task t = workMessage.getTask();
+		//
 		state.getCurrentState().handleCmdQuery(workMessage, channel);
 	}
 

@@ -5,7 +5,6 @@ package gash.router.server;
 
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
 
 /**
  * @author saurabh
@@ -13,14 +12,13 @@ import routing.Pipe.CommandMessage;
  */
 public class Router {
 
-	//TODO think about if this class is needed for command server.
-	// and accordingly pass server state and queues.
-	// Can we implement this in better way?
-	public CommandMessage route(CommandMessage msg) {
-		throw new RuntimeException("Not implemented...");
+	private final ServerState state;
+
+	public Router(ServerState state)    {
+		this.state = state;
 	}
 
-	public WorkMessage route(WorkMessage msg, QueueManager queues, ServerState state) throws InterruptedException {
+	public WorkMessage route(WorkMessage msg) {
 		
 		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
 			System.out.println("Same message received by source! Dropping message...");
@@ -31,13 +29,6 @@ public class Router {
 
 			if (msg.getHeader().getDestination() == -1) {
 				if (msg.getHeader().getMaxHops() > 0) {
-					if (msg.hasTask()) {
-						if (msg.getTask().getTaskMessage().hasResponse()) {
-							CommandMessage.Builder cb = CommandMessage
-								.newBuilder(msg.getTask().getTaskMessage());
-							queues.getFromWorkServer().put(cb.build());
-							return null;
-						}
 						WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
 						Header.Builder hb = Header.newBuilder(msg.getHeader());
 						hb.setDestination(state.getLeaderId());
@@ -59,10 +50,10 @@ public class Router {
 					return null;
 				}
 			}
-		}
+
 		return msg;
 	}
-	
+
 	private void broadcast(WorkMessage msg) {
 		System.out.println("Forwarding message...");
 		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
@@ -71,4 +62,5 @@ public class Router {
 		wb.setHeader(hb);
 		state.getEmon().broadcastMessage(wb.build());
 	}
+
 }

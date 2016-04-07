@@ -15,25 +15,16 @@
  */
 package gash.router.server;
 
-import java.net.InetSocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.messages.FailureMessage;
-import gash.router.server.messages.wrk_messages.handlers.BeatMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.ElectionMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.IWrkMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.StateMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.TaskMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.WrkFailureMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.WrkPingMessageHandler;
+import gash.router.server.messages.wrk_messages.handlers.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import pipe.common.Common.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
+
+import java.net.InetSocketAddress;
 
 /**
  * The message handler processes json messages that are delimited by a 'newline'
@@ -54,7 +45,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		if (state != null) {
 			this.state = state;
 		}
-		this.router = new Router();
+		this.router = new Router(state);
 		initializeMessageHandlers();
 	}
 
@@ -97,8 +88,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		if (debug)
 			PrintUtil.printWork(msg);
 
-		// TODO Error here.. need to access queues here. Think better design.
-		msg = router.route(msg, queues, state);
+		msg = router.route(msg);
 		
 		if (msg == null) {
 			System.out.println("No need to handle message.. ");
@@ -109,8 +99,6 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
 
-			//TODO we need this map in command side. Since messages will be replied to client from there.
-			if (msg.getHeader().getNodeId() != -1) {
 				/*
 				 * Create in-bound edge's if it is not created/if it was removed
 				 * when connection was down.
@@ -120,7 +108,6 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 				state.getEmon().createInboundIfNew(
 					msg.getHeader().getNodeId(), socketAddress.getHostName(),
 					socketAddress.getPort(), channel);
-			}
 		} catch (Exception e) {
 			getLogger ().info ("Got an exception in work");
 			e.printStackTrace ();

@@ -7,15 +7,15 @@ import pipe.common.Common;
 import routing.Pipe.CommandMessage;
 
 /**
- * Created by codepenman on 3/27/16.
+ * @author: codepenman.
+ * @date: 3/27/16
  */
 public class CmdPingMsgHandler implements ICmdMessageHandler {
 
-	private final CommandChannelHandler cmdChannelHandler;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdPingMsgHandler(CommandChannelHandler cmdChannelHandler) {
-		this.cmdChannelHandler = cmdChannelHandler;
+	public CmdPingMsgHandler(CommandChannelHandler commandChannelHandler) {
+
 	}
 
 	@Override
@@ -33,7 +33,6 @@ public class CmdPingMsgHandler implements ICmdMessageHandler {
 
 	private void handle(CommandMessage cmdMessage, Channel channel) {
 
-		cmdChannelHandler.getLogger ().info("ping from " + cmdMessage.getHeader().getNodeId());
 		// construct the message to send
 		Common.Header.Builder hb = Common.Header.newBuilder();
 		hb.setNodeId(888);

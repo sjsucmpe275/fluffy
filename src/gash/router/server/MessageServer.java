@@ -47,13 +47,8 @@ public class MessageServer {
 	 * @param cfg
 	 */
 	public MessageServer(File cfg) {
-		this.confFile = cfg;
+		confFile = cfg;
 		init(cfg);
-	}
-
-	public MessageServer(RoutingConf conf) {
-		this.conf = conf;
-		
 	}
 
 	public void release() {
@@ -199,11 +194,12 @@ public class MessageServer {
 			this.queues = queues;
 			
 			//final Path path = FileSystems.getDefault().getPath();
-			monitor.monitorFile(confFile.getPath());
 			logger.info("in message server");
 			state = new ServerState(conf);
+
 			monitor.registerObserver(state);
-			
+			monitor.monitorFile(confFile.getPath());
+
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);
 

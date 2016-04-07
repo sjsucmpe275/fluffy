@@ -36,12 +36,11 @@ public class WrkPingMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 
-		logger.info("ping from " + workMessage.getHeader().getNodeId());
-		//Todo: I commented this code to avoid infinite loop. Will update later
-				/*boolean p = msg.getPing();
-				WorkMessage.Builder rb = WorkMessage.newBuilder();
-				rb.setPing(true);
-				channel.write(rb.build());*/
+		logger.info("Ping from " + workMessage.getHeader().getNodeId());
+
+		WorkMessage.Builder rb = WorkMessage.newBuilder();
+		rb.setPing(true);
+		channel.write(rb.build());
 	}
 
 	@Override

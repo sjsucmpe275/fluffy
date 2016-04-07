@@ -1,18 +1,17 @@
 package election;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.tasks.IReplicationStrategy;
 import gash.router.server.tasks.RoundRobinStrategy;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -252,7 +251,7 @@ public class Leader implements INodeState, FollowerListener {
 		}
 
 		long currentTime = System.currentTimeMillis ();
-		state.setLeaderHeartBeatdt (currentTime);
+		//state.setLeaderHeartBeatdt (currentTime);
 
 		int followerId = workMessage.getHeader ().getNodeId ();
 		addFollower (followerId); // Add follower Id
