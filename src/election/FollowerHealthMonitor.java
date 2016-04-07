@@ -107,6 +107,11 @@ public class FollowerHealthMonitor {
 
 						state.getEmon().broadcastMessage(beat.getMessage());
 						broadCastBeat = false;
+						
+						System.out.println(System.currentTimeMillis());
+						synchronized (this) {
+							wait((long)((timeout * 0.9)));
+						}
 					} else {
 						ArrayList<Integer> nodes2Remove = new ArrayList<> ();
 
@@ -121,9 +126,8 @@ public class FollowerHealthMonitor {
 
 						System.out.println ("####Follower heartbeats:" + follower2BeatTimeMap);
 						broadCastBeat = true;
-					}
-					synchronized (this) {
-						wait((long)(timeout * 0.1));
+						System.out.println(System.currentTimeMillis());
+
 					}
 				}
 			} catch (InterruptedException e) {

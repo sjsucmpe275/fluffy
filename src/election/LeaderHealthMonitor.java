@@ -62,6 +62,7 @@ public class LeaderHealthMonitor {
 */
 
 	public void onBeat(long beatTime) {
+		System.out.println(">>>>>>>>>>Updating beat time...");
 		this.beatTime.getAndSet(beatTime);
 	}
 
@@ -82,7 +83,7 @@ public class LeaderHealthMonitor {
 						//break;
 					}
 					synchronized (this) {
-						wait((long) (timeout * 0.1));
+						wait((long) ((timeout * 0.9)));
 					}
 				}
 			} catch (InterruptedException e) {

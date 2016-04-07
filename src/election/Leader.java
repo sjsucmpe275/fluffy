@@ -1,19 +1,18 @@
 package election;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.tasks.IReplicationStrategy;
 import gash.router.server.tasks.RoundRobinStrategy;
 import io.netty.channel.Channel;
-import pipe.common.Common;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Leader implements INodeState, FollowerListener {
 
@@ -26,37 +25,34 @@ public class Leader implements INodeState, FollowerListener {
 	private FollowerHealthMonitor followerMonitor;
 	private ElectionUtil util;
 	private IReplicationStrategy strategy;
-
+	private ConcurrentHashMap<String, Integer> key2node;
+	
 	public Leader(ServerState state) {
 		this.state = state;
 		this.nodeId = state.getConf().getNodeId();
 		this.activeNodes = new ConcurrentHashMap<> ();
-		followerMonitor = new FollowerHealthMonitor(this, state,
+		this.followerMonitor = new FollowerHealthMonitor(this, state,
 				state.getConf().getElectionTimeout());
 		this.util = new ElectionUtil();
 		this.strategy = new RoundRobinStrategy(2);
-	}
-
-	private Common.Header.Builder buildHeader(int destinationId) {
-		Common.Header.Builder hb = Common.Header.newBuilder();
-		hb.setNodeId(nodeId);
-		hb.setTime(System.currentTimeMillis());
-		hb.setDestination(destinationId);
-		return hb;
+		this.key2node = new ConcurrentHashMap<>();
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
 		
-		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
+		System.out.println("LEADER RECEIVED MESSAGE");
+		System.out.println(wrkMessage);
+		CommandMessage taskMessage = wrkMessage.getTask().getTaskMessage();
+		if (taskMessage.hasQuery()) {
 
 			List<Integer> activeNodeIds = new ArrayList<>();
 			for (Integer i : activeNodes.keySet()) {
 				activeNodeIds.add(i);
 			}
+			
 //			activeNodeIds.add(wrkMessage.getHeader().getDestination());
 			state.getTasks().addTask(wrkMessage.getTask());
-			switch (wrkMessage.getTask().getTaskMessage().getQuery()
-				.getAction()) {
+			switch (taskMessage.getQuery().getAction()) {
 			case GET:
 				System.out.println("Do Things");
 				break;
@@ -64,8 +60,13 @@ public class Leader implements INodeState, FollowerListener {
 				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 				System.out.println(wrkMessage);
 				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-				List<Integer> replicationNodes = strategy
-					.getNodeIds(activeNodeIds);
+
+				key2node.putIfAbsent(taskMessage.getQuery().getKey(),
+					wrkMessage.getHeader().getNodeId());
+				System.out.println(key2node);
+				
+				List<Integer> replicationNodes = strategy.getNodeIds(activeNodeIds);
+				System.out.println("Active nodes: " + activeNodeIds);
 				for (Integer destinationId : replicationNodes) {
 					WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
 					Header.Builder hb = Header
@@ -74,34 +75,18 @@ public class Leader implements INodeState, FollowerListener {
 					hb.setDestination(destinationId);
 					wb.setHeader(hb);
 					wb.setSecret(1);
+					
 					state.getEmon().broadcastMessage(wb.build());
+					return;
 				}
-				break;
-			case DELETE:
-				break;
-			case UPDATE:
-				break;
-			default:
-				break;
-			}
-
-		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
-			switch (wrkMessage.getTask().getTaskMessage().getQuery()
-				.getAction()) {
-			case GET:
-				System.out.println("Do Things");
-				break;
-			case STORE:
-				System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-				System.out.println(wrkMessage);
-				System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+				
 				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
 				Header.Builder hb = Header
 					.newBuilder(wrkMessage.getHeader());
-				hb.setDestination(-1);
+				hb.setNodeId(nodeId);
+				hb.setDestination(nodeId);
 				wb.setHeader(hb);
 				wb.setSecret(1);
-				state.getEmon().broadcastMessage(wb.build());
 				break;
 			case DELETE:
 				break;
@@ -110,11 +95,61 @@ public class Leader implements INodeState, FollowerListener {
 			default:
 				break;
 			}
-		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
+
+		} else if (taskMessage.hasResponse()) {
+			
+		} else if (taskMessage.hasResponse()) {
 
 		}
 	}
+	
+	@Override
+	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
 
+		CommandMessage taskMessage = workMessage.getTask().getTaskMessage();
+		switch (taskMessage.getQuery().getAction()) {
+		
+		case GET:
+			System.out.println("Do Things");
+			break;
+			
+		case STORE:
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+			System.out.println(workMessage);
+			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
+			WorkMessage.Builder wb = WorkMessage.newBuilder(workMessage);
+			Header.Builder hb = Header
+				.newBuilder(workMessage.getHeader());
+			hb.setDestination(key2node.get(taskMessage.getQuery().getKey()));
+			wb.setHeader(hb);
+			wb.setSecret(1);
+			
+			if (hb.getDestination() == nodeId) {
+				try {
+					state.getQueues().getFromWorkServer().put(wb.build().getTask().getTaskMessage());
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} else {
+				state.getEmon().broadcastMessage(wb.build());
+			}
+			break;
+			
+		case DELETE:
+			break;
+		case UPDATE:
+			break;
+		default:
+			break;
+		}
+	
+	}
+
+	@Override
+	public void handleCmdError(WorkMessage workMessage, Channel channel) {
+		
+	}
+	
 	/*
 	* For this event I just reply with SIZEIS message.
 	* Since term is set when CANDIDATE starts election, this leader will go to Follower state as part of request vote event.
@@ -259,7 +294,7 @@ public class Leader implements INodeState, FollowerListener {
 		}
 
 		long currentTime = System.currentTimeMillis ();
-		state.setLeaderHeartBeatdt (currentTime);
+		//state.setLeaderHeartBeatdt (currentTime);
 
 		int followerId = workMessage.getHeader ().getNodeId ();
 		addFollower (followerId); // Add follower Id
@@ -270,7 +305,7 @@ public class Leader implements INodeState, FollowerListener {
 	@Override
 	public void beforeStateChange() {
 		System.out.println("~~~~~~~~Leader - Handle Before State Change Event");
-		activeNodes.clear ();
+		getActiveNodes().clear ();
 		followerMonitor.cancel ();
 	}
 
@@ -283,12 +318,16 @@ public class Leader implements INodeState, FollowerListener {
 	@Override
 	public void addFollower(int followerId) {
 		System.out.println("~~~~~~~~Leader - Follower Added");
-		activeNodes.put(followerId, theObject);
+		getActiveNodes().put(followerId, theObject);
 	}
 
 	@Override
 	public void removeFollower(int followerId) {
 		System.out.println("~~~~~~~~Leader - Handle Remove Follower");
-		activeNodes.remove(followerId);
+		getActiveNodes().remove(followerId);
+	}
+
+	public ConcurrentHashMap<Integer, Object> getActiveNodes() {
+		return activeNodes;
 	}
 }

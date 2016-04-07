@@ -1,8 +1,6 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import org.slf4j.Logger;
-
-import gash.router.container.RoutingConf;
+import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
 import routing.Pipe.CommandMessage;
 
@@ -11,13 +9,9 @@ import routing.Pipe.CommandMessage;
  */
 public class CmdFailureMsgHandler implements ICmdMessageHandler {
 
-	private final RoutingConf conf;
-	private final Logger logger;
 	private ICmdMessageHandler nextHandler;
 
-	public CmdFailureMsgHandler(RoutingConf state, Logger logger)  {
-		this.conf = state;
-		this.logger = logger;
+	public CmdFailureMsgHandler(CommandChannelHandler commandChannelHandler)  {
 	}
 
 	@Override

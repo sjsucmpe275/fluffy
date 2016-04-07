@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gash.router.container.RoutingConf;
-import gash.router.server.GlobalCommandChannelInitializer;
 import gash.router.server.MessageServer.JsonUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -155,8 +154,8 @@ public class CommConnection {
 
 		group = new NioEventLoopGroup();
 		try {
-			GlobalCommandChannelInitializer si = new GlobalCommandChannelInitializer(conf,false);
-			//CommInit si = new CommInit(false);
+//			GlobalCommandChannelInitializer si = new GlobalCommandChannelInitializer(conf,false);
+			CommInit si = new CommInit(false);
 			Bootstrap b = new Bootstrap();
 			b.group(group).channel(NioSocketChannel.class).handler(si);
 			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);

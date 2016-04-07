@@ -1,6 +1,7 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
@@ -14,12 +15,11 @@ import pipe.work.Work.WorkMessage;
 public class WrkFailureMessageHandler implements IWrkMessageHandler{
 
 	private final ServerState state;
-	private final Logger logger;
+	private final Logger logger = LoggerFactory.getLogger(WrkFailureMessageHandler.class);;
 	private IWrkMessageHandler nextHandler;
 
-	public WrkFailureMessageHandler(ServerState state, Logger logger)   {
+	public WrkFailureMessageHandler(ServerState state)   {
 		this.state = state;
-		this.logger = logger;
 	}
 
 	@Override

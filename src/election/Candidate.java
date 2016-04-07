@@ -57,7 +57,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleSizeIs(WorkMessage workMessage, Channel channel) {
-		logger.info("Getting size is:" + workMessage.getHeader().getNodeId());
+		System.out.println("Getting size is:" + workMessage.getHeader().getNodeId());
 		visitedNodes.put(workMessage.getHeader().getNodeId(), theObject);
 		System.out.println("****Getting size is : " + visitedNodes.size ());
 		System.out.println("****Visited Nodes : " + visitedNodes);
@@ -81,6 +81,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			//Cancel if there is any timer that is currently started...
 			timer.cancel ();
+			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 
 			//Change the state to Follower..
 			state.setState(NodeStateEnum.FOLLOWER);
@@ -265,7 +266,17 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("In candidate state.. dropping message..");
+		System.out.println(workMessage);
+	}
+	
+	@Override
+	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
+		handleCmdQuery(workMessage, channel);
+	}
+	
+	@Override
+	public void handleCmdError(WorkMessage workMessage, Channel channel) {
+		handleCmdQuery(workMessage, channel);
 	}
 }

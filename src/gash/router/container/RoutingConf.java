@@ -57,6 +57,7 @@ public class RoutingConf  {
 		electionTimeout=new AtomicInteger();
 		maxHops = new AtomicInteger ();
 		adaptorPort = new AtomicInteger(0);
+		secret = new AtomicInteger(0);
 	}
 
 	//private List<RoutingEntry> routing;

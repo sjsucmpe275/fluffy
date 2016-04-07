@@ -1,19 +1,13 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import org.slf4j.Logger;
-
-import gash.router.container.RoutingConf;
 import io.netty.channel.Channel;
 import routing.Pipe.CommandMessage;
 
 public class GlobalCommandMsgHandler implements ICmdMessageHandler  {
-	private final RoutingConf conf;
-	private final Logger logger;
+
 	private ICmdMessageHandler nextHandler;
 	
-	public GlobalCommandMsgHandler(RoutingConf conf, Logger logger)   {
-		this.conf = conf;
-		this.logger = logger;
+	public GlobalCommandMsgHandler()   {
 	}
 
 	@Override

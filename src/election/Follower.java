@@ -35,7 +35,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		this.nodeId = state.getConf().getNodeId();
 
 		/*Creating Leader Monitor, But will monitor beats only when I learn about Leader in the network*/
-		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getHeartbeatDt ());
+		leaderMonitor = new LeaderHealthMonitor (this, state.getConf().getElectionTimeout());
 		leaderMonitor.start ();
 
 		/*Initially I will always be in Follower State, and wait for some random time before going into Candidate State*/
@@ -48,22 +48,32 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
-		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
-			
-			if (wrkMessage.getHeader().getDestination() == nodeId) {
-				System.out.println("Carrying out command:" + wrkMessage
-					.getTask().getTaskMessage().getQuery().getKey());
-				Task.Builder t = Task.newBuilder();
-				t.setSeqId(wrkMessage.getTask().getTaskMessage().getQuery()
-					.getSequenceNo());
-				t.setSeriesId(wrkMessage.getTask().getTaskMessage().getQuery()
-					.getKey().hashCode());
-				t.setTaskMessage(wrkMessage.getTask().getTaskMessage());
-				state.getTasks().addTask(t.build());
-			}
-		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
 
+		System.out.println("Carrying out command:" + wrkMessage.getTask()
+			.getTaskMessage().getQuery().getKey());
+		Task.Builder t = Task.newBuilder();
+		t.setSeqId(wrkMessage.getTask().getTaskMessage().getQuery().getSequenceNo());
+		t.setSeriesId(wrkMessage.getTask().getTaskMessage().getQuery().getKey()
+			.hashCode());
+		t.setTaskMessage(wrkMessage.getTask().getTaskMessage());
+		state.getTasks().addTask(t.build());
+	}
+	
+	@Override
+	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
+		// If message reach this point. It should be transferred to command server
+		try {
+			state.getQueues().getFromWorkServer().put(workMessage.getTask().getTaskMessage());
+		} catch (InterruptedException e) {
+			// Enqueue failure message
+			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void handleCmdError(WorkMessage workMessage, Channel channel) {
+		// This should handle same as response message
+		handleCmdResponse(workMessage, channel);
 	}
 
 	@Override

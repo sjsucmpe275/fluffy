@@ -13,7 +13,7 @@ public class AdaptorEdgeMonitor extends EdgeMonitor  {
 	
 	
 	public AdaptorEdgeMonitor(ServerState state) {
-		super(state);
+		super(state, null);
 
 		
 	}

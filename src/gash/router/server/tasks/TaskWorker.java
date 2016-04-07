@@ -53,7 +53,7 @@ public class TaskWorker extends Thread {
 
 	@Override
 	public void run() {
-		logger.info("Starting task worker : " + Thread.currentThread());
+		System.out.println("Starting task worker : " + Thread.currentThread());
 		while (forever) {
 			if (state.getTasks().shouldSteal()) {
 				startStealing();
@@ -174,9 +174,12 @@ public class TaskWorker extends Thread {
 				rb.setSuccess(true);
 				rb.setSequenceNo(query.getSequenceNo());
 				rb.setInfomessage("Data stored successfully at key: " + key);
-
-				cb.setHeader(hb);
-				cb.setResponse(rb);
+				
+				cb.setHeader(hb.build());
+				cb.setResponse(rb.build());
+				System.out.println("**********************************");
+				System.out.println(cb.build());
+				System.out.println("**********************************");
 				break;
 
 			case UPDATE:
@@ -205,7 +208,23 @@ public class TaskWorker extends Thread {
 			returnTask.setTaskMessage(cb);
 			returnTask.setSeqId(task.getSeqId());
 			returnTask.setSeriesId(task.getSeriesId());
-			state.getEmon().broadcastMessage(wrapMessage(task));
+
+			WorkMessage workMessage = wrapMessage(returnTask.build());
+			
+			if (hb.getDestination() == state.getConf().getNodeId()) {
+				System.out.println("asdjaskdjkalsdjaklsdjaskldjl``````````````");
+				try {
+					state.getQueues().getFromWorkServer()
+						.put(workMessage.getTask().getTaskMessage());
+					System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+					System.out.println(workMessage.getTask().getTaskMessage());
+					System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			} else {
+				state.getEmon().broadcastMessage(workMessage);
+			}
 		}
 	}
 

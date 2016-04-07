@@ -27,7 +27,7 @@ public class RoundRobinStrategyTest {
 
 	@Test
 	public void testGetNodeIds() {
-		List<Integer> output=new ArrayList();
+		List<Integer> output=new ArrayList<Integer>();
 		
 		for(int j=0;j<20;j++){
 			int temp=0;

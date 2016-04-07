@@ -1,6 +1,7 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
@@ -13,12 +14,11 @@ import pipe.work.Work.WorkMessage;
 public class WrkPingMessageHandler implements IWrkMessageHandler {
 
 	private final ServerState state;
-	private final Logger logger;
+	private final Logger logger = LoggerFactory.getLogger(WrkPingMessageHandler.class);
 	private IWrkMessageHandler nextHandler;
 
-	public WrkPingMessageHandler(ServerState state, Logger logger) {
+	public WrkPingMessageHandler(ServerState state) {
 		this.state = state;
-		this.logger = logger;
 	}
 
 	@Override
@@ -36,12 +36,11 @@ public class WrkPingMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 
-		logger.info("ping from " + workMessage.getHeader().getNodeId());
-		//Todo: I commented this code to avoid infinite loop. Will update later
-				/*boolean p = msg.getPing();
-				WorkMessage.Builder rb = WorkMessage.newBuilder();
-				rb.setPing(true);
-				channel.write(rb.build());*/
+		logger.info("Ping from " + workMessage.getHeader().getNodeId());
+
+		WorkMessage.Builder rb = WorkMessage.newBuilder();
+		rb.setPing(true);
+		channel.write(rb.build());
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
+import gash.router.server.QueueManager;
 import gash.router.server.ServerState;
 import gash.router.server.WorkChannelInitializer;
 import gash.router.server.messages.wrk_messages.BeatMessage;
@@ -49,7 +50,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private EventLoopGroup group;
 	private EdgeHealthMonitorTask edgeHealthMonitorTask;
 	
-	public EdgeMonitor(ServerState state) {
+	public EdgeMonitor(ServerState state, QueueManager queues) {
 		if (state == null)
 			throw new RuntimeException("state is null");
 
@@ -94,7 +95,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 				for (EdgeInfo ei : outboundEdges.getEdgesMap ().values()) {
 					if (ei.isActive() && ei.getChannel() != null) {
 						if (debug)
-							logger.info ("*******Sending Heartbeat to: " + ei.getRef ());
+							System.out.println("*******Sending Heartbeat to: " + ei.getRef ());
 						BeatMessage beatMessage = new BeatMessage (state.getConf ().getNodeId ());
 						beatMessage.setDestination (ei.getRef ());
 						//beatMessage.setMaxHops (state.getConf ().getMaxHops ());
@@ -102,7 +103,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 					} else {
 						// TODO create a client to the node
 						if (debug)
-							logger.info("trying to connect to node " + ei.getRef());
+							System.out.println("trying to connect to node " + ei.getRef());
 
 						try {
 							WorkChannelInitializer wi = new WorkChannelInitializer (state, false);
@@ -129,7 +130,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 							logger.error("failed to initialize the client connection");
 //							ex.printStackTrace();
 						}
-						logger.info("trying to connect to node " + ei.getRef());
+						System.out.println("trying to connect to node " + ei.getRef());
 					}
 				}
 
