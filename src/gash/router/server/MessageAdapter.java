@@ -25,10 +25,10 @@ public class MessageAdapter {
 		return msg.getTask().getTaskMessage();
 	}
 	
-	public static WorkMessage getWorkMessage( RoutingConf conf, CommandMessage msg) {
+	public static WorkMessage getWorkMessageToLeader( ServerState state, CommandMessage msg) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
-		wb.setHeader(getGenericHeader(conf));
-		
+		wb.setHeader(getGenericHeader(state.getConf(), state.getLeaderId()));
+
 		Task.Builder tb = Task.newBuilder();
 		if (msg.hasQuery()) {
 			tb.setSeqId(msg.getQuery().getSequenceNo());
@@ -40,13 +40,13 @@ public class MessageAdapter {
 		tb.setTaskMessage(msg);
 		
 		wb.setTask(tb.build());
-		wb.setSecret(conf.getSecret());
+		wb.setSecret(state.getConf().getSecret());
 		return wb.build();
 	}
 	
-	public static Header getGenericHeader(RoutingConf conf) {
+	public static Header getGenericHeader(RoutingConf conf, int destination) {
 		Header.Builder hb = Header.newBuilder();
-		hb.setDestination(-1);
+		hb.setDestination(destination);
 		hb.setMaxHops(conf.getMaxHops());
 		hb.setNodeId(conf.getNodeId());
 		hb.setTime(System.currentTimeMillis());

@@ -188,7 +188,7 @@ public class Client implements CommListener {
 		}
 
 		try {
-			Thread.sleep(1 * 1000);
+			Thread.sleep(10 * 1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

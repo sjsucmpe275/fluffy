@@ -265,7 +265,17 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
-		// TODO Auto-generated method stub
-		
+		System.out.println("In candidate state.. dropping message..");
+		System.out.println(workMessage);
+	}
+	
+	@Override
+	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
+		handleCmdQuery(workMessage, channel);
+	}
+	
+	@Override
+	public void handleCmdError(WorkMessage workMessage, Channel channel) {
+		handleCmdQuery(workMessage, channel);
 	}
 }

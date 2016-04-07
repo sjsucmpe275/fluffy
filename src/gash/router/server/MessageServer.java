@@ -16,6 +16,7 @@ import deven.monitor.client.WorkerThread;
 import gash.router.container.MonitoringTask;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
+import gash.router.server.messages.wrk_messages.handlers.TaskMessageHandler;
 import gash.router.server.tasks.NoOpBalancer;
 import gash.router.server.tasks.TaskList;
 import gash.router.server.tasks.TaskWorker;
@@ -196,7 +197,7 @@ public class MessageServer {
 			//final Path path = FileSystems.getDefault().getPath();
 			logger.info("in message server");
 			state = new ServerState(conf);
-
+			state.setQueues(queues);
 			monitor.registerObserver(state);
 			monitor.monitorFile(confFile.getPath());
 
@@ -208,19 +209,22 @@ public class MessageServer {
 			Thread t = new Thread(emon);
 			t.start();
 
-			WorkServerQueueManager queueManager = new WorkServerQueueManager(queues, state);
-			queueManager.start();
+//			WorkServerQueueManager queueManager = new WorkServerQueueManager(queues, state);
+//			queueManager.start();
 			
 //			monitorThread = new WorkerThread("localhost", 5000, state);
 //			monitorThread.start();
-
+			
+			TaskMessageHandler command2workerThread = new TaskMessageHandler(state);
+			t = new Thread(command2workerThread);
+			t.start();
+			
 			int workerCount = 4;
 			ExecutorService executors = Executors.newFixedThreadPool(workerCount);
 			for(int i = 0; i < workerCount; i++) {
 				TaskWorker taskWorker = new TaskWorker(state);
 				executors.execute(taskWorker);
 			}
-			executors.shutdown();	
 		}
 
 		public void run() {

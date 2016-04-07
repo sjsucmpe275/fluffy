@@ -54,13 +54,14 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	}
 
 	private void initializeMessageHandlers() {
+		
 		//Define Handlers
-		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (state, logger);
-		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (state, logger);
-		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (state, logger);
-		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (state, logger);
-		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (state, logger);
-		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(state, logger);
+		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (state);
+		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (state);
+		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (state);
+		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (state);
+		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (state);
+		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(state);
 
 		//Chain all the handlers
 		beatMessageHandler.setNextHandler (failureMessageHandler);
