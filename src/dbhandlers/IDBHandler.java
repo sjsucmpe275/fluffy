@@ -23,7 +23,7 @@ public interface IDBHandler {
 	 * @param value - Data to store
 	 * @return Key at which object is stored
 	 */
-	public String put(String key, int sequenceId, byte[] value);
+	String put(String key, int sequenceId, byte[] value);
 	
 	/**
 	 * Method to store object. Key should be calculated implicitly.<br>
@@ -34,7 +34,7 @@ public interface IDBHandler {
 	 * @param value - Object to store
 	 * @return Key at which object is stored
 	 */
-	public String store(byte[] value);
+	String store(byte[] value);
 
 
 	/**

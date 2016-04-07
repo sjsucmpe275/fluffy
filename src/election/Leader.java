@@ -39,54 +39,52 @@ public class Leader implements INodeState, FollowerListener {
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
-		
-		System.out.println("LEADER RECEIVED MESSAGE");
-		System.out.println(wrkMessage);
-		CommandMessage taskMessage = wrkMessage.getTask().getTaskMessage();
-		if (taskMessage.hasQuery()) {
 
-			List<Integer> activeNodeIds = new ArrayList<>();
-			for (Integer i : activeNodes.keySet()) {
-				activeNodeIds.add(i);
-			}
-			
+		System.out.println ("LEADER RECEIVED MESSAGE");
+		System.out.println (wrkMessage);
+		CommandMessage taskMessage = wrkMessage.getTask ().getTaskMessage ();
+
+		List<Integer> activeNodeIds = new ArrayList<> ();
+
+			/*I am adding myself also as a Node, which will take part in storage/replication*/
+		activeNodeIds.add (nodeId);
+
+		for (Integer i : activeNodes.keySet ()) {
+			activeNodeIds.add (i);
+		}
+
 //			activeNodeIds.add(wrkMessage.getHeader().getDestination());
-			state.getTasks().addTask(wrkMessage.getTask());
-			switch (taskMessage.getQuery().getAction()) {
+
+		switch (taskMessage.getQuery ().getAction ()) {
 			case GET:
-				System.out.println("Do Things");
+				System.out.println ("Do Things");
 				break;
 			case STORE:
-				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-				System.out.println(wrkMessage);
-				System.out.println("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				System.out.println ("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+				System.out.println (wrkMessage);
+				System.out.println ("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
-				key2node.putIfAbsent(taskMessage.getQuery().getKey(),
-					wrkMessage.getHeader().getNodeId());
-				System.out.println(key2node);
-				
-				List<Integer> replicationNodes = strategy.getNodeIds(activeNodeIds);
-				
+				key2node.putIfAbsent (taskMessage.getQuery ().getKey (),
+						wrkMessage.getHeader ().getNodeId ());
+				System.out.println (key2node);
+
+				List<Integer> replicationNodes = strategy.getNodeIds (activeNodeIds);
+
 				for (Integer destinationId : replicationNodes) {
-					WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
+					WorkMessage.Builder wb = WorkMessage.newBuilder (wrkMessage);
 					Header.Builder hb = Header
-						.newBuilder(wrkMessage.getHeader());
-					hb.setNodeId(nodeId);
-					hb.setDestination(destinationId);
-					wb.setHeader(hb);
-					wb.setSecret(1);
-					
-					state.getEmon().broadcastMessage(wb.build());
-					return;
+							.newBuilder (wrkMessage.getHeader ());
+					hb.setNodeId (nodeId);
+					hb.setDestination (destinationId);
+					wb.setHeader (hb);
+					wb.setSecret (1);
+
+					if (destinationId != nodeId) {
+						state.getEmon ().broadcastMessage (wb.build ());
+					} else {
+						state.getTasks ().addTask (wrkMessage.getTask ());
+					}
 				}
-				
-				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
-				Header.Builder hb = Header
-					.newBuilder(wrkMessage.getHeader());
-				hb.setNodeId(nodeId);
-				hb.setDestination(nodeId);
-				wb.setHeader(hb);
-				wb.setSecret(1);
 				break;
 			case DELETE:
 				break;
@@ -94,23 +92,18 @@ public class Leader implements INodeState, FollowerListener {
 				break;
 			default:
 				break;
-			}
-
-		} else if (taskMessage.hasResponse()) {
-			
-		} else if (taskMessage.hasResponse()) {
-
 		}
+
 	}
 	
 	@Override
 	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
 
 		CommandMessage taskMessage = workMessage.getTask().getTaskMessage();
-		switch (taskMessage.getQuery().getAction()) {
+		switch (taskMessage.getResponse ().getAction()) {
 		
 		case GET:
-			System.out.println("Do Things");
+			System.out.println("Get is going");
 			break;
 			
 		case STORE:
@@ -120,7 +113,7 @@ public class Leader implements INodeState, FollowerListener {
 			WorkMessage.Builder wb = WorkMessage.newBuilder(workMessage);
 			Header.Builder hb = Header
 				.newBuilder(workMessage.getHeader());
-			hb.setDestination(key2node.get(taskMessage.getQuery().getKey()));
+			hb.setDestination(key2node.get(taskMessage.getResponse ().getKey()));
 			wb.setHeader(hb);
 			wb.setSecret(1);
 			

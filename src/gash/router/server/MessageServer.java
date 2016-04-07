@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import gash.router.server.messages.cmd_messages.handlers.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,10 +129,13 @@ public class MessageServer {
 	private static class StartCommandCommunication implements Runnable {
 		RoutingConf conf;
 		QueueManager queues;
+		CmdStorageMsgHandler cmdMessageHandler;
 		
 		public StartCommandCommunication(RoutingConf conf, QueueManager queues) {
 			this.conf = conf;
 			this.queues = queues;
+			cmdMessageHandler = new CmdStorageMsgHandler (queues);//createCommandMsgHandlersChainAndGetStart();
+			cmdMessageHandler.start();
 		}
 
 		public void run() {
@@ -153,7 +157,7 @@ public class MessageServer {
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
 				boolean compressComm = false;
-				b.childHandler(new CommandChannelInitializer (conf, compressComm, queues));
+				b.childHandler(new CommandChannelInitializer (conf, compressComm, queues, cmdMessageHandler));
 
 				// Start the server.
 				logger.info("Starting command server (" + conf.getNodeId() + "), listening on port = "
@@ -174,6 +178,25 @@ public class MessageServer {
 				workerGroup.shutdownGracefully();
 			}
 		}
+
+/*
+		private void createCommandMsgHandlersChainAndGetStart() throws Exception {
+			// Define Handlers
+			ICmdMessageHandler queryHandler = new CmdStorageMsgHandler (queues);
+*//*
+			ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler ();
+			ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler ();
+			ICmdMessageHandler msgHandler = new CmdMsgHandler ();
+*//*
+
+			// Chain all the handlers
+			queryHandler.setNextHandler (failureMsgHandler);
+			failureMsgHandler.setNextHandler (pingMsgHandler);
+			pingMsgHandler.setNextHandler(msgHandler);
+
+			// Define the start of Chain
+			cmdMessageHandler = queryHandler;
+		}*/
 	}
 
 	/**

@@ -148,7 +148,6 @@ public class CommConnection {
 
 	private void init() {
 		System.out.println("--> initializing connection to " + host + ":" + port);
-		RoutingConf conf = init(new File("runtime/route-2.conf"));
 		// the queue to support client-side surging
 		outbound = new LinkedBlockingDeque<CommandMessage>();
 

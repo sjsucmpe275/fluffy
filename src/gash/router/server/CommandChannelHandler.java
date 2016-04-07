@@ -37,28 +37,12 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 	private ICmdMessageHandler cmdMessageHandler;
 	private QueueManager queues;
 
-	public CommandChannelHandler(RoutingConf conf, QueueManager queues) throws Exception {
+	public CommandChannelHandler(RoutingConf conf, QueueManager queues, ICmdMessageHandler cmdMessageHandler) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
 		}
 		this.queues = queues;
-		initializeMessageHandlers();
-	}
-
-	private void initializeMessageHandlers() throws Exception {
-		// Define Handlers
-		ICmdMessageHandler queryHandler = new CmdStorageMsgHandler (queues);
-		ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler(this);
-		ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler(this);
-		ICmdMessageHandler msgHandler = new CmdMsgHandler(this);
-
-		// Chain all the handlers
-		queryHandler.setNextHandler (failureMsgHandler);
-		failureMsgHandler.setNextHandler (pingMsgHandler);
-		pingMsgHandler.setNextHandler(msgHandler);
-
-		// Define the start of Chain
-		cmdMessageHandler = queryHandler;
+		this.cmdMessageHandler = cmdMessageHandler;
 	}
 
 	public Logger getLogger() {

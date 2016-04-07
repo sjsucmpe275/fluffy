@@ -27,16 +27,16 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 	public CmdStorageMsgHandler(QueueManager queues) {
 		super();
 		this.queues = queues;
-		start ();
+		//start ();
 	}
 
 	@Override
 	public void run() {
+		System.out.println("Started Command Storage Message Handler...");
+
 		while (forever) {
 			try {
-
-				System.out.println("Started Command Storage Message Handler...");
-				// Getting message from work server. This message should be 
+				// Getting message from work server. This message should be
 				// forwarded to the client.
 				CommandMessage msg = queues.getFromWorkServer().take();
 				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
@@ -106,6 +106,8 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 		public void operationComplete(ChannelFuture future) throws Exception {
 			// we lost the connection or have shutdown.
 			System.out.println("--> client lost connection to the server");
+			System.out.println(key2Address);
+			System.out.println(addr2Channel);
 			addr2Channel.remove (future.channel ().remoteAddress ());
 		}
 	}

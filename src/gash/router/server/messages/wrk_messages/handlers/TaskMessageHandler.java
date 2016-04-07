@@ -1,12 +1,10 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.MessageAdapter;
-import gash.router.server.Router;
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
@@ -20,11 +18,9 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 	private final Logger logger = LoggerFactory.getLogger(TaskMessageHandler.class);
 	private IWrkMessageHandler nextHandler;
 	private boolean forever = true;
-	private Router router;
-	
+
 	public TaskMessageHandler(ServerState state) {
 		this.state = state;
-		this.router = new Router(state);
 	}
 
 	@Override
@@ -77,7 +73,6 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 
 				if (state.getLeaderId() == state.getConf().getNodeId()) {
 					handleMessage(wrkMsg, null);
-					return;
 				}
 				state.getEmon ().broadcastMessage (wrkMsg);
 			} catch (InterruptedException e) {

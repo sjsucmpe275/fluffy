@@ -4,7 +4,6 @@
 package gash.router.server.tasks;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,9 +30,13 @@ public class RoundRobinStrategy implements IReplicationStrategy {
 	@Override
 	public List<Integer> getNodeIds(List<Integer> activeNodes) {
 		List<Integer> output = new ArrayList<Integer>();
-		activeNodes = Collections.synchronizedList(activeNodes);
 		int temp = 0;
 		index++;
+
+		if(activeNodes.size () < size)  {
+			return activeNodes;
+		}
+
 		while (output.size() < size && activeNodes.size() >= size) {
 			output.add(activeNodes.get((index + temp) % activeNodes.size()));
 			temp++;
