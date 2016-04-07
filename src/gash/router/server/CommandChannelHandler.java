@@ -85,26 +85,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 		// TODO How can you implement this without if-else statements? - With
 		// COR
 		try {
-
 			cmdMessageHandler.handleMessage(msg, channel);
-
-//			WorkMessage.Builder wb = WorkMessage.newBuilder();
-//
-//			Header.Builder header = Common.Header.newBuilder();
-//			header.setNodeId(-1);
-//			header.setDestination(-1);
-//			header.setMaxHops(10);
-//			header.setTime(System.currentTimeMillis());
-//
-//			Task.Builder t = Task.newBuilder();
-//			t.setSeqId(msg.getQuery().getSequenceNo());
-//			t.setSeriesId(msg.getQuery().getKey().hashCode());
-//			t.setTaskMessage(msg);
-//
-//			wb.setHeader(header);
-//			wb.setSecret(1);
-//			wb.setTask(t);
-
 		} catch (Exception e) {
 			logger.error("Got an exception in command", e);
 			FailureMessage failureMessage = new FailureMessage(msg, e);
@@ -137,56 +118,8 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 		ctx.close();
 	}
 
-	public static class ClientClosedListener implements ChannelFutureListener {
-		CommandChannelHandler cc;
-
-		public ClientClosedListener(CommandChannelHandler commandChannelHandler) {
-			this.cc = commandChannelHandler;
-		}
-
-		@Override
-		public void operationComplete(ChannelFuture future) throws Exception {
-			// we lost the connection or have shutdown.
-			System.out.println("--> client lost connection to the server");
-			System.out.flush();
-		}
-	}
-
 	public RoutingConf getConf() {
 		return conf;
 	}
-
-/*
-	public Channel connect() {
-		if (channel == null) {
-			init();
-		}
-
-		if (channel != null && channel.isSuccess()
-			&& channel.channel().isWritable())
-			return channel.channel();
-		else
-			throw new RuntimeException("Not able to establish connection ");
-	}
-*/
-/*
-
-	public boolean write(CommandMessage msg) {
-		if (msg == null)
-			return false;
-		else if (channel == null)
-			throw new RuntimeException("missing channel");
-
-		// TODO a queue is needed to prevent overloading of the socket
-		// connection. For the demonstration, we don't need it
-		ChannelFuture cf = connect().writeAndFlush(msg);
-		if (cf.isDone() && !cf.isSuccess()) {
-			logger.error("failed to send message to server");
-			return false;
-		}
-
-		return true;
-	}
-*/
 }
 

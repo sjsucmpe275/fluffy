@@ -63,6 +63,7 @@ public class WorkServerQueueManager extends Thread {
 				msg = queues.getToWorkServer().take();
 				System.out.println("Fetched task for worker...");
 				System.out.println(msg);
+
 				WorkMessage wrkMsg = MessageAdapter.getWorkMessage(state.getConf(),
 					msg);
 				
