@@ -66,7 +66,7 @@ public class Leader implements INodeState, FollowerListener {
 				System.out.println(key2node);
 				
 				List<Integer> replicationNodes = strategy.getNodeIds(activeNodeIds);
-				
+				System.out.println("Active nodes: " + activeNodeIds);
 				for (Integer destinationId : replicationNodes) {
 					WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
 					Header.Builder hb = Header

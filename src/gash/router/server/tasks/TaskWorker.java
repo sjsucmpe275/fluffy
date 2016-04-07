@@ -53,7 +53,7 @@ public class TaskWorker extends Thread {
 
 	@Override
 	public void run() {
-		logger.info("Starting task worker : " + Thread.currentThread());
+		System.out.println("Starting task worker : " + Thread.currentThread());
 		while (forever) {
 			if (state.getTasks().shouldSteal()) {
 				startStealing();

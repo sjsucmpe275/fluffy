@@ -95,7 +95,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 				for (EdgeInfo ei : outboundEdges.getEdgesMap ().values()) {
 					if (ei.isActive() && ei.getChannel() != null) {
 						if (debug)
-							logger.info ("*******Sending Heartbeat to: " + ei.getRef ());
+							System.out.println("*******Sending Heartbeat to: " + ei.getRef ());
 						BeatMessage beatMessage = new BeatMessage (state.getConf ().getNodeId ());
 						beatMessage.setDestination (ei.getRef ());
 						//beatMessage.setMaxHops (state.getConf ().getMaxHops ());
@@ -103,7 +103,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 					} else {
 						// TODO create a client to the node
 						if (debug)
-							logger.info("trying to connect to node " + ei.getRef());
+							System.out.println("trying to connect to node " + ei.getRef());
 
 						try {
 							WorkChannelInitializer wi = new WorkChannelInitializer (state, false);
@@ -130,7 +130,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 							logger.error("failed to initialize the client connection");
 //							ex.printStackTrace();
 						}
-						logger.info("trying to connect to node " + ei.getRef());
+						System.out.println("trying to connect to node " + ei.getRef());
 					}
 				}
 

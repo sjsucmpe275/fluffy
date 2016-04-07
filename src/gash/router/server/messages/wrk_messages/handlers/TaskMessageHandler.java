@@ -79,7 +79,7 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 					handleMessage(wrkMsg, null);
 					return;
 				} 
-				wrkMsg = router.route(wrkMsg);
+				wrkMsg = router.publish(wrkMsg);
 				
 				if (wrkMsg != null) {
 					handleMessage(wrkMsg, null);

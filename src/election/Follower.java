@@ -35,7 +35,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		this.nodeId = state.getConf().getNodeId();
 
 		/*Creating Leader Monitor, But will monitor beats only when I learn about Leader in the network*/
-		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getHeartbeatDt ());
+		leaderMonitor = new LeaderHealthMonitor (this, state.getConf().getElectionTimeout());
 		leaderMonitor.start ();
 
 		/*Initially I will always be in Follower State, and wait for some random time before going into Candidate State*/

@@ -86,15 +86,15 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 			return;
 		}
 
-		if (debug)
-			PrintUtil.printWork(msg);
-
 		msg = router.route(msg);
 		
 		if (msg == null) {
 			System.out.println("No need to handle message.. ");
 			return;
 		}
+
+		if (debug)
+			PrintUtil.printWork(msg);
 		
 		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
