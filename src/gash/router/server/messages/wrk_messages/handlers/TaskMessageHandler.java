@@ -78,12 +78,8 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 				if (state.getLeaderId() == state.getConf().getNodeId()) {
 					handleMessage(wrkMsg, null);
 					return;
-				} 
-				wrkMsg = router.route(wrkMsg);
-				
-				if (wrkMsg != null) {
-					handleMessage(wrkMsg, null);
 				}
+				state.getEmon ().broadcastMessage (wrkMsg);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

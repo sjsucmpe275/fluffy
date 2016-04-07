@@ -188,7 +188,7 @@ public class Leader implements INodeState, FollowerListener {
 	* */
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Leader - Handle Leader Size Event");
+		System.out.println("~~~~~~~~Leader - Handle Leader Is Event");
 
 		int inComingTerm = workMessage.getLeader ().getElectionId ();
 		int currentTerm = state.getElectionId ();
@@ -293,11 +293,13 @@ public class Leader implements INodeState, FollowerListener {
 			return;
 		}
 
-		long currentTime = System.currentTimeMillis ();
 		//state.setLeaderHeartBeatdt (currentTime);
 
 		int followerId = workMessage.getHeader ().getNodeId ();
 		addFollower (followerId); // Add follower Id
+
+		long currentTime = System.currentTimeMillis ();
+
 		followerMonitor.onBeat (followerId, currentTime); // notify follower monitor about heart beat
 	}
 

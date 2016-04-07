@@ -15,11 +15,6 @@
  */
 package gash.router.server.edges;
 
-import java.util.Timer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
@@ -35,8 +30,12 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
+
+import java.util.Timer;
 
 public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private static Logger logger = LoggerFactory.getLogger("edge monitor");
@@ -168,7 +167,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	public void broadCastInBound(WorkMessage msg) {
 		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
 			System.out.println("**********Broadcasting to inbound edges********");
-
+			System.out.println(inboundEdges);
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}
@@ -176,6 +175,9 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	}
 
 	public void broadCastOutBound(WorkMessage msg) {
+		System.out.println("**********Broadcasting to outbound edges********");
+		System.out.println(outboundEdges);
+
 		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);

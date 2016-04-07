@@ -1,19 +1,18 @@
 package election;
 
-import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.Random;
 
 public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
 
@@ -35,7 +34,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		this.nodeId = state.getConf().getNodeId();
 
 		/*Creating Leader Monitor, But will monitor beats only when I learn about Leader in the network*/
-		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getHeartbeatDt ());
+		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getElectionTimeout ());
 		leaderMonitor.start ();
 
 		/*Initially I will always be in Follower State, and wait for some random time before going into Candidate State*/
@@ -79,6 +78,11 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
 
+		/*if(workMessage.getHeader ().getNodeId () == state.getLeaderId ())   {
+			System.out.println("Receiving messages to calculate size again from my leader");
+			return;
+		}
+*/
 		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
 
 		state.getEmon ().broadcastMessage(util.createSizeIsMessage(state,

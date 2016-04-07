@@ -1,16 +1,15 @@
 package election;
 
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election.LeaderStatus;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
 	private final Logger logger = LoggerFactory.getLogger("Candidate");
@@ -81,6 +80,8 @@ public class Candidate implements INodeState, TimeoutListener {
 
 			//Cancel if there is any timer that is currently started...
 			timer.cancel ();
+
+			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 
 			//Change the state to Follower..
 			state.setState(NodeStateEnum.FOLLOWER);
