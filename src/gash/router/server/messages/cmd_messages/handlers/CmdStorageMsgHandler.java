@@ -23,7 +23,7 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 	public CmdStorageMsgHandler(QueueManager queues) {
 		super();
 		this.queues = queues;
-		start ();
+		start();
 	}
 
 	@Override
@@ -34,7 +34,9 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 				// Getting message from work server. This message should be 
 				// forwarded to the client.
 				CommandMessage msg = queues.getFromWorkServer().take();
-
+				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+				System.out.println(msg);
+				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 				// Expecting only command messages which needs to be sent to the
 				// client. So channel is null.
 			} catch (InterruptedException e) {
@@ -66,7 +68,8 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 		if(cmdMessage.hasQuery ())  {
 				key2Channel.put (cmdMessage.getQuery ().getKey (), channel);
 			try {
-				queues.getToWorkServer ().put (cmdMessage);
+				System.out.println("-----Putting in queues------");
+				queues.getToWorkServer ().put(cmdMessage);
 			} catch (InterruptedException e) {
 				e.printStackTrace ();
 			}

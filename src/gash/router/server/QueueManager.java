@@ -28,6 +28,8 @@ public class QueueManager {
 	
 	
 	public LinkedBlockingQueue<CommandMessage> getToWorkServer() {
+		System.out.println("To work server...");
+		System.out.println(toWorkServer);
 		return toWorkServer;
 	}
 

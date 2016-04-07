@@ -25,6 +25,10 @@ public interface INodeState {
 	void handleBeat(WorkMessage workMessage, Channel channel);
 	
 	void handleCmdQuery(WorkMessage workMessage, Channel channel);
+	
+	void handleCmdResponse(WorkMessage workMessage, Channel channel);
+	
+	void handleCmdError(WorkMessage workMessage, Channel channel);
 
 	default void handleMessage(WorkMessage workMessage, Channel channel) {
 		LeaderStatus leaderStatus = workMessage.getLeader();
