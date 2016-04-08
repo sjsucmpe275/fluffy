@@ -103,7 +103,17 @@ public class TaskWorker extends Thread {
 
 						cb.setHeader(hb);
 						cb.setResponse(rb);
+						
+						Task.Builder returnTask = Task.newBuilder();
+						returnTask.setTaskMessage(cb);
+						returnTask.setSeqId(task.getSeqId());
+						returnTask.setSeriesId(task.getSeriesId());
+
+						WorkMessage workMessage = wrapMessage(returnTask.build());
+						state.getCurrentState().handleCmdResponse(workMessage, null);
+						
 					}
+					continue;
 				}
 				break;
 
@@ -165,8 +175,6 @@ public class TaskWorker extends Thread {
 					dbHandler.put(key, 0, mb.build().toByteArray());
 				}
 
-				System.out.println("Data saved at: " + key);
-
 				rb.setAction(query.getAction());
 				rb.setKey(key);
 				rb.setSuccess(true);
@@ -175,9 +183,6 @@ public class TaskWorker extends Thread {
 				
 				cb.setHeader(hb.build());
 				cb.setResponse(rb.build());
-				System.out.println("**********************************");
-				System.out.println(cb.build());
-				System.out.println("**********************************");
 				break;
 
 			case UPDATE:
@@ -209,20 +214,6 @@ public class TaskWorker extends Thread {
 
 			WorkMessage workMessage = wrapMessage(returnTask.build());
 			state.getCurrentState ().handleCmdResponse (workMessage, null);
-
-			/*if (hb.getDestination() == state.getConf().getNodeId()) {
-				System.out.println("asdjaskdjkalsdjaklsdjaskldjl``````````````");
-					state.getCurrentState ().handleCmdResponse (workMessage, null);
-*//*
-					state.getQueues().getFromWorkServer()
-						.put(workMessage.getTask().getTaskMessage());
-*//*
-					System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-					System.out.println(workMessage.getTask().getTaskMessage());
-					System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-			} else {
-				state.getEmon().broadcastMessage(workMessage);
-			}*/
 		}
 	}
 

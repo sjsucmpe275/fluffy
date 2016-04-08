@@ -61,26 +61,24 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	@Override
 	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
 		try {
-			switch(workMessage.getTask ().getTaskMessage ().getResponse ().getAction ())    {
-				case GET:
-					state.getEmon ().broadcastMessage (workMessage);
-					break;
-				case STORE:
-					//I have this condition because even TaskWorker can call handleCommandMessage...
-					if (workMessage.getHeader ().getDestination () == state.getConf().getNodeId()) {
-
-						state.getQueues().getFromWorkServer()
-							.put(workMessage.getTask().getTaskMessage());
-
-						System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-						System.out.println(workMessage.getTask().getTaskMessage());
-						System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-					} else {
-						state.getEmon().broadcastMessage(workMessage);
-					}
-					break;
-				default:
-					break;
+			switch (workMessage.getTask().getTaskMessage().getResponse()
+				.getAction()) {
+			case GET:
+			case STORE:
+				// I have this condition because even TaskWorker can call
+				// handleCommandMessage...
+				if (workMessage.getHeader().getDestination() == state.getConf()
+					.getNodeId()) {
+					state.getQueues().getFromWorkServer()
+						.put(workMessage.getTask().getTaskMessage());
+				} else {
+					state.getEmon().broadcastMessage(workMessage);
+				}
+				break;
+			default:
+				state.getQueues().getFromWorkServer()
+					.put(workMessage.getTask().getTaskMessage());
+				break;
 			}
 		} catch (InterruptedException e) {
 			// Enqueue failure message

@@ -39,9 +39,6 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 				// Getting message from work server. This message should be
 				// forwarded to the client.
 				CommandMessage msg = queues.getFromWorkServer().take();
-				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-				System.out.println(msg);
-				System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
 
 				//Update Address of the source from where I recieved Message Request...
 				if(key2Address.containsKey (msg.getResponse ().getKey ()))  {
@@ -78,8 +75,6 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 	private void handleTaskMessage(CommandMessage cmdMessage, Channel channel) {
 
 		System.out.println("Adding command message to work server:");
-		System.out.println(cmdMessage);
-
 
 		if(cmdMessage.hasQuery ())  {
 			if(!key2Address.containsKey (cmdMessage.getQuery ().getKey ()))  {

@@ -1,20 +1,21 @@
 package election;
 
-import gash.router.server.ServerState;
-import gash.router.server.tasks.IReplicationStrategy;
-import gash.router.server.tasks.RoundRobinStrategy;
-import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pipe.common.Common.Header;
-import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gash.router.server.ServerState;
+import gash.router.server.tasks.IReplicationStrategy;
+import gash.router.server.tasks.RoundRobinStrategy;
+import io.netty.channel.Channel;
+import pipe.common.Common.Header;
+import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
 
 public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 
@@ -28,7 +29,7 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	private ElectionUtil util;
 	private IReplicationStrategy strategy;
 	private ConcurrentHashMap<String, Integer> key2node;
-	private ExecutorService service = Executors.newCachedThreadPool();
+	private ExecutorService service = Executors.newFixedThreadPool(3);
 	private ConcurrentHashMap<String, GetTask> taskMap;
 	
 	public Leader(ServerState state) {
@@ -44,59 +45,58 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
-		
-		System.out.println ("LEADER RECEIVED MESSAGE");
-		System.out.println (wrkMessage);
-		CommandMessage taskMessage = wrkMessage.getTask ().getTaskMessage ();
 
-		List<Integer> activeNodeIds = new ArrayList<> ();
+		System.out.println("LEADER RECEIVED MESSAGE");
+		CommandMessage taskMessage = wrkMessage.getTask().getTaskMessage();
 
-			/*I am adding myself also as a Node, which will take part in storage/replication*/
-		activeNodeIds.add (nodeId);
 
-		for (Integer i : activeNodes.keySet ()) {
-			activeNodeIds.add (i);
+		/*
+		 * I am adding myself also as a Node, which will take part in
+		 * storage/replication
+		 */
+
+		List<Integer> activeNodeIds = new ArrayList<>();
+		activeNodeIds.add(nodeId);
+		for (Integer i : activeNodes.keySet()) {
+			activeNodeIds.add(i);
 		}
 
-//			activeNodeIds.add(wrkMessage.getHeader().getDestination());
+		// activeNodeIds.add(wrkMessage.getHeader().getDestination());
 
-		switch (taskMessage.getQuery ().getAction ()) {
-			case GET:
-				System.out.println ("Do Things");
-				break;
-			case STORE:
-				System.out.println ("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
-				System.out.println (wrkMessage);
-				System.out.println ("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+		switch (taskMessage.getQuery().getAction()) {
+		case GET:
+			GetTask task = new GetTask(state, this, wrkMessage);
+			service.submit(task);
+			taskMap.putIfAbsent(taskMessage.getQuery().getKey(), task);
+			break;
+		case STORE:
+			key2node.putIfAbsent(taskMessage.getQuery().getKey(),
+				wrkMessage.getHeader().getNodeId());
+			System.out.println(key2node);
 
-				key2node.putIfAbsent (taskMessage.getQuery ().getKey (),
-						wrkMessage.getHeader ().getNodeId ());
-				System.out.println (key2node);
+			List<Integer> replicationNodes = strategy.getNodeIds(activeNodeIds);
 
-				List<Integer> replicationNodes = strategy.getNodeIds (activeNodeIds);
+			for (Integer destinationId : replicationNodes) {
+				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
+				Header.Builder hb = Header.newBuilder(wrkMessage.getHeader());
+				hb.setNodeId(nodeId);
+				hb.setDestination(destinationId);
+				wb.setHeader(hb);
+				wb.setSecret(1);
 
-				for (Integer destinationId : replicationNodes) {
-					WorkMessage.Builder wb = WorkMessage.newBuilder (wrkMessage);
-					Header.Builder hb = Header
-							.newBuilder (wrkMessage.getHeader ());
-					hb.setNodeId (nodeId);
-					hb.setDestination (destinationId);
-					wb.setHeader (hb);
-					wb.setSecret (1);
-
-					if (destinationId != nodeId) {
-						state.getEmon ().broadcastMessage (wb.build ());
-					} else {
-						state.getTasks ().addTask (wrkMessage.getTask ());
-					}
+				if (destinationId != nodeId) {
+					state.getEmon().broadcastMessage(wb.build());
+				} else {
+					state.getTasks().addTask(wrkMessage.getTask());
 				}
-				break;
-			case DELETE:
-				break;
-			case UPDATE:
-				break;
-			default:
-				break;
+			}
+			break;
+		case DELETE:
+			break;
+		case UPDATE:
+			break;
+		default:
+			break;
 		}
 	}
 	
@@ -107,13 +107,13 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 		switch (taskMessage.getResponse ().getAction()) {
 		
 		case GET:
-			System.out.println("Get is going");
+			if (taskMap.containsKey(taskMessage.getResponse().getKey())) {
+				GetTask task = taskMap.get(taskMessage.getResponse().getKey());
+				task.handleResponse(workMessage);
+			}
 			break;
 			
 		case STORE:
-			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
-			System.out.println(workMessage);
-			System.out.println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%");
 			WorkMessage.Builder wb = WorkMessage.newBuilder(workMessage);
 			Header.Builder hb = Header
 				.newBuilder(workMessage.getHeader());
@@ -331,7 +331,7 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	}
 
 	@Override
-	public void notifyGetTaskCompletion(String requestKey) {
-		
+	public void notifyGetTaskCompletion(String key) {
+		taskMap.remove(key);
 	}
 }
