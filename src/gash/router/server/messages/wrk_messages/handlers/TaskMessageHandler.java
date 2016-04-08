@@ -66,8 +66,6 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 			
 			try {
 				msg = state.getQueues().getToWorkServer().take();
-				System.out.println("$$$$$$$$$$$$$Fetched task for worker...");
-				System.out.println(msg);
 				WorkMessage wrkMsg = MessageAdapter
 					.getWorkMessageToLeader(state, msg);
 

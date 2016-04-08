@@ -20,7 +20,7 @@ public class GetTask implements Runnable{
 	private int size = Integer.MAX_VALUE;
 	private TreeSet<Integer> receivedMessages;
 	private LinkedBlockingQueue<WorkMessage> blockingQueue;
-	
+
 	public GetTask(ServerState state, IGetTaskListener listener, WorkMessage requestMsg) {
 		this.listener = listener;
 		this.requestMsg = requestMsg;
