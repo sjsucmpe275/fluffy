@@ -39,9 +39,6 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 	private void handle(WorkMessage workMessage, Channel channel) {
 
 		CommandMessage msg = workMessage.getTask().getTaskMessage();
-		System.out.println("Handling task message...");
-		System.out.println(workMessage);
-		System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 		if (msg.hasQuery()) {
 			state.getCurrentState().handleCmdQuery(workMessage, channel);
 		} else if (msg.hasResponse()) {
@@ -66,8 +63,6 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 			
 			try {
 				msg = state.getQueues().getToWorkServer().take();
-				System.out.println("$$$$$$$$$$$$$Fetched task for worker...");
-				System.out.println(msg);
 				WorkMessage wrkMsg = MessageAdapter
 					.getWorkMessageToLeader(state, msg);
 

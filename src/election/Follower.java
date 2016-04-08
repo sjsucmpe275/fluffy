@@ -60,9 +60,26 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	
 	@Override
 	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
-		// If message reach this point. It should be transferred to command server
 		try {
-			state.getQueues().getFromWorkServer().put(workMessage.getTask().getTaskMessage());
+			switch (workMessage.getTask().getTaskMessage().getResponse()
+				.getAction()) {
+			case GET:
+			case STORE:
+				// I have this condition because even TaskWorker can call
+				// handleCommandMessage...
+				if (workMessage.getHeader().getDestination() == state.getConf()
+					.getNodeId()) {
+					state.getQueues().getFromWorkServer()
+						.put(workMessage.getTask().getTaskMessage());
+				} else {
+					state.getEmon().broadcastMessage(workMessage);
+				}
+				break;
+			default:
+				state.getQueues().getFromWorkServer()
+					.put(workMessage.getTask().getTaskMessage());
+				break;
+			}
 		} catch (InterruptedException e) {
 			// Enqueue failure message
 			e.printStackTrace();

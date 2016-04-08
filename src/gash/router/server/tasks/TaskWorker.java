@@ -3,21 +3,13 @@
  */
 package gash.router.server.tasks;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Map;
-import java.util.concurrent.FutureTask;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-
 import dbhandlers.DatabaseFactory;
 import dbhandlers.IDBHandler;
 import gash.router.server.ServerState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
@@ -25,6 +17,11 @@ import routing.Pipe.CommandMessage;
 import storage.Storage;
 import storage.Storage.Metadata;
 import storage.Storage.Query;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Map;
 
 /**
  * @author saurabh
@@ -106,7 +103,17 @@ public class TaskWorker extends Thread {
 
 						cb.setHeader(hb);
 						cb.setResponse(rb);
+						
+						Task.Builder returnTask = Task.newBuilder();
+						returnTask.setTaskMessage(cb);
+						returnTask.setSeqId(task.getSeqId());
+						returnTask.setSeriesId(task.getSeriesId());
+
+						WorkMessage workMessage = wrapMessage(returnTask.build());
+						state.getCurrentState().handleCmdResponse(workMessage, null);
+						
 					}
+					continue;
 				}
 				break;
 
@@ -168,8 +175,6 @@ public class TaskWorker extends Thread {
 					dbHandler.put(key, 0, mb.build().toByteArray());
 				}
 
-				System.out.println("Data saved at: " + key);
-
 				rb.setAction(query.getAction());
 				rb.setKey(key);
 				rb.setSuccess(true);
@@ -178,9 +183,6 @@ public class TaskWorker extends Thread {
 				
 				cb.setHeader(hb.build());
 				cb.setResponse(rb.build());
-				System.out.println("**********************************");
-				System.out.println(cb.build());
-				System.out.println("**********************************");
 				break;
 
 			case UPDATE:
@@ -211,21 +213,7 @@ public class TaskWorker extends Thread {
 			returnTask.setSeriesId(task.getSeriesId());
 
 			WorkMessage workMessage = wrapMessage(returnTask.build());
-			
-			if (hb.getDestination() == state.getConf().getNodeId()) {
-				System.out.println("asdjaskdjkalsdjaklsdjaskldjl``````````````");
-				try {
-					state.getQueues().getFromWorkServer()
-						.put(workMessage.getTask().getTaskMessage());
-					System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-					System.out.println(workMessage.getTask().getTaskMessage());
-					System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			} else {
-				state.getEmon().broadcastMessage(workMessage);
-			}
+			state.getCurrentState ().handleCmdResponse (workMessage, null);
 		}
 	}
 

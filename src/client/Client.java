@@ -26,8 +26,8 @@ public class Client implements CommListener {
 
 	private static final int M = 1024 * 1024;
 
-	private String host = "192.168.1.100";
-	private int port = 4668;
+	private String host = "localhost";
+	private int port = 4568;
 	private MessageClient mc;
 	private String filepath;
 	private List<Response> responseList;

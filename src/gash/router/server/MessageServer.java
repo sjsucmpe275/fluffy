@@ -153,7 +153,7 @@ public class MessageServer {
 				b.option(ChannelOption.SO_BACKLOG, 100);
 				b.option(ChannelOption.TCP_NODELAY, true);
 				b.option(ChannelOption.SO_KEEPALIVE, true);
-
+				b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
 				boolean compressComm = false;

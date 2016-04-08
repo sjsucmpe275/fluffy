@@ -267,7 +267,6 @@ public class Candidate implements INodeState, TimeoutListener {
 	@Override
 	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
 		System.out.println("In candidate state.. dropping message..");
-		System.out.println(workMessage);
 	}
 	
 	@Override
