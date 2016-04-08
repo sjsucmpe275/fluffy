@@ -64,6 +64,9 @@ public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 		switch (taskMessage.getQuery ().getAction ()) {
 			case GET:
 				System.out.println ("Do Things");
+				GetTask task = new GetTask(state, wrkMessage, this);
+				service.submit(task);
+				taskMap.putIfAbsent(taskMessage.getQuery().getKey(), task);
 				break;
 			case STORE:
 				System.out.println ("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
@@ -108,7 +111,10 @@ public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 		switch (taskMessage.getResponse ().getAction()) {
 		
 		case GET:
-			System.out.println("Get is going");
+			if (taskMap.containsKey(taskMessage.getResponse().getKey())) {
+				GetTask task = taskMap.get(taskMessage.getResponse().getKey());
+				task.handleResponse(workMessage);
+			}
 			break;
 			
 		case STORE:
@@ -332,7 +338,7 @@ public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 	}
 
 	@Override
-	public void notifyGetTaskCompletion() {
-		
+	public void notifyGetTaskCompletion(String key) {
+		taskMap.remove(key);
 	}
 }
