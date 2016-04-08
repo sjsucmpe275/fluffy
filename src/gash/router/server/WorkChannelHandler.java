@@ -35,7 +35,7 @@ import java.net.InetSocketAddress;
  * 
  */
 public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage> {
-	private static Logger logger = LoggerFactory.getLogger("work");
+	private static Logger logger = LoggerFactory.getLogger("Work Channel Handler");
 	private ServerState state;
 	private boolean debug = true;
 	private IWrkMessageHandler wrkMessageHandler;
@@ -92,7 +92,7 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 		msg = router.route(msg);
 		
 		if (msg == null) {
-			System.out.println("No need to handle message.. ");
+			logger.info("No need to handle message.. ");
 			return;
 		}
 		
@@ -138,9 +138,5 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
-	}
-
-	public ServerState getServerState() {
-		return state;
 	}
 }

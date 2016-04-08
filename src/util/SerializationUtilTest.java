@@ -1,18 +1,17 @@
 package util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
-
+import com.google.protobuf.ByteString;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 
-import com.google.protobuf.ByteString;
+import java.io.File;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @FixMethodOrder
 public class SerializationUtilTest {
@@ -44,7 +43,7 @@ public class SerializationUtilTest {
 
 		System.out.println(list.size());
 		for (ByteString data : list) {
-			// System.out.println(data.size());
+			// logger.info(data.size());
 		}
 		instance.writeFile("src/util/dump2.jpg", list);
 		File file = new File("src/util/dump2.jpg");

@@ -1,23 +1,21 @@
 package election;
 
+import gash.router.server.ServerState;
+import gash.router.server.tasks.IReplicationStrategy;
+import gash.router.server.tasks.RoundRobinStrategy;
+import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gash.router.server.ServerState;
-import gash.router.server.tasks.IReplicationStrategy;
-import gash.router.server.tasks.RoundRobinStrategy;
-import io.netty.channel.Channel;
-import pipe.common.Common.Header;
-import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
-
-public class Leader implements INodeState, FollowerListener, IGetTaskListener {
+public class Leader implements INodeState, FollowerListener, ITaskListener {
 
 	private final Logger logger = LoggerFactory.getLogger("Leader");
 
@@ -28,9 +26,10 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	private FollowerHealthMonitor followerMonitor;
 	private ElectionUtil util;
 	private IReplicationStrategy strategy;
-	private ConcurrentHashMap<String, Integer> key2node;
+	//private ConcurrentHashMap<String, Integer> key2node;
 	private ExecutorService service = Executors.newFixedThreadPool(3);
-	private ConcurrentHashMap<String, GetTask> taskMap;
+	private ConcurrentHashMap<String, GetTask> getTaskMap;
+	private ConcurrentHashMap<String, StoreTask> storeTaskMap;
 	
 	public Leader(ServerState state) {
 		this.state = state;
@@ -40,98 +39,78 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 				state.getConf().getElectionTimeout());
 		this.util = new ElectionUtil();
 		this.strategy = new RoundRobinStrategy(2);
-		this.key2node = new ConcurrentHashMap<>();
-		this.taskMap = new ConcurrentHashMap<>();
+		//this.key2node = new ConcurrentHashMap<>();
+		this.getTaskMap = new ConcurrentHashMap<>();
+		this.storeTaskMap = new ConcurrentHashMap<> ();
 	}
 
-	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+	public synchronized void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
 
-		System.out.println("LEADER RECEIVED MESSAGE");
+		logger.info("LEADER RECEIVED MESSAGE");
 		CommandMessage taskMessage = wrkMessage.getTask().getTaskMessage();
-
 
 		/*
 		 * I am adding myself also as a Node, which will take part in
 		 * storage/replication
 		 */
 
-		List<Integer> activeNodeIds = new ArrayList<>();
-		activeNodeIds.add(nodeId);
+		List<Integer> availableNodes = new ArrayList<>();
+		availableNodes.add(nodeId);
 		for (Integer i : activeNodes.keySet()) {
-			activeNodeIds.add(i);
+			availableNodes.add(i);
 		}
 
-		// activeNodeIds.add(wrkMessage.getHeader().getDestination());
-
 		switch (taskMessage.getQuery().getAction()) {
-		case GET:
-			GetTask task = new GetTask(state, this, wrkMessage);
-			service.submit(task);
-			taskMap.putIfAbsent(taskMessage.getQuery().getKey(), task);
-			break;
-		case STORE:
-			key2node.putIfAbsent(taskMessage.getQuery().getKey(),
-				wrkMessage.getHeader().getNodeId());
-			System.out.println(key2node);
-
-			List<Integer> replicationNodes = strategy.getNodeIds(activeNodeIds);
-
-			for (Integer destinationId : replicationNodes) {
-				WorkMessage.Builder wb = WorkMessage.newBuilder(wrkMessage);
-				Header.Builder hb = Header.newBuilder(wrkMessage.getHeader());
-				hb.setNodeId(nodeId);
-				hb.setDestination(destinationId);
-				wb.setHeader(hb);
-				wb.setSecret(1);
-
-				if (destinationId != nodeId) {
-					state.getEmon().broadcastMessage(wb.build());
-				} else {
-					state.getTasks().addTask(wrkMessage.getTask());
+			case GET:
+				GetTask getTask = new GetTask (state, this, wrkMessage);
+				service.submit(getTask);
+				getTaskMap.put(taskMessage.getQuery().getKey(), getTask);
+				break;
+			case STORE:
+				/*Store task should be created only once for a particular key, which will be mostly for Meta Data. For Data Chunks existing task will be
+				* used for replication and task will finish execution when all the chunks are stored...*/
+				if(!storeTaskMap.containsKey (taskMessage.getQuery ().getKey ())) {
+					StoreTask storeTask = new StoreTask (state, this, wrkMessage, strategy, availableNodes);
+					service.submit (storeTask);
+					storeTaskMap.put(wrkMessage.getTask ().getTaskMessage ().getQuery ().getKey (), storeTask);
+					return;
 				}
-			}
-			break;
-		case DELETE:
-			break;
-		case UPDATE:
-			break;
-		default:
-			break;
+
+				String key = wrkMessage.getTask ().getTaskMessage ().getQuery ().getKey ();
+				if(storeTaskMap.containsKey (key))    {
+					//Update the task with new message to broad cast
+					storeTaskMap.get (key).handleRequest (wrkMessage, availableNodes);
+					return;
+				}
+				break;
+			case DELETE:
+				break;
+			case UPDATE:
+				break;
+			default:
+				break;
 		}
 	}
 	
 	@Override
-	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
+	public synchronized void handleCmdResponse(WorkMessage workMessage, Channel channel) {
 
 		CommandMessage taskMessage = workMessage.getTask().getTaskMessage();
 		switch (taskMessage.getResponse ().getAction()) {
 		
 		case GET:
-			if (taskMap.containsKey(taskMessage.getResponse().getKey())) {
-				GetTask task = taskMap.get(taskMessage.getResponse().getKey());
+			if (getTaskMap.containsKey(taskMessage.getResponse().getKey())) {
+				AbstractTask task = getTaskMap.get(taskMessage.getResponse().getKey());
 				task.handleResponse(workMessage);
 			}
 			break;
 			
 		case STORE:
-			WorkMessage.Builder wb = WorkMessage.newBuilder(workMessage);
-			Header.Builder hb = Header
-				.newBuilder(workMessage.getHeader());
-			hb.setDestination(key2node.get(taskMessage.getResponse ().getKey()));
-			wb.setHeader(hb);
-			wb.setSecret(1);
-			
-			if (hb.getDestination() == nodeId) {
-				try {
-					state.getQueues().getFromWorkServer().put(wb.build().getTask().getTaskMessage());
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			} else {
-				state.getEmon().broadcastMessage(wb.build());
+			if (storeTaskMap.containsKey(taskMessage.getResponse().getKey())) {
+				AbstractTask task = storeTaskMap.get(taskMessage.getResponse().getKey());
+				task.handleResponse(workMessage);
 			}
 			break;
-			
 		case DELETE:
 			break;
 		case UPDATE:
@@ -154,23 +133,11 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	* */
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Leader - Handle Cluster Size Event");
+		logger.info("~~~~~~~~Leader - Handle Cluster Size Event");
 
-		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
+		logger.info("Replying to :" + workMessage.getHeader().getNodeId());
 		state.getEmon().broadcastMessage(util.createSizeIsMessage(
 			state, workMessage.getHeader().getNodeId()));
-		
-/*
-		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
-			.getOutboundEdges().getEdgesMap();
-		for (Integer destinationId : edgeMap.keySet()) {
-			EdgeInfo edge = edgeMap.get(destinationId);
-			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(
-					util.createGetClusterSizeMessage(nodeId, destinationId));
-			}
-		}
-*/
 	}
 
 	/*
@@ -185,19 +152,19 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	* */
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Leader - Handle Leader Is Event");
+		logger.info("~~~~~~~~Leader - Handle Leader Is Event");
 
 		int inComingTerm = workMessage.getLeader ().getElectionId ();
 		int currentTerm = state.getElectionId ();
 
-		System.out.println("Leader - New Term: " + inComingTerm);
-		System.out.println("Leader - Current Term: " + currentTerm);
+		logger.info("Leader - New Term: " + inComingTerm);
+		logger.info("Leader - Current Term: " + currentTerm);
 
 		/*
 		* If there is another node which is leader in new term, then I update myself and go back to election state
 		* */
 		if (inComingTerm > currentTerm) {
-			System.out.println("LEADER IS: " + workMessage.getLeader().getLeaderId());
+			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(workMessage.getLeader().getElectionId());
 			state.setLeaderId(workMessage.getLeader().getLeaderId());
 			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
@@ -219,13 +186,13 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	* */
 	@Override
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Leader - Handle Vote Request Event");
+		logger.info("~~~~~~~~Leader - Handle Vote Request Event");
 
 		int inComingTerm = workMessage.getLeader ().getElectionId ();
 		int currentTerm = state.getElectionId ();
 
-		System.out.println("Leader - New Term: " + inComingTerm);
-		System.out.println("Leader - Current Term: " + currentTerm);
+		logger.info("Leader - New Term: " + inComingTerm);
+		logger.info("Leader - Current Term: " + currentTerm);
 
 		if (inComingTerm > currentTerm) {
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
@@ -271,13 +238,13 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	* */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Leader - Handle Beat Event");
+		logger.info("~~~~~~~~Leader - Handle Beat Event");
 
 		int inComingTerm = workMessage.getLeader ().getElectionId ();
 		int currentTerm = state.getElectionId ();
 
-		System.out.println("Leader - New Term: " + inComingTerm);
-		System.out.println("Leader - Current Term: " + currentTerm);
+		logger.info("Leader - New Term: " + inComingTerm);
+		logger.info("Leader - Current Term: " + currentTerm);
 
 		if(inComingTerm > currentTerm)   {
 			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
@@ -290,8 +257,6 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 			return;
 		}
 
-		//state.setLeaderHeartBeatdt (currentTime);
-
 		int followerId = workMessage.getHeader ().getNodeId ();
 		addFollower (followerId); // Add follower Id
 
@@ -303,26 +268,26 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	/* Release all the resources. In this case it is only followerMonitor */
 	@Override
 	public void beforeStateChange() {
-		System.out.println("~~~~~~~~Leader - Handle Before State Change Event");
+		logger.info("~~~~~~~~Leader - Handle Before State Change Event");
 		getActiveNodes().clear ();
 		followerMonitor.cancel ();
 	}
 
 	@Override
 	public void afterStateChange() {
-		System.out.println("~~~~~~~~Leader - Handle After State Change Event");
+		logger.info("~~~~~~~~Leader - Handle After State Change Event");
 		followerMonitor.start();
 	}
 
 	@Override
 	public void addFollower(int followerId) {
-		System.out.println("~~~~~~~~Leader - Follower Added");
+		logger.info("~~~~~~~~Leader - Follower Added");
 		getActiveNodes().put(followerId, theObject);
 	}
 
 	@Override
 	public void removeFollower(int followerId) {
-		System.out.println("~~~~~~~~Leader - Handle Remove Follower");
+		logger.info("~~~~~~~~Leader - Handle Remove Follower");
 		getActiveNodes().remove(followerId);
 	}
 
@@ -331,7 +296,17 @@ public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 	}
 
 	@Override
-	public void notifyGetTaskCompletion(String key) {
-		taskMap.remove(key);
+	public void notifyTaskCompletion(String key) {
+		logger.info("Task Complete Notification");
+
+		if(getTaskMap.containsKey (key))   {
+			logger.info("Removing Get Task");
+			getTaskMap.remove(key);
+		}
+
+		if(storeTaskMap.containsKey (key))  {
+			logger.info("Removing Store Task");
+			storeTaskMap.remove (key);
+		}
 	}
 }

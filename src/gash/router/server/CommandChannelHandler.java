@@ -32,16 +32,14 @@ import routing.Pipe.CommandMessage;
  * 
  */
 public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMessage> {
-	protected static Logger logger = LoggerFactory.getLogger("cmd");
+	protected static Logger logger = LoggerFactory.getLogger("Command Channel Handler");
 	private RoutingConf conf;
 	private ICmdMessageHandler cmdMessageHandler;
-	private QueueManager queues;
 
-	public CommandChannelHandler(RoutingConf conf, QueueManager queues, ICmdMessageHandler cmdMessageHandler) throws Exception {
+	public CommandChannelHandler(RoutingConf conf, ICmdMessageHandler cmdMessageHandler) throws Exception {
 		if (conf != null) {
 			this.conf = conf;
 		}
-		this.queues = queues;
 		this.cmdMessageHandler = cmdMessageHandler;
 	}
 
@@ -60,7 +58,7 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 		
 		if (msg == null) {
 			// TODO add logging
-			System.out.println("ERROR: Unexpected content - " + msg);
+			logger.info("ERROR: Unexpected content - " + msg);
 			return;
 		}
 

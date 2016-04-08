@@ -58,6 +58,7 @@ public class MessageServer {
 
 	public void startServer() {
 		StartWorkCommunication comm = new StartWorkCommunication(conf, queues);
+		/*Adaptor Communication is for Inter Cluster Communication - it was not fully done*/
 //		StartAdaptorCommunication adapComm = new StartAdaptorCommunication(conf);
 		logger.info("Work starting");
 
@@ -100,7 +101,7 @@ public class MessageServer {
 			br = new BufferedInputStream(new FileInputStream(cfg));
 			br.read(raw);
 			conf = JsonUtil.decode(new String(raw), RoutingConf.class);
-			System.out.println(conf.getNodeId());
+			System.out.println (conf.getNodeId());
 			if (!verifyConf(conf))
 				throw new RuntimeException("verification of configuration failed");
 		} catch (Exception ex) {
@@ -157,7 +158,7 @@ public class MessageServer {
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
 				boolean compressComm = false;
-				b.childHandler(new CommandChannelInitializer (conf, compressComm, queues, cmdMessageHandler));
+				b.childHandler(new CommandChannelInitializer (conf, compressComm, cmdMessageHandler));
 
 				// Start the server.
 				logger.info("Starting command server (" + conf.getNodeId() + "), listening on port = "
@@ -178,25 +179,6 @@ public class MessageServer {
 				workerGroup.shutdownGracefully();
 			}
 		}
-
-/*
-		private void createCommandMsgHandlersChainAndGetStart() throws Exception {
-			// Define Handlers
-			ICmdMessageHandler queryHandler = new CmdStorageMsgHandler (queues);
-*//*
-			ICmdMessageHandler failureMsgHandler = new CmdFailureMsgHandler ();
-			ICmdMessageHandler pingMsgHandler = new CmdPingMsgHandler ();
-			ICmdMessageHandler msgHandler = new CmdMsgHandler ();
-*//*
-
-			// Chain all the handlers
-			queryHandler.setNextHandler (failureMsgHandler);
-			failureMsgHandler.setNextHandler (pingMsgHandler);
-			pingMsgHandler.setNextHandler(msgHandler);
-
-			// Define the start of Chain
-			cmdMessageHandler = queryHandler;
-		}*/
 	}
 
 	/**
@@ -232,12 +214,6 @@ public class MessageServer {
 			Thread t = new Thread(emon);
 			t.start();
 
-//			WorkServerQueueManager queueManager = new WorkServerQueueManager(queues, state);
-//			queueManager.start();
-			
-//			monitorThread = new WorkerThread("localhost", 5000, state);
-//			monitorThread.start();
-			
 			TaskMessageHandler command2workerThread = new TaskMessageHandler(state);
 			t = new Thread(command2workerThread);
 			t.start();

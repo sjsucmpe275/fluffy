@@ -90,11 +90,11 @@ public class FollowerHealthMonitor {
 				while (!stop.get()) {
 
 					if (debug)
-						System.out.println("********Started: " + new Date(System.currentTimeMillis()));
+						logger.info("********Started: " + new Date(System.currentTimeMillis()));
 
 					if (broadCastBeat) {
 						// Broadcast heartbeat to all the followers
-						System.out.println ("#####Leader broadcasting heartbeat to all followers");
+						logger.info ("#####Leader broadcasting heartbeat to all followers");
 
 						LeaderStatusMessage beat = new LeaderStatusMessage (state.getConf().getNodeId());
 						beat.setElectionId (state.getElectionId ());
@@ -122,12 +122,12 @@ public class FollowerHealthMonitor {
 							followerListener.removeFollower (nodeId);
 						}
 
-						System.out.println ("####Follower heartbeats:" + follower2BeatTimeMap);
+						logger.info ("####Follower heartbeats:" + follower2BeatTimeMap);
 						broadCastBeat = true;
 					}
 				}
 			} catch (InterruptedException e) {
-				System.out.println("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
+				logger.info("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
 			}
 		}
 	}

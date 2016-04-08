@@ -62,7 +62,7 @@ public class MonitorClient {
 
 		ChannelFuture cf = connect().writeAndFlush(msg);
 		if (cf.isDone() && !cf.isSuccess()) {
-			System.out.println("failed to send message to server");
+			logger.info("failed to send message to server");
 			return false;
 		}
 		return true;
@@ -80,7 +80,7 @@ public class MonitorClient {
 	}
 	
 	private void init() {
-		System.out.println("--> initializing connection to " + host + ":" + port);
+		logger.info("--> initializing connection to " + host + ":" + port);
 
 		group = new NioEventLoopGroup();
 		try {
@@ -99,7 +99,7 @@ public class MonitorClient {
 			ClientClosedListener ccl = new ClientClosedListener(this);
 			channel.channel().closeFuture().addListener(ccl);
 
-			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
+			logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 		} catch (Throwable ex) {
@@ -153,7 +153,7 @@ public class MonitorClient {
 		@Override
 		public void operationComplete(ChannelFuture future) throws Exception {
 			// we lost the connection or have shutdown.
-			System.out.println("--> client lost connection to the server");
+			logger.info("--> client lost connection to the server");
 			System.out.flush();
 
 			// @TODO if lost, try to re-establish the connection

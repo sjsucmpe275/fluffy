@@ -35,46 +35,33 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Candidate - Handle Cluster Size Event");
+		logger.info("~~~~~~~~Candidate - Handle Cluster Size Event");
 
 		state.getEmon().broadcastMessage(util.createSizeIsMessage(
 				state, workMessage.getHeader().getNodeId()));
-
-		/*channel.writeAndFlush(util.createSizeIsMessage(nodeId,
-			workMessage.getHeader().getNodeId()));
-
-		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon().getOutboundEdges().getEdgesMap();
-
-		for (Integer destinationId : edgeMap.keySet()) {
-			EdgeInfo edge = edgeMap.get(destinationId);
-			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(
-						util.createGetClusterSizeMessage(nodeId, destinationId));
-			}
-		}*/
 	}
 
 	@Override
 	public void handleSizeIs(WorkMessage workMessage, Channel channel) {
 		logger.info("Getting size is:" + workMessage.getHeader().getNodeId());
 		visitedNodes.put(workMessage.getHeader().getNodeId(), theObject);
-		System.out.println("****Getting size is : " + visitedNodes.size ());
-		System.out.println("****Visited Nodes : " + visitedNodes);
+		logger.info("****Getting size is : " + visitedNodes.size ());
+		logger.info("****Visited Nodes : " + visitedNodes);
 	}
 
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
 	//	validateTermAndUpdateStateIfRequired (workMessage);
-		System.out.println("~~~~~~~~Candidate - Handle LeaderIs Event");
+		logger.info("~~~~~~~~Candidate - Handle LeaderIs Event");
 
 		int inComingTerm = workMessage.getLeader().getElectionId();
 		int currentTerm = state.getElectionId ();
 
-		System.out.println("Candidate - New Term: " + inComingTerm);
-		System.out.println("Candidate - Current Term: " + currentTerm);
+		logger.info("Candidate - New Term: " + inComingTerm);
+		logger.info("Candidate - Current Term: " + currentTerm);
 
 		if (workMessage.getLeader().getElectionId() >= state.getElectionId()) {
-			System.out.println("LEADER IS: " + workMessage.getLeader().getLeaderId());
+			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(workMessage.getLeader().getElectionId());
 			state.setLeaderId(workMessage.getLeader().getLeaderId());
 
@@ -90,7 +77,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~~~~Candidate - Handle Vote Request Event");
+		logger.info("~~~~~~~~~~~Candidate - Handle Vote Request Event");
 		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
 			VoteResponse vote = new VoteResponse (nodeId,
 					workMessage.getLeader().getElectionId(),
@@ -117,14 +104,14 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleVoteResponse(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Candidate - Handle Vote Response Event");
-		System.out.println("Receiving Vote Response from :" + workMessage.getHeader().getNodeId());
+		logger.info("~~~~~~~~Candidate - Handle Vote Response Event");
+		logger.info("Receiving Vote Response from :" + workMessage.getHeader().getNodeId());
 
 		LeaderStatus leader = workMessage.getLeader();
 		/*getLeaderId - nothing other than candiate Id, I set this value before I send vote request*/
 		if (leader.getVotedFor() == state.getConf ().getNodeId () && leader.getVoteGranted()) {
 			votes.put(workMessage.getHeader().getNodeId(), theObject);
-			System.out.println("Votes: " + votes.toString());
+			logger.info("Votes: " + votes.toString());
 		}
 
 	}
@@ -138,16 +125,16 @@ public class Candidate implements INodeState, TimeoutListener {
 	* */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Candidate - Handle Beat Event");
+		logger.info("~~~~~~~~Candidate - Handle Beat Event");
 
 		int inComingTerm = workMessage.getLeader().getElectionId();
 		int currentTerm = state.getElectionId ();
 
-		System.out.println("Candidate - New Term: " + inComingTerm);
-		System.out.println("Candidate - Current Term: " + currentTerm);
+		logger.info("Candidate - New Term: " + inComingTerm);
+		logger.info("Candidate - Current Term: " + currentTerm);
 
 		if (workMessage.getLeader().getElectionId() >= state.getElectionId()) {
-			System.out.println("*****Heart Beat From Leader: " + workMessage.getLeader().getLeaderId());
+			logger.info("*****Heart Beat From Leader: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(workMessage.getLeader().getElectionId());
 			state.setLeaderId(workMessage.getLeader().getLeaderId());
 
@@ -164,41 +151,41 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void beforeStateChange() {
-		System.out.println("~~~~~~~~Candidate - Before State Change Event");
+		logger.info("~~~~~~~~Candidate - Before State Change Event");
 		timer.cancel ();
 	}
 
 	@Override
 	public void afterStateChange() {
-		System.out.println("~~~~~~~~Candidate - After State Change Event");
+		logger.info("~~~~~~~~Candidate - After State Change Event");
 		clear();
 		getClusterSize();
 	}
 
 	@Override
 	public void notifyTimeout() {
-		System.out.println("~~~~~~~~Candidate - Notify Timeout Event - " + Thread.currentThread ().getName ());
+		logger.info("~~~~~~~~Candidate - Notify Timeout Event - " + Thread.currentThread ().getName ());
 		//Cancel the previous timer...
 		timer.cancel ();
 
 		sizeOfCluster = visitedNodes.size() + 1;
 		requiredVotes = Math.round((sizeOfCluster / 2) + 0.5f);
-		System.out.println("###############################");
-		System.out.println("Size of the network is: " + sizeOfCluster);
-		System.out.println("Required vote count is: " + requiredVotes);
-		System.out.println("Time: " + System.currentTimeMillis());
-		System.out.println("###############################");
+		logger.info("###############################");
+		logger.info("Size of the network is: " + sizeOfCluster);
+		logger.info("Required vote count is: " + requiredVotes);
+		logger.info("Time: " + System.currentTimeMillis());
+		logger.info("###############################");
 		
 		startElection();
 
 		//start a new timer...
 		timer.start (() -> {
 			int myVoteCount = votes.size () + 1;
-			System.out.println("#########################");
-			System.out.println("Election is over..");
-			System.out.println("Time: " + System.currentTimeMillis());
-			System.out.println("Votes I got: " + myVoteCount);
-			System.out.println("#########################");
+			logger.info("#########################");
+			logger.info("Election is over..");
+			logger.info("Time: " + System.currentTimeMillis());
+			logger.info("Votes I got: " + myVoteCount);
+			logger.info("#########################");
 
 			if (myVoteCount >= requiredVotes) {
 				/*Update myself as a Leader in the new term and broad cast LEADERIS message*/
@@ -208,7 +195,7 @@ public class Candidate implements INodeState, TimeoutListener {
 				//TODO this should be in separate method.
 				state.getEmon().broadcastMessage(util
 						.createLeaderIsMessage(state));
-				System.out.println("State is leader now..");
+				logger.info("State is leader now..");
 				state.setState(NodeStateEnum.LEADER);
 			}
 
@@ -220,35 +207,6 @@ public class Candidate implements INodeState, TimeoutListener {
 
 		state.getEmon ().broadcastMessage (util.createGetClusterSizeMessage(
 				state, -1));
-
-/*		ConcurrentHashMap<Integer, EdgeInfo> edgeMap = state.getEmon()
-				.getOutboundEdges().getEdgesMap();
-
-
-		//Broad Cast on Each outbound edge
-		for (Integer destinationId : edgeMap.keySet()) {
-			EdgeInfo edge = edgeMap.get(destinationId);
-
-			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-						state, destinationId));
-			}
-		}
-
-		//Broadcast on each in-bound edge
-		edgeMap = state.getEmon()
-				.getInboundEdges().getEdgesMap();
-
-		for (Integer destinationId : edgeMap.keySet()) {
-			EdgeInfo edge = edgeMap.get(destinationId);
-
-			if (edge.isActive() && edge.getChannel() != null) {
-				edge.getChannel().writeAndFlush(util.createGetClusterSizeMessage(
-						state, destinationId));
-			}
-		}
-*/
-
 		timer.start ();
 	}
 
@@ -266,7 +224,7 @@ public class Candidate implements INodeState, TimeoutListener {
 
 	@Override
 	public void handleCmdQuery(WorkMessage workMessage, Channel channel) {
-		System.out.println("In candidate state.. dropping message..");
+		logger.info("In candidate state.. dropping message..");
 	}
 	
 	@Override

@@ -10,7 +10,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * @author saurabh
- *
  */
 public class MultiClientRunner {
 

@@ -15,22 +15,25 @@
  */
 package gash.router.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common.Failure;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
 public class PrintUtil {
+	private static final Logger logger = LoggerFactory.getLogger("Print Util");
 	private static final String gap = "   ";
 
 	public static void printHeader(Header hdr) {
-		System.out.println("\n-------------------------------------------------------");
-		System.out.println("ID:   " + hdr.getNodeId());
-		System.out.println("Time: " + hdr.getTime());
+		logger.info("\n-------------------------------------------------------");
+		logger.info("ID:   " + hdr.getNodeId());
+		logger.info("Time: " + hdr.getTime());
 		if (hdr.hasMaxHops())
-			System.out.println("Hops: " + hdr.getMaxHops());
+			logger.info("Hops: " + hdr.getMaxHops());
 		if (hdr.hasDestination())
-			System.out.println("Dest: " + hdr.getDestination());
+			logger.info("Dest: " + hdr.getDestination());
 
 	}
 
@@ -39,23 +42,23 @@ public class PrintUtil {
 
 		System.out.print("\nCommand: ");
 		if (msg.hasErr()) {
-			System.out.println("Failure");
-			System.out.println(PrintUtil.gap + "Code:    " + msg.getErr().getId());
-			System.out.println(PrintUtil.gap + "Ref ID:  " + msg.getErr().getRefId());
-			System.out.println(PrintUtil.gap + "Message: " + msg.getErr().getMessage());
+			logger.info("Failure");
+			logger.info(PrintUtil.gap + "Code:    " + msg.getErr().getId());
+			logger.info(PrintUtil.gap + "Ref ID:  " + msg.getErr().getRefId());
+			logger.info(PrintUtil.gap + "Message: " + msg.getErr().getMessage());
 		} else if (msg.hasPing())
-			System.out.println("Ping");
+			logger.info("Ping");
 		else if (msg.hasMessage()) {
-			System.out.println("Message");
-			System.out.println(PrintUtil.gap + "Msg:  " + msg.getMessage());
+			logger.info("Message");
+			logger.info(PrintUtil.gap + "Msg:  " + msg.getMessage());
 		} else if (msg.hasQuery()) {
-			System.out.println("Query");
-//			System.out.println(msg.getQuery().getAction().name());
-//			System.out.println(msg.getQuery().getKey());
-//			System.out.println(msg.getQuery().getData());
-			System.out.println("--------------------");
+			logger.info("Query");
+//			logger.info(msg.getQuery().getAction().name());
+//			logger.info(msg.getQuery().getKey());
+//			logger.info(msg.getQuery().getData());
+			logger.info("--------------------");
 		} else {
-			System.out.println("Unknown");
+			logger.info("Unknown");
 		}
 	}
 
@@ -64,24 +67,24 @@ public class PrintUtil {
 
 		System.out.print("\nWork: ");
 		if (msg.hasErr())
-			System.out.println("Failure");
+			logger.info("Failure");
 		else if (msg.hasPing())
-			System.out.println("Ping");
+			logger.info("Ping");
 		else if(msg.hasBeat ())
-			System.out.println("Beat");
+			logger.info("Beat");
 		else if(msg.hasLeader()) {
-			System.out.println("Election");
-			System.out.println(msg);
+			logger.info("Election");
+			logger.info(msg.toString ());
 		}else if(msg.hasTask()){
-			System.out.println("Task");
+			logger.info("Task");
 		} 
 		else
-			System.out.println("Unknown");
+			logger.info("Unknown");
 
-//		System.out.println(PrintUtil.gap + "Secret:  " + msg.getSecret());
+//		logger.info(PrintUtil.gap + "Secret:  " + msg.getSecret());
 	}
 
 	public static void printFailure(Failure f) {
-		System.out.println("ERROR: " + f.getId() + "." + f.getRefId() + " : " + f.getMessage());
+		logger.info("ERROR: " + f.getId() + "." + f.getRefId() + " : " + f.getMessage());
 	}
 }

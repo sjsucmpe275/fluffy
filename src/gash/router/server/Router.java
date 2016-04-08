@@ -1,5 +1,7 @@
 package gash.router.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
 
@@ -8,6 +10,7 @@ import pipe.work.Work.WorkMessage;
  *
  */
 public class Router {
+	private final Logger logger = LoggerFactory.getLogger("Router");
 
 	private final ServerState state;
 
@@ -28,7 +31,7 @@ public class Router {
 		}
 
 		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-			System.out.println(
+			logger.info(
 					"Same message received by source! Dropping message...");
 			return null;
 		}
@@ -53,20 +56,20 @@ public class Router {
 				// If destination is not -1 that means this message is only for
 				// broadcasting. So return null.
 				if (msg.getHeader().getDestination() != -1) {
-					System.out.println("Destination is not -1...");
+					logger.info("Destination is not -1...");
 					return null;
 				}
 			} else {
-				System.out.println("MAX HOPS is Zero! Dropping message...");
+				logger.info("MAX HOPS is Zero! Dropping message...");
 				return null;
 			}
 		}
-		System.out.println("<<<<<<<<<<<<Returning Message>>>>>>>>>>>>>>>>>>>>>>>>" + msg);
+		logger.info("<<<<<<<<<<<<Returning Message>>>>>>>>>>>>>>>>>>>>>>>>" + msg);
 		return msg;
 	}
 
 	private void broadcast(WorkMessage msg) {
-		System.out.println("Forwarding message...");
+		logger.info("Forwarding message...");
 		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
 		Header.Builder hb = Header.newBuilder(msg.getHeader());
 		hb.setMaxHops(hb.getMaxHops() - 1);

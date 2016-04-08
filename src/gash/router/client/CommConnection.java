@@ -147,7 +147,7 @@ public class CommConnection {
 	
 
 	private void init() {
-		System.out.println("--> initializing connection to " + host + ":" + port);
+		logger.info("--> initializing connection to " + host + ":" + port);
 		// the queue to support client-side surging
 		outbound = new LinkedBlockingDeque<CommandMessage>();
 
@@ -168,7 +168,7 @@ public class CommConnection {
 			// connection, we can try to re-establish it.
 			channel.channel().closeFuture();
 
-			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
+			logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 		} catch (Throwable ex) {

@@ -110,8 +110,8 @@ public class TaskWorker extends Thread {
 						returnTask.setSeriesId(task.getSeriesId());
 
 						WorkMessage workMessage = wrapMessage(returnTask.build());
-						state.getCurrentState().handleCmdResponse(workMessage, null);
-						
+
+						state.getCurrentState ().handleCmdResponse(workMessage, null);
 					}
 					continue;
 				}
@@ -218,11 +218,7 @@ public class TaskWorker extends Thread {
 	}
 
 	private void startStealing() {
-	
-	}
 
-	public void shutdown() {
-		forever = false;
 	}
 
 	private Common.Header.Builder buildHeader() {

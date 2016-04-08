@@ -7,6 +7,8 @@ import gash.router.server.QueueManager;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import routing.Pipe.CommandMessage;
 
 import java.net.SocketAddress;
@@ -18,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 
+	private final Logger logger = LoggerFactory.getLogger("Command Storage Message Handler");
 	private QueueManager queues;
 	private boolean forever = true;
 	private ICmdMessageHandler nextHandler;
@@ -32,7 +35,7 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 
 	@Override
 	public void run() {
-		System.out.println("Started Command Storage Message Handler...");
+		logger.info("Started Command Storage Message Handler...");
 
 		while (forever) {
 			try {
@@ -50,7 +53,7 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 						key2Address.remove (msg.getResponse ().getKey ());
 					}
 				}else   {
-					System.out.println("No Client is waiting for the response....");
+					logger.info("No Client is waiting for the response....");
 				}
 			} catch (InterruptedException e) {
 				e.printStackTrace();
@@ -66,27 +69,24 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 			if (nextHandler != null) {
 				nextHandler.handleMessage(cmdMessage, channel);
 			} else {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}
 
-
 	private void handleTaskMessage(CommandMessage cmdMessage, Channel channel) {
 
-		System.out.println("Adding command message to work server:");
+		logger.info("Adding command message to work server:");
 
-		if(cmdMessage.hasQuery ())  {
-			if(!key2Address.containsKey (cmdMessage.getQuery ().getKey ()))  {
-				key2Address.put (cmdMessage.getQuery ().getKey (), channel.remoteAddress ());
-				addr2Channel.put (channel.remoteAddress (), channel);
-				channel.closeFuture ().addListener (new ClientClosedListener());
-			}
-			try {
-				queues.getToWorkServer ().put (cmdMessage);
-			} catch (InterruptedException e) {
-				e.printStackTrace ();
-			}
+		if(!key2Address.containsKey (cmdMessage.getQuery ().getKey ()))  {
+			key2Address.put (cmdMessage.getQuery ().getKey (), channel.remoteAddress ());
+			addr2Channel.put (channel.remoteAddress (), channel);
+			channel.closeFuture ().addListener (new ClientClosedListener());
+		}
+		try {
+			queues.getToWorkServer ().put (cmdMessage);
+		} catch (InterruptedException e) {
+			e.printStackTrace ();
 		}
 	}
 
@@ -100,10 +100,12 @@ public class CmdStorageMsgHandler extends Thread implements ICmdMessageHandler {
 		@Override
 		public void operationComplete(ChannelFuture future) throws Exception {
 			// we lost the connection or have shutdown.
-			System.out.println("--> client lost connection to the server");
-			System.out.println(key2Address);
-			System.out.println(addr2Channel);
+			logger.info("--> client lost connection to the server");
+			logger.info(key2Address.toString ());
+			logger.info(addr2Channel.toString ());
+
 			addr2Channel.remove (future.channel ().remoteAddress ());
+			key2Address.values ().removeIf (entry -> entry == future.channel ().remoteAddress ());
 		}
 	}
 }

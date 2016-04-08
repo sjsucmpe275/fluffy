@@ -122,7 +122,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 							ei.setChannel(channel.channel());
 							ei.setActive(channel.channel().isActive());
 							ei.setLastHeartbeat (System.currentTimeMillis ());
-							System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
+							logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 									+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 						} catch (Throwable ex) {
@@ -155,8 +155,8 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 			int termIdBroadCasting = msg.getLeader ().getElectionId ();
 			int leaderIdBroadCasting = msg.getLeader ().getLeaderId ();
 
-			System.out.println("Edge Monitor - Term: " + termIdBroadCasting + ", " + Thread.currentThread ().getName ());
-			System.out.println("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
+			logger.info("Edge Monitor - Term: " + termIdBroadCasting + ", " + Thread.currentThread ().getName ());
+			logger.info("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
 		}
 
 		broadCastOutBound (msg);
@@ -166,8 +166,6 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 
 	public void broadCastInBound(WorkMessage msg) {
 		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
-			System.out.println("**********Broadcasting to inbound edges********");
-			System.out.println(inboundEdges);
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}
@@ -175,9 +173,6 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	}
 
 	public void broadCastOutBound(WorkMessage msg) {
-		System.out.println("**********Broadcasting to outbound edges********");
-		System.out.println(outboundEdges);
-
 		for (EdgeInfo edge : outboundEdges.getEdgesMap ().values()) {
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);

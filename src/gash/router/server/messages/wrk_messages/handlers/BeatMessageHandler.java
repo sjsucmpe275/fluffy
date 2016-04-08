@@ -17,7 +17,7 @@ import pipe.work.Work.WorkMessage;
 public class BeatMessageHandler implements IWrkMessageHandler {
 
 	private final ServerState state;
-	private final Logger logger = LoggerFactory.getLogger(BeatMessageHandler.class);
+	private final Logger logger = LoggerFactory.getLogger("Beat Message Handler");
 	private IWrkMessageHandler nextHandler;
 	private final static boolean debug = false;
 
@@ -37,7 +37,7 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 			if (nextHandler != null) {
 				nextHandler.handleMessage(workMessage, channel);
 			} else {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}

@@ -31,7 +31,7 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 			if (nextHandler != null) {
 				nextHandler.handleMessage(workMessage, channel);
 			} else {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}
@@ -42,11 +42,11 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 		if (msg.hasQuery()) {
 			state.getCurrentState().handleCmdQuery(workMessage, channel);
 		} else if (msg.hasResponse()) {
-			state.getCurrentState().handleCmdResponse(workMessage, channel);
+			state.getCurrentState ().handleCmdResponse (workMessage, channel);
 		} else if (msg.hasErr()) {
-			state.getCurrentState().handleCmdError(workMessage, channel);
+				state.getCurrentState().handleCmdError(workMessage, channel);
 		} else {
-			System.out.println("This should never reach...");
+			logger.info("This should never reach...");
 		}
 	}
 
@@ -57,7 +57,7 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 
 	@Override
 	public void run() {
-		System.out.println("Starting work server queue manager thread...");
+		logger.info("Starting work server queue manager thread...");
 		while (forever) {
 			CommandMessage msg;
 			

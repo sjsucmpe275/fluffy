@@ -3,6 +3,8 @@ package gash.router.server.messages.cmd_messages.handlers;
 import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import routing.Pipe.CommandMessage;
 
@@ -12,6 +14,7 @@ import routing.Pipe.CommandMessage;
  */
 public class CmdPingMsgHandler implements ICmdMessageHandler {
 
+	private final Logger logger = LoggerFactory.getLogger("Command Ping Message Handler");
 	private ICmdMessageHandler nextHandler;
 
 	public CmdPingMsgHandler(CommandChannelHandler commandChannelHandler) {
@@ -26,7 +29,7 @@ public class CmdPingMsgHandler implements ICmdMessageHandler {
 			if(nextHandler != null) {
 				nextHandler.handleMessage (cmdMessage, channel);
 			}else   {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}
@@ -45,7 +48,7 @@ public class CmdPingMsgHandler implements ICmdMessageHandler {
 
 		ChannelFuture cf = channel.writeAndFlush (rb.build());
 		if(!cf.isSuccess ())    {
-			System.out.println("Reasion for failure : " + cf);
+			logger.info("Reasion for failure : " + cf);
 		}
 	}
 

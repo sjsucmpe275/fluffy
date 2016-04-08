@@ -1,17 +1,13 @@
 package gash.router.server;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import election.Candidate;
-import election.Follower;
-import election.INodeState;
-import election.Leader;
-import election.NodeStateEnum;
+import election.*;
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
+
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerState implements Observer {
 
@@ -108,42 +104,23 @@ public class ServerState implements Observer {
 	}
 
 	public int getElectionId() {
-		System.out.println(
-			"------------------- Fetching Election Id ----------------- "
-				+ electionId.get() + " Thread: "
-				+ Thread.currentThread().getName());
-		// new Exception().printStackTrace ();
 		return electionId.get();
 	}
 
 	public void setElectionId(int electionId) {
-		System.out.println(
-			"------------------- Election Id Updated ----------------- "
-				+ electionId + " Thread: " + Thread.currentThread().getName());
-		// new Exception().printStackTrace ();
 		this.electionId.getAndSet(electionId);
 	}
 
 	public long getLeaderHeartBeatdt() {
-		System.out.println(
-			"------------------- Fetching Leader Heart Beat ----------------- "
-				+ leaderHeartBeatdt.get() + " Thread: "
-				+ Thread.currentThread().getName());
 		return leaderHeartBeatdt.get();
 	}
 
 	public void setLeaderHeartBeatdt(long leaderHeartBeatdt) {
-		System.out.println(
-			"------------------- Leader Heart Beat Updated ----------------- "
-				+ leaderHeartBeatdt + " Thread: "
-				+ Thread.currentThread().getName());
 		this.leaderHeartBeatdt.getAndSet(leaderHeartBeatdt);
 	}
 
 	@Override
 	public void onFileChanged(RoutingConf configuration) {
-		System.out.println("in server state");
-
 		conf.setNodeId(configuration.getNodeId());
 		conf.setCommandPort(configuration.getCommandPort());
 		conf.setWorkPort(configuration.getWorkPort());
@@ -160,6 +137,5 @@ public class ServerState implements Observer {
 		for (int j = 0; j < configuration.adaptorRouting.size(); j++) {
 			this.conf.adaptorRouting.add(configuration.adaptorRouting.get(j));
 		}
-
 	}
 }

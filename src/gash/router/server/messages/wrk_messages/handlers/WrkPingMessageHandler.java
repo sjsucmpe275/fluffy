@@ -29,7 +29,7 @@ public class WrkPingMessageHandler implements IWrkMessageHandler {
 			if(nextHandler != null) {
 				nextHandler.handleMessage (workMessage, channel);
 			}else   {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}
