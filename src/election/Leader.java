@@ -1,23 +1,22 @@
 package election;
 
+import gash.router.server.ServerState;
+import gash.router.server.tasks.IReplicationStrategy;
+import gash.router.server.tasks.RoundRobinStrategy;
+import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pipe.common.Common.Header;
+import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gash.router.server.ServerState;
-import gash.router.server.tasks.IReplicationStrategy;
-import gash.router.server.tasks.RoundRobinStrategy;
-import io.netty.channel.Channel;
-import pipe.common.Common.Header;
-import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
-
-public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
+public class Leader implements INodeState, FollowerListener, IGetTaskListener {
 
 	private final Logger logger = LoggerFactory.getLogger("Leader");
 
@@ -332,7 +331,7 @@ public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 	}
 
 	@Override
-	public void notifyGetTaskCompletion() {
+	public void notifyGetTaskCompletion(String requestKey) {
 		
 	}
 }
