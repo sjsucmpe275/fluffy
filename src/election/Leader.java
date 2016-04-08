@@ -46,11 +46,6 @@ public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
 		
-		System.out.println("LEADER RECEIVED MESSAGE");
-		System.out.println(wrkMessage);
-		CommandMessage taskMessage = wrkMessage.getTask().getTaskMessage();
-		if (taskMessage.hasQuery()) {
-
 		System.out.println ("LEADER RECEIVED MESSAGE");
 		System.out.println (wrkMessage);
 		CommandMessage taskMessage = wrkMessage.getTask ().getTaskMessage ();
@@ -103,12 +98,6 @@ public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 				break;
 			default:
 				break;
-		}
-
-		} else if (taskMessage.hasResponse()) {
-			
-		} else if (taskMessage.hasResponse()) {
-
 		}
 	}
 	
