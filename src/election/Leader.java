@@ -1,20 +1,23 @@
 package election;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gash.router.server.ServerState;
 import gash.router.server.tasks.IReplicationStrategy;
 import gash.router.server.tasks.RoundRobinStrategy;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-public class Leader implements INodeState, FollowerListener {
+public class Leader implements INodeState, FollowerListener, IGetTaskNotifier {
 
 	private final Logger logger = LoggerFactory.getLogger("Leader");
 
@@ -26,6 +29,8 @@ public class Leader implements INodeState, FollowerListener {
 	private ElectionUtil util;
 	private IReplicationStrategy strategy;
 	private ConcurrentHashMap<String, Integer> key2node;
+	private ExecutorService service = Executors.newCachedThreadPool();
+	private ConcurrentHashMap<String, GetTask> taskMap;
 	
 	public Leader(ServerState state) {
 		this.state = state;
@@ -36,9 +41,15 @@ public class Leader implements INodeState, FollowerListener {
 		this.util = new ElectionUtil();
 		this.strategy = new RoundRobinStrategy(2);
 		this.key2node = new ConcurrentHashMap<>();
+		this.taskMap = new ConcurrentHashMap<>();
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
+		
+		System.out.println("LEADER RECEIVED MESSAGE");
+		System.out.println(wrkMessage);
+		CommandMessage taskMessage = wrkMessage.getTask().getTaskMessage();
+		if (taskMessage.hasQuery()) {
 
 		System.out.println ("LEADER RECEIVED MESSAGE");
 		System.out.println (wrkMessage);
@@ -94,6 +105,11 @@ public class Leader implements INodeState, FollowerListener {
 				break;
 		}
 
+		} else if (taskMessage.hasResponse()) {
+			
+		} else if (taskMessage.hasResponse()) {
+
+		}
 	}
 	
 	@Override
@@ -324,5 +340,10 @@ public class Leader implements INodeState, FollowerListener {
 
 	public ConcurrentHashMap<Integer, Object> getActiveNodes() {
 		return activeNodes;
+	}
+
+	@Override
+	public void notifyGetTaskCompletion() {
+		
 	}
 }
