@@ -1,19 +1,18 @@
 package election;
 
-import java.util.Random;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
+
+import java.util.Random;
 
 public class Follower implements INodeState, TimeoutListener, LeaderHealthListener {
 
@@ -35,7 +34,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		this.nodeId = state.getConf().getNodeId();
 
 		/*Creating Leader Monitor, But will monitor beats only when I learn about Leader in the network*/
-		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getHeartbeatDt ());
+		leaderMonitor = new LeaderHealthMonitor (this, state.getConf ().getElectionTimeout ());
 		leaderMonitor.start ();
 
 		/*Initially I will always be in Follower State, and wait for some random time before going into Candidate State*/
@@ -48,28 +47,60 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	}
 
 	public void handleCmdQuery(WorkMessage wrkMessage, Channel channel) {
-		if (wrkMessage.getTask().getTaskMessage().hasQuery()) {
-			
-			if (wrkMessage.getHeader().getDestination() == nodeId) {
-				System.out.println("Carrying out command:" + wrkMessage
-					.getTask().getTaskMessage().getQuery().getKey());
-				Task.Builder t = Task.newBuilder();
-				t.setSeqId(wrkMessage.getTask().getTaskMessage().getQuery()
-					.getSequenceNo());
-				t.setSeriesId(wrkMessage.getTask().getTaskMessage().getQuery()
-					.getKey().hashCode());
-				t.setTaskMessage(wrkMessage.getTask().getTaskMessage());
-				state.getTasks().addTask(t.build());
-			}
-		} else if (wrkMessage.getTask().getTaskMessage().hasResponse()) {
 
+		logger.info("Carrying out command:" + wrkMessage.getTask()
+			.getTaskMessage().getQuery().getKey());
+		Task.Builder t = Task.newBuilder();
+		t.setSeqId(wrkMessage.getTask().getTaskMessage().getQuery().getSequenceNo());
+		t.setSeriesId(wrkMessage.getTask().getTaskMessage().getQuery().getKey()
+			.hashCode());
+		t.setTaskMessage(wrkMessage.getTask().getTaskMessage());
+		state.getTasks().addTask(t.build());
+	}
+	
+	@Override
+	public void handleCmdResponse(WorkMessage workMessage, Channel channel) {
+		try {
+			switch (workMessage.getTask().getTaskMessage().getResponse()
+				.getAction()) {
+			case GET:
+			case STORE:
+				// I have this condition because even TaskWorker can call
+				// handleCommandMessage...
+				if (workMessage.getHeader().getDestination() == state.getConf()
+					.getNodeId()) {
+					state.getQueues().getFromWorkServer()
+						.put(workMessage.getTask().getTaskMessage());
+				} else {
+					state.getEmon().broadcastMessage(workMessage);
+				}
+				break;
+			default:
+				state.getQueues().getFromWorkServer()
+					.put(workMessage.getTask().getTaskMessage());
+				break;
+			}
+		} catch (InterruptedException e) {
+			// Enqueue failure message
+			e.printStackTrace();
 		}
+	}
+	
+	@Override
+	public void handleCmdError(WorkMessage workMessage, Channel channel) {
+		// This should handle same as response message
+		handleCmdResponse(workMessage, channel);
 	}
 
 	@Override
 	public void handleGetClusterSize(WorkMessage workMessage, Channel channel) {
 
-		System.out.println("Replying to :" + workMessage.getHeader().getNodeId());
+		/*if(workMessage.getHeader ().getNodeId () == state.getLeaderId ())   {
+			logger.info("Receiving messages to calculate size again from my leader");
+			return;
+		}
+*/
+		logger.info("Replying to :" + workMessage.getHeader().getNodeId());
 
 		state.getEmon ().broadcastMessage(util.createSizeIsMessage(state,
 				workMessage.getHeader().getNodeId()));
@@ -77,29 +108,29 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void handleSizeIs(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~Follower - Handle Size Is Event~~~~~~~~~");
+		logger.info("~~~~~~~~Follower - Handle Size Is Event~~~~~~~~~");
 	}
 
 	@Override
 	public void handleLeaderIs(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~~Follower - Handler Leader Is Event ");
+		logger.info("~~~~~~~~~Follower - Handler Leader Is Event ");
 		int incomingTerm = workMessage.getLeader().getElectionId();
 		int currentTerm = state.getElectionId ();
 
-		System.out.println("~~~~~~~~~Follower - New Term: " + incomingTerm);
-		System.out.println("~~~~~~~~~Follower - Current Term: " + currentTerm);
+		logger.info("~~~~~~~~~Follower - New Term: " + incomingTerm);
+		logger.info("~~~~~~~~~Follower - Current Term: " + currentTerm);
 
 		int inComingLeader = workMessage.getLeader ().getLeaderId ();
 		int myLeader = state.getLeaderId ();
 
-		System.out.println("~~~~~~~~~Follower - In Coming Leader Id: " + inComingLeader);
-		System.out.println("~~~~~~~~~Follower - My Leader Id: " + myLeader);
+		logger.info("~~~~~~~~~Follower - In Coming Leader Id: " + inComingLeader);
+		logger.info("~~~~~~~~~Follower - My Leader Id: " + myLeader);
 
 	/*
 	* I check if I got this message from a new leader with new terms
 	* */
 		if (incomingTerm >  currentTerm && inComingLeader != myLeader) {
-			System.out.println("LEADER IS: " + workMessage.getLeader().getLeaderId());
+			logger.info("LEADER IS: " + workMessage.getLeader().getLeaderId());
 			state.setElectionId(incomingTerm);
 			state.setLeaderId(inComingLeader);
 
@@ -117,7 +148,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	/* As part of this event,  Follower will vote if he has not voted in this term and update him term */
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~~Follower - Handler Vote Request Event ");
+		logger.info("~~~~~~~~~Follower - Handler Vote Request Event ");
 
 		if (workMessage.getLeader().getElectionId() > state.getElectionId()/* &&
 				workMessage.getLeader ().getLeaderId () != state.getVotedFor ()*/) {
@@ -145,7 +176,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 			// Reset timer, so that if nobody becomes leader in near by future I can go to Candidate state.
 			timer.cancel ();
-			System.out.println("******** Restarting the timer, once I have given my vote*********");
+			logger.info("******** Restarting the timer, once I have given my vote*********");
 			timer.start ();
 		}
 	}
@@ -166,7 +197,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	* if it is lesser then drop it, */
 	@Override
 	public void handleBeat(WorkMessage workMessage, Channel channel) {
-		System.out.println("~~~~~~~~~Follower - Handle Leader Heart Beat ");
+		logger.info("~~~~~~~~~Follower - Handle Leader Heart Beat ");
 		/* There might be a timer waiting for response from leader, If I am here I assume I got response from leader
 		* and cancel my previously started timer*/
 		timer.cancel();
@@ -177,11 +208,11 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 		int newLeaderId = workMessage.getLeader ().getLeaderId ();
 		int currentLeaderId = state.getLeaderId ();
 
-		System.out.println("Follower - New Term: " + inComingTerm);
-		System.out.println("Follower - Current Term: " + currentTerm);
+		logger.info("Follower - New Term: " + inComingTerm);
+		logger.info("Follower - Current Term: " + currentTerm);
 
-		System.out.println("Follower - New LeaderId: " +newLeaderId);
-		System.out.println("Follower - Current LeaderId: " + currentLeaderId);
+		logger.info("Follower - New LeaderId: " +newLeaderId);
+		logger.info("Follower - Current LeaderId: " + currentLeaderId);
 
 		if(inComingTerm > currentTerm && newLeaderId != currentLeaderId)   {
 			state.setElectionId (inComingTerm);
@@ -251,7 +282,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void beforeStateChange() {
-		System.out.println("~~~~~~~~Follower - Before State Change");
+		logger.info("~~~~~~~~Follower - Before State Change");
 		timer.cancel();
 
 		leaderMonitor.onBeat (Long.MAX_VALUE);
@@ -275,7 +306,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	}
 
 	private void onElectionTimeout() {
-		System.out.println("******ELECTION TIMED OUT******");
+		logger.info("******ELECTION TIMED OUT******");
 		state.setState(NodeStateEnum.CANDIDATE);
 	}
 
@@ -287,7 +318,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	@Override
 	public void onLeaderBadHealth() {
 		timer.cancel ();
-		System.out.println("~~~~~~~~Follower - On Leader Bad Health Event");
+		logger.info("~~~~~~~~Follower - On Leader Bad Health Event");
 		timer.start (getRandomTimeout ());
 	}
 

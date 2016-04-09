@@ -15,6 +15,9 @@
  */
 package gash.router.container;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,10 +25,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Routing information for the server - internal use only
@@ -57,6 +56,7 @@ public class RoutingConf  {
 		electionTimeout=new AtomicInteger();
 		maxHops = new AtomicInteger ();
 		adaptorPort = new AtomicInteger(0);
+		secret = new AtomicInteger(0);
 	}
 
 	//private List<RoutingEntry> routing;
@@ -233,7 +233,4 @@ public class RoutingConf  {
 		}
 
 	}
-
-
-	
 }

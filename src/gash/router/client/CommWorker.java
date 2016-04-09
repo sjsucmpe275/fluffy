@@ -70,7 +70,7 @@ public class CommWorker extends Thread {
 		}
 
 		if (!forever) {
-			CommConnection.logger.info("connection queue closing");
+			System.out.println("connection queue closing");
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import gash.router.server.ServerState;
 import gash.router.server.edges.EdgeInfo;
@@ -16,13 +17,12 @@ import pipe.work.Work.WorkMessage;
 public class BeatMessageHandler implements IWrkMessageHandler {
 
 	private final ServerState state;
-	private final Logger logger;
+	private final Logger logger = LoggerFactory.getLogger("Beat Message Handler");
 	private IWrkMessageHandler nextHandler;
 	private final static boolean debug = false;
 
-	public BeatMessageHandler(ServerState state, Logger logger) {
+	public BeatMessageHandler(ServerState state) {
 		this.state = state;
-		this.logger = logger;
 	}
 
 	/*
@@ -37,7 +37,7 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 			if (nextHandler != null) {
 				nextHandler.handleMessage(workMessage, channel);
 			} else {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}

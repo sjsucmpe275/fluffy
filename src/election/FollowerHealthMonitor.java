@@ -1,19 +1,18 @@
 package election;
 
+import gash.router.server.ServerState;
+import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import pipe.election.Election.LeaderStatus.LeaderQuery;
+import pipe.election.Election.LeaderStatus.LeaderState;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import gash.router.server.ServerState;
-import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
-import pipe.election.Election.LeaderStatus.LeaderQuery;
-import pipe.election.Election.LeaderStatus.LeaderState;
 
 /**
  * @author: codepenman.
@@ -89,14 +88,13 @@ public class FollowerHealthMonitor {
 		public void run() {
 			try {
 				while (!stop.get()) {
-					long currentTime = System.currentTimeMillis();
 
 					if (debug)
-						System.out.println("********Started: " + new Date(System.currentTimeMillis()));
+						logger.info("********Started: " + new Date(System.currentTimeMillis()));
 
 					if (broadCastBeat) {
 						// Broadcast heartbeat to all the followers
-						System.out.println ("#####Leader broadcasting heartbeat to all followers");
+						logger.info ("#####Leader broadcasting heartbeat to all followers");
 
 						LeaderStatusMessage beat = new LeaderStatusMessage (state.getConf().getNodeId());
 						beat.setElectionId (state.getElectionId ());
@@ -107,7 +105,12 @@ public class FollowerHealthMonitor {
 
 						state.getEmon().broadcastMessage(beat.getMessage());
 						broadCastBeat = false;
+						synchronized (this) {
+							wait((long)(timeout * 0.9));
+						}
 					} else {
+						long currentTime = System.currentTimeMillis();
+
 						ArrayList<Integer> nodes2Remove = new ArrayList<> ();
 
 						nodes2Remove.addAll (follower2BeatTimeMap.entrySet().stream()
@@ -119,15 +122,12 @@ public class FollowerHealthMonitor {
 							followerListener.removeFollower (nodeId);
 						}
 
-						System.out.println ("####Follower heartbeats:" + follower2BeatTimeMap);
+						logger.info ("####Follower heartbeats:" + follower2BeatTimeMap);
 						broadCastBeat = true;
-					}
-					synchronized (this) {
-						wait((long)(timeout * 0.1));
 					}
 				}
 			} catch (InterruptedException e) {
-				System.out.println("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
+				logger.info("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package gash.router.server;
 
 import gash.router.container.RoutingConf;
+import gash.router.server.messages.cmd_messages.handlers.ICmdMessageHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -20,11 +21,14 @@ import routing.Pipe.CommandMessage;
 public class CommandChannelInitializer extends ChannelInitializer<SocketChannel> {
 	boolean compress = false;
 	RoutingConf conf;
+	private ICmdMessageHandler cmdMessageHandler;
 
-	public CommandChannelInitializer(RoutingConf conf, boolean enableCompression) {
+	public CommandChannelInitializer(RoutingConf conf, boolean enableCompression,
+	                                 ICmdMessageHandler cmdMessageHandler) {
 		super();
 		compress = enableCompression;
 		this.conf = conf;
+		this.cmdMessageHandler = cmdMessageHandler;
 	}
 
 	@Override
@@ -53,6 +57,6 @@ public class CommandChannelInitializer extends ChannelInitializer<SocketChannel>
 
 
 		// our server processor (new instance for each connection)
-		pipeline.addLast("handler", new CommandChannelHandler (conf));
+		pipeline.addLast("handler", new CommandChannelHandler (conf, cmdMessageHandler));
 	}
 }

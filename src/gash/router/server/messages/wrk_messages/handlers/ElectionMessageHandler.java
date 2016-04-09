@@ -1,20 +1,19 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
-import org.slf4j.Logger;
-
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
 
 public class ElectionMessageHandler implements IWrkMessageHandler {
 
 	private final ServerState state;
-	private final Logger logger;
+	private final Logger logger = LoggerFactory.getLogger(ElectionMessageHandler.class);
 	private IWrkMessageHandler nextHandler;
 
-	public ElectionMessageHandler(ServerState state, Logger logger) {
+	public ElectionMessageHandler(ServerState state) {
 		this.state = state;
-		this.logger = logger;
 	}
 
 	@Override
@@ -32,8 +31,8 @@ public class ElectionMessageHandler implements IWrkMessageHandler {
 
 	private void handle(WorkMessage workMessage, Channel channel) {
 		logger.info ("Election Message Received forwarding to state");
-		synchronized (state)    {
-			state.getCurrentState().handleMessage(workMessage, channel);
+		synchronized (state.getCurrentState ()) {
+			state.getCurrentState ().handleMessage (workMessage, channel);
 		}
 	}
 

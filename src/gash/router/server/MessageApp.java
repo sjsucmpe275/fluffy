@@ -22,7 +22,6 @@ import java.io.File;
  * 
  */
 public class MessageApp {
-
 	/**
 	 * @param args
 	 */

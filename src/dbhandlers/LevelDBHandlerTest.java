@@ -20,7 +20,7 @@
 //	public void testPut() {
 //		log("****PUT*****");
 //		LevelDBHandler.instance ().put ("Name", "Harish");
-//		System.out.println(LevelDBHandler.instance ().get ("Name"));
+//		logger.info(LevelDBHandler.instance ().get ("Name"));
 //	}
 //
 //	@Test
@@ -28,37 +28,37 @@
 //		log("****Store****");
 //		String key = LevelDBHandler.instance ().store ("Time Saved");
 //		assertEquals("Time Saved", LevelDBHandler.instance ().get (key));
-//		System.out.println(key);
-//		System.out.println(LevelDBHandler.instance ().get (key));
+//		logger.info(key);
+//		logger.info(LevelDBHandler.instance ().get (key));
 //	}
 //
 //	@Test
 //	public void testUpdate() {
 //		log("****Update****");
 //		LevelDBHandler.instance ().put ("Name", "CodePenMan");
-//		System.out.println(LevelDBHandler.instance ().get ("Name"));
+//		logger.info(LevelDBHandler.instance ().get ("Name"));
 //	}
 //
 //	@Test
 //	public void testRemove() {
 //		log("****Remove****");
-//		System.out.println(LevelDBHandler.instance ().get ("Name"));
+//		logger.info(LevelDBHandler.instance ().get ("Name"));
 //		LevelDBHandler.instance ().remove ("Name");
-//		System.out.println(LevelDBHandler.instance ().get ("Name"));
+//		logger.info(LevelDBHandler.instance ().get ("Name"));
 //	}
 //
 //	@Test
 //	public void testHasKey() {
 //		log("****Has Key****");
-//		System.out.println(LevelDBHandler.instance ().hasKey ("Name"));
+//		logger.info(LevelDBHandler.instance ().hasKey ("Name"));
 //	}
 //
 //	@Test
 //	public void testGetDatabaseVendor() {
-//		System.out.println(LevelDBHandler.instance ().getDatabaseVendor ());
+//		logger.info(LevelDBHandler.instance ().getDatabaseVendor ());
 //	}
 //
 //	private void log(String description)  {
-//		System.out.println(description);
+//		logger.info(description);
 //	}
 //}

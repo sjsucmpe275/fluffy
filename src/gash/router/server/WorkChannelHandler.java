@@ -15,25 +15,16 @@
  */
 package gash.router.server;
 
-import java.net.InetSocketAddress;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.server.messages.FailureMessage;
-import gash.router.server.messages.wrk_messages.handlers.BeatMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.ElectionMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.IWrkMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.StateMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.TaskMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.WrkFailureMessageHandler;
-import gash.router.server.messages.wrk_messages.handlers.WrkPingMessageHandler;
+import gash.router.server.messages.wrk_messages.handlers.*;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import pipe.common.Common.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
+
+import java.net.InetSocketAddress;
 
 /**
  * The message handler processes json messages that are delimited by a 'newline'
@@ -44,16 +35,17 @@ import routing.Pipe.CommandMessage;
  * 
  */
 public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage> {
-	private static Logger logger = LoggerFactory.getLogger("work");
+	private static Logger logger = LoggerFactory.getLogger("Work Channel Handler");
 	private ServerState state;
 	private boolean debug = true;
 	private IWrkMessageHandler wrkMessageHandler;
-	private Channel commandChannel;
-
+	private Router router;
+	
 	public WorkChannelHandler(ServerState state) {
 		if (state != null) {
 			this.state = state;
 		}
+		this.router = new Router(state);
 		initializeMessageHandlers();
 	}
 
@@ -62,13 +54,14 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	}
 
 	private void initializeMessageHandlers() {
+		
 		//Define Handlers
-		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (state, logger);
-		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (state, logger);
-		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (state, logger);
-		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (state, logger);
-		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (state, logger);
-		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(state, logger);
+		IWrkMessageHandler beatMessageHandler = new BeatMessageHandler (state);
+		IWrkMessageHandler failureMessageHandler = new WrkFailureMessageHandler (state);
+		IWrkMessageHandler pingMessageHandler = new WrkPingMessageHandler (state);
+		IWrkMessageHandler stateMessageHandler = new StateMessageHandler (state);
+		IWrkMessageHandler taskMessageHandler = new TaskMessageHandler (state);
+		IWrkMessageHandler electionMessageHandler=new ElectionMessageHandler(state);
 
 		//Chain all the handlers
 		beatMessageHandler.setNextHandler (failureMessageHandler);
@@ -89,100 +82,41 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void handleMessage(WorkMessage msg, Channel channel) {
 		
 		if (msg == null) {
-			logger.info ("ERROR: Null message is received");
+			logger.info("ERROR: Null message is received");
 			return;
 		}
 
 		if (debug)
 			PrintUtil.printWork(msg);
 
-		if(msg.getHeader().getNodeId()==-1){
-			commandChannel=channel;
-		}
-/*
-		logger.info ("Received message from: " + msg.getHeader ().getNodeId ());
-		logger.info ("Destination is: " + msg.getHeader ().getDestination ());
-*/
+		msg = router.route(msg);
 		
-		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-			System.out.println("Same message received by source! Dropping message...");
+		if (msg == null) {
+			logger.info("No need to handle message.. ");
 			return;
 		}
-
-		if (msg.getHeader().getDestination() != state.getConf().getNodeId()) {
-
-			if (msg.getHeader().getDestination() == -1) {
-				if (msg.getHeader().getMaxHops() > 0) {
-					if(msg.hasTask()){
-						if(msg.getTask().getTaskMessage().hasResponse()){
-							CommandMessage.Builder cb = CommandMessage.newBuilder(msg.getTask().getTaskMessage());
-							commandChannel.writeAndFlush(cb.build());
-							return;
-						}
-						WorkMessage.Builder wb=WorkMessage.newBuilder(msg);
-						Header.Builder hb = Header.newBuilder(msg.getHeader()); 
-						hb.setDestination(state.getLeaderId());
-						hb.setNodeId(state.getConf().getNodeId());
-						wb.setHeader(hb);
-						msg=wb.build();
-					}
-					broadcast(msg);
-				}else {
-					System.out.println("MAX HOPS is Zro! Dropping message...");
-					return;
-				}
-			} else {
-				if (msg.getHeader().getMaxHops() > 0) {
-					broadcast(msg);
-					return;
-				} else {
-					System.out.println("MAX HOPS is Zero! Dropping message...");
-					return;
-				}
-			}
-		}
-/*
-
-		if (debug)
-			PrintUtil.printWork(msg);
-*/
-
 		
 		// TODO How can you implement this without if-else statements? - Implemented COR
 		try {
 			wrkMessageHandler.handleMessage (msg, channel);
 
-			if (msg.getHeader().getNodeId()!=-1) {
 				/*
-						* Create in-bound edge's if it is not created/if it was removed when connection was down.
-						* */
+				 * Create in-bound edge's if it is not created/if it was removed
+				 * when connection was down.
+				 */
 				InetSocketAddress socketAddress = (InetSocketAddress) channel
 					.remoteAddress();
-				//			getLogger ().info ("Remote Address I rec msg from: " + socketAddress.getHostName ());
-				//			getLogger ().info ("Remote Port I rec msg from: " + socketAddress.getPort ());
-				getServerState().getEmon().createInboundIfNew(
+				state.getEmon().createInboundIfNew(
 					msg.getHeader().getNodeId(), socketAddress.getHostName(),
 					socketAddress.getPort(), channel);
-			}
 		} catch (Exception e) {
-			// TODO add logging
 			getLogger ().info ("Got an exception in work");
 			e.printStackTrace ();
 			FailureMessage failureMessage = new FailureMessage (msg, e);
 			failureMessage.setNodeId (state.getConf ().getNodeId ());
 			channel.write(failureMessage.getWorkMessage ());
 		}
-
 		System.out.flush();
-	}
-
-	private void broadcast(WorkMessage msg) {
-		System.out.println("Forwarding message...");
-		WorkMessage.Builder wb = WorkMessage.newBuilder(msg);
-		Header.Builder hb = Header.newBuilder(msg.getHeader());
-		hb.setMaxHops(hb.getMaxHops() - 1);
-		wb.setHeader(hb);
-		state.getEmon().broadcastMessage(wb.build());
 	}
 
 	/**
@@ -204,9 +138,5 @@ public class WorkChannelHandler extends SimpleChannelInboundHandler<WorkMessage>
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		logger.error("Unexpected exception from downstream.", cause);
 		ctx.close();
-	}
-
-	public ServerState getServerState() {
-		return state;
 	}
 }

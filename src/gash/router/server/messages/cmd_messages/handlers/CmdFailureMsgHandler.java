@@ -1,9 +1,9 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import org.slf4j.Logger;
-
-import gash.router.container.RoutingConf;
+import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import routing.Pipe.CommandMessage;
 
 /**
@@ -11,13 +11,10 @@ import routing.Pipe.CommandMessage;
  */
 public class CmdFailureMsgHandler implements ICmdMessageHandler {
 
-	private final RoutingConf conf;
-	private final Logger logger;
+	private final Logger logger = LoggerFactory.getLogger("Command Failure Message Handler");
 	private ICmdMessageHandler nextHandler;
 
-	public CmdFailureMsgHandler(RoutingConf state, Logger logger)  {
-		this.conf = state;
-		this.logger = logger;
+	public CmdFailureMsgHandler(CommandChannelHandler commandChannelHandler)  {
 	}
 
 	@Override
@@ -28,7 +25,7 @@ public class CmdFailureMsgHandler implements ICmdMessageHandler {
 			if(nextHandler != null) {
 				nextHandler.handleMessage (cmdMessage, channel);
 			}else   {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}

@@ -3,21 +3,21 @@
  */
 package client;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-
 import com.google.protobuf.ByteString;
-
 import gash.router.client.CommListener;
 import gash.router.client.MessageClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import routing.Pipe.CommandMessage;
 import storage.Storage.Action;
 import storage.Storage.Response;
 import util.SerializationUtil;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author saurabh
@@ -25,9 +25,10 @@ import util.SerializationUtil;
  */
 public class Client implements CommListener {
 
+	private static Logger logger = LoggerFactory.getLogger(Client.class);
 	private static final int M = 1024 * 1024;
 
-	private String host = "127.0.0.1";
+	private String host = "localhost";
 	private int port = 4568;
 	private MessageClient mc;
 	private String filepath;
@@ -50,11 +51,12 @@ public class Client implements CommListener {
 	public void onMessage(CommandMessage msg) {
 
 		if (!fileOutput) {
-			System.out.println(msg);
+			logger.info(msg.toString ());
 		}
 
 		if (msg.getResponse().getAction() == Action.GET) {
 
+			logger.info("I am in GET");
 			if (msg.getResponse().hasMetaData()) {
 				responseSize = msg.getResponse().getMetaData().getSeqSize();
 			} else {
@@ -62,18 +64,12 @@ public class Client implements CommListener {
 				String str = new String(data.toByteArray());
 				
 				if (!fileOutput) {
-					System.out.println("Fetched data: " + str);
+					logger.info("Fetched data: " + str);
 				}
 				responseList.add(msg.getResponse());
 
 				if (responseList.size() == responseSize) {
-					Collections.sort(responseList, new Comparator<Response>() {
-
-						@Override
-						public int compare(Response o1, Response o2) {
-							return o1.getSequenceNo() - o2.getSequenceNo();
-						}
-					});
+					Collections.sort(responseList, (o1, o2) -> o1.getSequenceNo() - o2.getSequenceNo());
 
 					List<ByteString> list = new LinkedList<>();
 					for (Response response : responseList) {
@@ -91,16 +87,16 @@ public class Client implements CommListener {
 
 	public void handleCommand(String[] args) throws FileNotFoundException {
 		if (args.length < 1) {
-			System.out.println("Operation not specified!");
+			logger.info("Operation not specified!");
 			return;
 		}
 
-		System.out.println(Thread.currentThread() + ": Handling " + args[0] );
+		logger.info(Thread.currentThread() + ": Handling " + args[0] );
 		switch (args[0].toUpperCase()) {
 		case "GET":
 
 			if (args.length < 3) {
-				System.out.println(
+				logger.info(
 					"Not enough params.\n->Key\n->Output File Location");
 				return;
 			}
@@ -113,7 +109,7 @@ public class Client implements CommListener {
 		case "GETS":
 
 			if (args.length < 2) {
-				System.out.println("Not enough params.\n->key");
+				logger.info("Not enough params.\n->key");
 				return;
 			}
 			key = args[1];
@@ -123,7 +119,7 @@ public class Client implements CommListener {
 
 		case "STORE":
 			if (args.length < 2) {
-				System.out.println("Not enough params. \n->string value");
+				logger.info("Not enough params. \n->string value");
 				return;
 			}
 			String value = args[1];
@@ -132,7 +128,7 @@ public class Client implements CommListener {
 
 		case "PUT":
 			if (args.length < 3) {
-				System.out.println(
+				logger.info(
 					"Not enough params.\n->Key\n->Input File Location");
 				return;
 			}
@@ -158,7 +154,7 @@ public class Client implements CommListener {
 
 		case "PUTS":
 			if (args.length < 3) {
-				System.out.println("Not enough params.\n->Key\n->String value");
+				logger.info("Not enough params.\n->Key\n->String value");
 				return;
 			}
 			key = args[1];
@@ -169,26 +165,26 @@ public class Client implements CommListener {
 
 		case "DELETE":
 			if (args.length < 2) {
-				System.out.println("Not enough params.\n->Key");
+				logger.info("Not enough params.\n->Key");
 				return;
 			}
 			key = args[1];
-			System.out.println("Delete not implemented");
+			logger.info("Delete not implemented");
 			break;
 
 		default:
-			System.out.println("Operation not supported. Use one of the :");
-			System.out.println("GET");
-			System.out.println("GETS");
-			System.out.println("STORE");
-			System.out.println("PUT");
-			System.out.println("PUTS");
-			System.out.println("DELETE");
+			logger.info("Operation not supported. Use one of the :");
+			logger.info("GET");
+			logger.info("GETS");
+			logger.info("STORE");
+			logger.info("PUT");
+			logger.info("PUTS");
+			logger.info("DELETE");
 			break;
 		}
 
 		try {
-			Thread.sleep(1 * 1000);
+			Thread.sleep(20 * 1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -197,7 +193,7 @@ public class Client implements CommListener {
 	}
 	
 	public void releaseClient() {
-		System.out.println("Client closing...");
+		logger.info("Client closing...");
 		mc.release();
 	}
 	

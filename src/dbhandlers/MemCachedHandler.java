@@ -13,9 +13,9 @@
 //		int port=8000;
 //		try {
 //			memcachedClient = new MemcachedClient(new InetSocketAddress("127.0.0.1", 8000));
-//	        System.out.println("Connection to server sucessful.");
+//	        logger.info("Connection to server sucessful.");
 //		} catch (IOException e) {
-//			System.out.println( e.getMessage() );
+//			logger.info( e.getMessage() );
 //		}
 //		return memcachedClient;
 //	}

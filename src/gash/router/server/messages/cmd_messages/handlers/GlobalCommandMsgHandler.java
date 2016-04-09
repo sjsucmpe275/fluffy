@@ -1,19 +1,16 @@
 package gash.router.server.messages.cmd_messages.handlers;
 
-import org.slf4j.Logger;
-
-import gash.router.container.RoutingConf;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import routing.Pipe.CommandMessage;
 
 public class GlobalCommandMsgHandler implements ICmdMessageHandler  {
-	private final RoutingConf conf;
-	private final Logger logger;
+
+	private final Logger logger = LoggerFactory.getLogger("Global Command Message Handler");
 	private ICmdMessageHandler nextHandler;
 	
-	public GlobalCommandMsgHandler(RoutingConf conf, Logger logger)   {
-		this.conf = conf;
-		this.logger = logger;
+	public GlobalCommandMsgHandler()   {
 	}
 
 	@Override
@@ -24,7 +21,7 @@ public class GlobalCommandMsgHandler implements ICmdMessageHandler  {
 			if(nextHandler != null) {
 				nextHandler.handleMessage (cmdMessage, channel);
 			}else   {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}
@@ -36,5 +33,4 @@ public class GlobalCommandMsgHandler implements ICmdMessageHandler  {
 		this.nextHandler = nextHandler;
 		
 	}
-
 }

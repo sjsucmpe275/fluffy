@@ -1,4 +1,4 @@
-package gash.router.server;
+/*package gash.router.server;
 
 
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class GlobalCommandChannelHandler extends SimpleChannelInboundHandler<Glo
 			// Make the connection attempt.
 			
 			channel = b.connect("localhost", conf.getWorkPort()).syncUninterruptibly();
-			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
+			logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 		} catch (Throwable ex) {
@@ -63,7 +63,7 @@ public class GlobalCommandChannelHandler extends SimpleChannelInboundHandler<Glo
 		CommandMessage.Builder cmdMsg = CommandMessage.newBuilder();
 		if (msg == null) {
 			// TODO add logging
-			System.out.println("ERROR: Unexpected content - " + msg);
+			logger.info("ERROR: Unexpected content - " + msg);
 			return;
 		}
 		if(msg.hasHeader()){
@@ -143,3 +143,4 @@ public class GlobalCommandChannelHandler extends SimpleChannelInboundHandler<Glo
 	}
 
 }
+*/

@@ -15,15 +15,11 @@
  */
 package gash.router.server.edges;
 
-import java.util.Timer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.container.RoutingConf.RoutingEntry;
 import gash.router.server.EdgeHealthMonitorTask;
+import gash.router.server.QueueManager;
 import gash.router.server.ServerState;
 import gash.router.server.WorkChannelInitializer;
 import gash.router.server.messages.wrk_messages.BeatMessage;
@@ -34,8 +30,12 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.election.Election;
 import pipe.work.Work.WorkMessage;
+
+import java.util.Timer;
 
 public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private static Logger logger = LoggerFactory.getLogger("edge monitor");
@@ -49,7 +49,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	private EventLoopGroup group;
 	private EdgeHealthMonitorTask edgeHealthMonitorTask;
 	
-	public EdgeMonitor(ServerState state) {
+	public EdgeMonitor(ServerState state, QueueManager queues) {
 		if (state == null)
 			throw new RuntimeException("state is null");
 
@@ -122,7 +122,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 							ei.setChannel(channel.channel());
 							ei.setActive(channel.channel().isActive());
 							ei.setLastHeartbeat (System.currentTimeMillis ());
-							System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
+							logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 									+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 						} catch (Throwable ex) {
@@ -155,8 +155,8 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 			int termIdBroadCasting = msg.getLeader ().getElectionId ();
 			int leaderIdBroadCasting = msg.getLeader ().getLeaderId ();
 
-			System.out.println("Edge Monitor - Term: " + termIdBroadCasting + ", " + Thread.currentThread ().getName ());
-			System.out.println("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
+			logger.info("Edge Monitor - Term: " + termIdBroadCasting + ", " + Thread.currentThread ().getName ());
+			logger.info("Edge Monitor - Leader Id: " + leaderIdBroadCasting + ", " + Thread.currentThread ().getName ());
 		}
 
 		broadCastOutBound (msg);
@@ -166,8 +166,6 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 
 	public void broadCastInBound(WorkMessage msg) {
 		for(EdgeInfo edge : inboundEdges.getEdgesMap().values()) {
-			System.out.println("**********Broadcasting to inbound edges********");
-
 			if (edge.isActive() && edge.getChannel() != null) {
 				edge.getChannel().writeAndFlush(msg);
 			}

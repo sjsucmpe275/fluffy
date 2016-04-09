@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import gash.router.container.RoutingConf;
-import gash.router.server.GlobalCommandChannelInitializer;
 import gash.router.server.MessageServer.JsonUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -148,18 +147,17 @@ public class CommConnection {
 	
 
 	private void init() {
-		System.out.println("--> initializing connection to " + host + ":" + port);
-		RoutingConf conf = init(new File("runtime/route-2.conf"));
+		logger.info("--> initializing connection to " + host + ":" + port);
 		// the queue to support client-side surging
 		outbound = new LinkedBlockingDeque<CommandMessage>();
 
 		group = new NioEventLoopGroup();
 		try {
-			GlobalCommandChannelInitializer si = new GlobalCommandChannelInitializer(conf,false);
-			//CommInit si = new CommInit(false);
+//			GlobalCommandChannelInitializer si = new GlobalCommandChannelInitializer(conf,false);
+			CommInit si = new CommInit(false);
 			Bootstrap b = new Bootstrap();
 			b.group(group).channel(NioSocketChannel.class).handler(si);
-			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+			b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 100000);
 			b.option(ChannelOption.TCP_NODELAY, true);
 			b.option(ChannelOption.SO_KEEPALIVE, true);
 
@@ -170,7 +168,7 @@ public class CommConnection {
 			// connection, we can try to re-establish it.
 			channel.channel().closeFuture();
 
-			System.out.println(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
+			logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
 					+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
 
 		} catch (Throwable ex) {

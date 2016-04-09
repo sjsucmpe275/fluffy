@@ -31,10 +31,14 @@ public class RoundRobinStrategy implements IReplicationStrategy {
 	@Override
 	public List<Integer> getNodeIds(List<Integer> activeNodes) {
 		List<Integer> output = new ArrayList<Integer>();
-		activeNodes = Collections.synchronizedList(activeNodes);
 		int temp = 0;
 		index++;
-		while (output.size() < size && activeNodes.size() >= size) {
+
+		if(activeNodes.size () < size)  {
+			return activeNodes;
+		}
+
+		while (output.size() < size) {
 			output.add(activeNodes.get((index + temp) % activeNodes.size()));
 			temp++;
 		}

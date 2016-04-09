@@ -29,7 +29,7 @@ public class Timer {
 
 	public void start()   {
 		if(debug)
-			System.out.println ("******** " + identifier+ ", Request to start timer: " + Thread.currentThread ().getName ());
+			logger.info ("******** " + identifier+ ", Request to start timer: " + Thread.currentThread ().getName ());
 
 		timerThread = new TimerThread ();
 		timerThread.start ();
@@ -51,7 +51,7 @@ public class Timer {
 			return;
 		}
 		if(debug)
-			System.out.println ("********" + identifier + ", Request to cancel timer: " + Thread.currentThread ().getName ());
+			logger.info ("********" + identifier + ", Request to cancel timer: " + Thread.currentThread ().getName ());
 
 		timerThread.interrupt ();
 	}
@@ -62,19 +62,19 @@ public class Timer {
 		public void run(){
 			try {
 				if(debug)
-					System.out.println ("********Timer started: " + Thread.currentThread ().getName ());
+					logger.info ("********Timer started: " + Thread.currentThread ().getName ());
 
 				synchronized (this) {
 					wait(timeout);
 				}
 
 				if(debug)
-					System.out.println ("********Timed out: " + Thread.currentThread ().getName ());
+					logger.info ("********Timed out: " + Thread.currentThread ().getName ());
 
 				listener.notifyTimeout ();
 
 			} catch (InterruptedException e) {
-				System.out.println ("********Timer was interrupted: " + Thread.currentThread ().getName ());
+				logger.info ("********Timer was interrupted: " + Thread.currentThread ().getName ());
 			}
 		}
 	}

@@ -1,23 +1,18 @@
 package gash.router.server;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
-import election.Candidate;
-import election.Follower;
-import election.INodeState;
-import election.Leader;
-import election.NodeStateEnum;
+import election.*;
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
-import gash.router.server.edges.AdaptorEdgeMonitor;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
 
-public class ServerState implements Observer{
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+public class ServerState implements Observer {
+
 	private final RoutingConf conf;
 	private EdgeMonitor emon;
-	private AdaptorEdgeMonitor adapEmon;
 	private TaskList tasks;
 	private INodeState leader;
 	private INodeState candidate;
@@ -25,8 +20,9 @@ public class ServerState implements Observer{
 	private INodeState currentState;
 	private AtomicInteger leaderId;
 	private AtomicLong leaderHeartBeatdt;
-	private AtomicInteger electionId;   // termId
+	private AtomicInteger electionId; // termId
 	private AtomicInteger votedFor;
+	private QueueManager queues;
 
 	public ServerState(RoutingConf conf) {
 		this.conf = conf;
@@ -34,10 +30,11 @@ public class ServerState implements Observer{
 		candidate = new Candidate(this);
 		follower = new Follower(this);
 		currentState = follower;
-		leaderId = new AtomicInteger (-1);
-		leaderHeartBeatdt = new AtomicLong (Long.MAX_VALUE); // To ensure that I will wait for heart beat timeout
-		electionId = new AtomicInteger (0);
-		votedFor = new AtomicInteger (-1);
+		leaderId = new AtomicInteger(-1);
+		leaderHeartBeatdt = new AtomicLong(Long.MAX_VALUE);
+		// To ensure that I will wait for heart beat timeout
+		electionId = new AtomicInteger(0);
+		votedFor = new AtomicInteger(-1);
 	}
 
 	public RoutingConf getConf() {
@@ -50,9 +47,6 @@ public class ServerState implements Observer{
 
 	public void setEmon(EdgeMonitor emon) {
 		this.emon = emon;
-	}
-	public void setAdaptorEmon(AdaptorEdgeMonitor emon) {
-		this.adapEmon = emon;
 	}
 
 	public TaskList getTasks() {
@@ -86,61 +80,62 @@ public class ServerState implements Observer{
 	}
 
 	public int getLeaderId() {
-		return leaderId.get ();
+		return leaderId.get();
 	}
 
 	public void setLeaderId(int leaderId) {
-		this.leaderId.getAndSet (leaderId);
+		this.leaderId.getAndSet(leaderId);
 	}
 
-	public void setVotedFor(int votedFor)   {
-		this.votedFor.getAndSet (votedFor);
+	public void setVotedFor(int votedFor) {
+		this.votedFor.getAndSet(votedFor);
 	}
 
-	public int getVotedFor()   {
-		return votedFor.get ();
+	public int getVotedFor() {
+		return votedFor.get();
+	}
+
+	public void setQueues(QueueManager queues) {
+		this.queues = queues;
+	}
+
+	public QueueManager getQueues() {
+		return queues;
 	}
 
 	public int getElectionId() {
-		System.out.println("------------------- Fetching Election Id ----------------- " + electionId.get () + " Thread: " + Thread.currentThread ().getName ());
-		//new Exception().printStackTrace ();
-		return electionId.get ();
+		return electionId.get();
 	}
 
 	public void setElectionId(int electionId) {
-		System.out.println("------------------- Election Id Updated ----------------- " + electionId  + " Thread: " + Thread.currentThread ().getName ());
-		//new Exception().printStackTrace ();
-		this.electionId.getAndSet (electionId);
+		this.electionId.getAndSet(electionId);
 	}
+
 	public long getLeaderHeartBeatdt() {
-		System.out.println("------------------- Fetching Leader Heart Beat ----------------- " + leaderHeartBeatdt.get ()  + " Thread: " + Thread.currentThread ().getName ());
-		return leaderHeartBeatdt.get ();
+		return leaderHeartBeatdt.get();
 	}
 
 	public void setLeaderHeartBeatdt(long leaderHeartBeatdt) {
-		System.out.println("------------------- Leader Heart Beat Updated ----------------- " + leaderHeartBeatdt  + " Thread: " + Thread.currentThread ().getName ());
-		this.leaderHeartBeatdt.getAndSet (leaderHeartBeatdt);
+		this.leaderHeartBeatdt.getAndSet(leaderHeartBeatdt);
 	}
+
 	@Override
 	public void onFileChanged(RoutingConf configuration) {
-		System.out.println("in server state");
+		conf.setNodeId(configuration.getNodeId());
+		conf.setCommandPort(configuration.getCommandPort());
+		conf.setWorkPort(configuration.getWorkPort());
+		conf.setInternalNode(configuration.isInternalNode());
+		conf.setHeartbeatDt(configuration.getHeartbeatDt());
+		conf.setDatabase(configuration.getDatabase());
+		conf.setElectionTimeout(configuration.getElectionTimeout());
+		conf.setMaxHops(configuration.getMaxHops());
 
-			conf.setNodeId(configuration.getNodeId());;
-			conf.setCommandPort(configuration.getCommandPort());
-			conf.setWorkPort(configuration.getWorkPort());
-			conf.setInternalNode(configuration.isInternalNode());
-			conf.setHeartbeatDt(configuration.getHeartbeatDt());
-			conf.setDatabase(configuration.getDatabase());
-			conf.setElectionTimeout(configuration.getElectionTimeout());
-			conf.setMaxHops (configuration.getMaxHops ());
-
-			for(int i=0;i<configuration.routing.size();i++){
-				conf.routing.add(configuration.routing.get(i));
-			}
-
-			for(int j=0;j<configuration.adaptorRouting.size();j++){
-				this.conf.adaptorRouting.add(configuration.adaptorRouting.get(j));
-			}
-			
+		for (int i = 0; i < configuration.routing.size(); i++) {
+			conf.routing.add(configuration.routing.get(i));
 		}
+
+		for (int j = 0; j < configuration.adaptorRouting.size(); j++) {
+			this.conf.adaptorRouting.add(configuration.adaptorRouting.get(j));
+		}
+	}
 }

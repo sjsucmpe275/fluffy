@@ -3,19 +3,22 @@ package gash.router.server.messages.cmd_messages.handlers;
 import gash.router.server.CommandChannelHandler;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import routing.Pipe.CommandMessage;
 
 /**
- * Created by codepenman on 3/27/16.
+ * @author: codepenman.
+ * @date: 3/27/16
  */
 public class CmdPingMsgHandler implements ICmdMessageHandler {
 
-	private final CommandChannelHandler cmdChannelHandler;
+	private final Logger logger = LoggerFactory.getLogger("Command Ping Message Handler");
 	private ICmdMessageHandler nextHandler;
 
-	public CmdPingMsgHandler(CommandChannelHandler cmdChannelHandler) {
-		this.cmdChannelHandler = cmdChannelHandler;
+	public CmdPingMsgHandler(CommandChannelHandler commandChannelHandler) {
+
 	}
 
 	@Override
@@ -26,14 +29,13 @@ public class CmdPingMsgHandler implements ICmdMessageHandler {
 			if(nextHandler != null) {
 				nextHandler.handleMessage (cmdMessage, channel);
 			}else   {
-				System.out.println("*****No Handler available*****");
+				logger.info("*****No Handler available*****");
 			}
 		}
 	}
 
 	private void handle(CommandMessage cmdMessage, Channel channel) {
 
-		cmdChannelHandler.getLogger ().info("ping from " + cmdMessage.getHeader().getNodeId());
 		// construct the message to send
 		Common.Header.Builder hb = Common.Header.newBuilder();
 		hb.setNodeId(888);
@@ -46,7 +48,7 @@ public class CmdPingMsgHandler implements ICmdMessageHandler {
 
 		ChannelFuture cf = channel.writeAndFlush (rb.build());
 		if(!cf.isSuccess ())    {
-			System.out.println("Reasion for failure : " + cf);
+			logger.info("Reasion for failure : " + cf);
 		}
 	}
 

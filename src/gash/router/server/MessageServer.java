@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import gash.router.server.messages.cmd_messages.handlers.*;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import deven.monitor.client.WorkerThread;
 import gash.router.container.MonitoringTask;
 import gash.router.container.RoutingConf;
-import gash.router.server.edges.AdaptorEdgeMonitor;
 import gash.router.server.edges.EdgeMonitor;
+import gash.router.server.messages.wrk_messages.handlers.TaskMessageHandler;
 import gash.router.server.tasks.NoOpBalancer;
 import gash.router.server.tasks.TaskList;
 import gash.router.server.tasks.TaskWorker;
@@ -40,39 +41,37 @@ public class MessageServer {
 	public static MonitoringTask monitor = new MonitoringTask();
 	public static File confFile;
 	
+	private QueueManager queues = new QueueManager(100);
+	
 	/**
 	 * initialize the server with a configuration of it's resources
 	 * 
 	 * @param cfg
 	 */
 	public MessageServer(File cfg) {
-		this.confFile = cfg;
+		confFile = cfg;
 		init(cfg);
-	}
-
-	public MessageServer(RoutingConf conf) {
-		this.conf = conf;
-		
 	}
 
 	public void release() {
 	}
 
 	public void startServer() {
-		StartWorkCommunication comm = new StartWorkCommunication(conf);
-		StartAdaptorCommunication adapComm = new StartAdaptorCommunication(conf);
+		StartWorkCommunication comm = new StartWorkCommunication(conf, queues);
+		/*Adaptor Communication is for Inter Cluster Communication - it was not fully done*/
+//		StartAdaptorCommunication adapComm = new StartAdaptorCommunication(conf);
 		logger.info("Work starting");
 
 		// We always start the worker in the background
 		Thread cthread = new Thread(comm);
 		cthread.start();
 		
-		Thread cthreadAdaptor = new Thread(adapComm);
-		cthreadAdaptor.start();
+//		Thread cthreadAdaptor = new Thread(adapComm);
+//		cthreadAdaptor.start();
 
 
 		if (!conf.isInternalNode()) {
-			StartCommandCommunication comm2 = new StartCommandCommunication(conf);
+			StartCommandCommunication comm2 = new StartCommandCommunication(conf, queues);
 			logger.info("Command starting");
 
 			if (background) {
@@ -102,7 +101,7 @@ public class MessageServer {
 			br = new BufferedInputStream(new FileInputStream(cfg));
 			br.read(raw);
 			conf = JsonUtil.decode(new String(raw), RoutingConf.class);
-			System.out.println(conf.getNodeId());
+			System.out.println (conf.getNodeId());
 			if (!verifyConf(conf))
 				throw new RuntimeException("verification of configuration failed");
 		} catch (Exception ex) {
@@ -130,9 +129,14 @@ public class MessageServer {
 	 */
 	private static class StartCommandCommunication implements Runnable {
 		RoutingConf conf;
-
-		public StartCommandCommunication(RoutingConf conf) {
+		QueueManager queues;
+		CmdStorageMsgHandler cmdMessageHandler;
+		
+		public StartCommandCommunication(RoutingConf conf, QueueManager queues) {
 			this.conf = conf;
+			this.queues = queues;
+			cmdMessageHandler = new CmdStorageMsgHandler (queues);//createCommandMsgHandlersChainAndGetStart();
+			cmdMessageHandler.start();
 		}
 
 		public void run() {
@@ -150,11 +154,11 @@ public class MessageServer {
 				b.option(ChannelOption.SO_BACKLOG, 100);
 				b.option(ChannelOption.TCP_NODELAY, true);
 				b.option(ChannelOption.SO_KEEPALIVE, true);
-
+				b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
 				// b.option(ChannelOption.MESSAGE_SIZE_ESTIMATOR);
 
 				boolean compressComm = false;
-				b.childHandler(new CommandChannelInitializer (conf, compressComm));
+				b.childHandler(new CommandChannelInitializer (conf, compressComm, cmdMessageHandler));
 
 				// Start the server.
 				logger.info("Starting command server (" + conf.getNodeId() + "), listening on port = "
@@ -186,35 +190,40 @@ public class MessageServer {
 	private static class StartWorkCommunication implements Runnable {
 		ServerState state;
 		WorkerThread monitorThread;
+		QueueManager queues;
 		
-		public StartWorkCommunication(RoutingConf conf) {
+		public StartWorkCommunication(RoutingConf conf, QueueManager queues) {
+			
 			if (conf == null)
 				throw new RuntimeException("missing conf");
 			
+			this.queues = queues;
+			
 			//final Path path = FileSystems.getDefault().getPath();
-			monitor.monitorFile(confFile.getPath());
 			logger.info("in message server");
 			state = new ServerState(conf);
+			state.setQueues(queues);
 			monitor.registerObserver(state);
-			
+			monitor.monitorFile(confFile.getPath());
+
 			TaskList tasks = new TaskList(new NoOpBalancer());
 			state.setTasks(tasks);
 
-			EdgeMonitor emon = new EdgeMonitor(state);
+			EdgeMonitor emon = new EdgeMonitor(state, queues);
 			monitor.registerObserver(emon);
 			Thread t = new Thread(emon);
 			t.start();
 
-			monitorThread = new WorkerThread("localhost", 5000, state);
-			monitorThread.start();
-
+			TaskMessageHandler command2workerThread = new TaskMessageHandler(state);
+			t = new Thread(command2workerThread);
+			t.start();
+			
 			int workerCount = 4;
 			ExecutorService executors = Executors.newFixedThreadPool(workerCount);
 			for(int i = 0; i < workerCount; i++) {
 				TaskWorker taskWorker = new TaskWorker(state);
 				executors.execute(taskWorker);
 			}
-			executors.shutdown();	
 		}
 
 		public void run() {
@@ -266,7 +275,7 @@ public class MessageServer {
 			}
 		}
 	}
-	private static class StartAdaptorCommunication implements Runnable {
+	/*private static class StartAdaptorCommunication implements Runnable {
 		ServerState state;
 		WorkerThread monitorThread;
 		
@@ -336,7 +345,8 @@ public class MessageServer {
 				}
 			}
 		}
-	}
+	}*/
+	
 	/**
 	 * help with processing the configuration information
 	 * 
