@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Fluffy by sjsucmpe275</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Fluffy</h1>
+        <p>Distributed file storage system similar to Dropbox using Google Protobuf and Netty</p>
+
+        <p class="view"><a href="https://github.com/sjsucmpe275/fluffy">View the Project on GitHub <small>sjsucmpe275/fluffy</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/sjsucmpe275/fluffy/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/sjsucmpe275/fluffy/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/sjsucmpe275/fluffy">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a id="project----fluffy" class="anchor" href="#project----fluffy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Project    Fluffy</h1>
+
+<p>Storing data    in  the cloud   or  on  a   network of  servers share   a   common  challenge   -<br>
+how to  securely    share,  store,  and survive failures    and corruption  of  data.   There   are 
+systems like    Drop    Box,    Sync,   Google  Drive,  and server  installations   like    HDFS    and 
+databases   like    Mongo   that    use multiple    servers and redundant   storage approaches.     </p>
+
+<p>As  consumers   we  are left    with    choosing    one.    What    if  we  could   use any number  of<br>
+services?       </p>
+
+<p>Your    team    has been    awarded the project to  design  and implement   a   new approach<br>
+to  storing and finding data    in  a   larger, decentralized,  heterogeneous   platform.   </p>
+
+<p>This    undertaking may appear  to  be  straightforward,    and some    of  the concepts    and 
+technologies    are certainly   that.   The challenge   is  in  combining   and building    loosely 
+coupled,    dynamic networks    where   all nodes   and technology  stacks  are not known.<br>
+There   are no  set software    stacks  and tools   –bounds   are fuzzy   – fluffy  so  to  speak.  </p>
+
+<p>Your    team    has been    tasked  to  build   the communication   and balancing   overlay 
+system  to  collect,    store   and stream  data    with    emphasis    on: <br>
+1. Cloud    – server  – personal    device  transparency<br>
+2. Balance  work    across  stacks<br>
+3. Survive  failures    </p>
+
+<p>To  this    goal,   you are given   the responsibility  to  design  and build   the FileEdge<br>
+architecture.   This    should  include a   scalability strategy    to  account for a   massive 
+registration    processes,  distributed image   storage,    and search  capabilities    that<br>
+include real-time   monitoring  of  work    and data    as  they    enter   the network of  servers.        </p>
+
+<p>A   study   conducted   last    quarter has identified  that    the best    approach    would   be  to<br>
+design  a   system  that    can be  hosted  on  a   series  of  compute platforms   using   multiple<br>
+international   deployments.    The study   also    concluded   the candidate   technologies    for 
+the system  should  be: </p>
+
+<h4>
+<a id="languages" class="anchor" href="#languages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Languages:</h4>
+
+<p>Java,   and Python  (client API),   C++ (client API)    </p>
+
+<h4>
+<a id="core----packages" class="anchor" href="#core----packages" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Core    Packages:</h4>
+
+<p>Google  Protobuf,   Netty   </p>
+
+<h4>
+<a id="storage" class="anchor" href="#storage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storage:</h4>
+
+<p>In-memory   database</p>
+
+<h4>
+<a id="challenges" class="anchor" href="#challenges" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Challenges:</h4>
+
+<p>Leader  election,   replication,    and work/data   balance </p>
+
+<p>These   candidate   languages/technologies  (though not inclusive)  would   be  best<br>
+utilized    in  the following   configuration:  The storage servers should  be  Java-based<br>
+and feeds   (adding files)  have    dual    Java    and Python  APIs.   Further recommendations 
+where   the use of  a   GIS database    and metadata    support with    geographic<br>
+registration/searching.     </p>
+
+<p>Users   of  the system  will    likely  interact    through any number  of  possible    platforms<br>
+(application,   a   web,    or  mobile  platforms)  -   you are building    a   toolkit/API to  not only<br>
+for clients but also    for server-side processes.      </p>
+
+<p>Note    at  this    time    the team    is  not directed    to  implement   a   web or  mobile  app.    The 
+team's  target  is  strictly    the server-side infrastructure. However,    the team    will    need<br>
+to  evaluate    the suitability of  the API for a   spectrum    of  client  uses.   </p>
+
+<h3>
+<a id="communication" class="anchor" href="#communication" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Communication:</h3>
+
+<p>Since   you are building    a   package for hosting data,   your    teams   must    ensure  that<br>
+multiple    servers can interoperate    to  form    dynamic 'overlay'   fabric. Furthermore,    it<br>
+is  unknown how wide    the network will    form    so, having  each    server  know    all nodes<br>
+is  not possible.   </p>
+
+<p>To  test    the design  and strengths   of  all implementations,    each    team    need    to  interact<br>
+with    deployments of  other   teams.  Each    team    should  support two storage solutions<br>
+of  which   50% cannot  overlap another team’s    choice.     </p>
+
+<h3>
+<a id="source---code" class="anchor" href="#source---code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Source   code:</h3>
+
+<p>The baseline    code    for the project is  the code    you have    been    using   in  the class   labs.<br>
+Periodically,   new releases    of  the code    will    be  made    available   to  provide you 
+examples    of  new concepts.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/sjsucmpe275">sjsucmpe275</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
