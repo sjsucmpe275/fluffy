@@ -21,39 +21,41 @@ public interface INodeState {
 	void handleVoteResponse(WorkMessage workMessage, Channel channel);
 
 	void handleWhoIsTheLeader(WorkMessage workMessage, Channel channel);
-	
+
 	void handleBeat(WorkMessage workMessage, Channel channel);
-	
+
 	void handleCmdQuery(WorkMessage workMessage, Channel channel);
-	
+
 	void handleCmdResponse(WorkMessage workMessage, Channel channel);
-	
+
 	void handleCmdError(WorkMessage workMessage, Channel channel);
 
 	default void handleMessage(WorkMessage workMessage, Channel channel) {
+
 		LeaderStatus leaderStatus = workMessage.getLeader();
+
 		switch (leaderStatus.getAction()) {
-			case WHOISTHELEADER:
-				handleWhoIsTheLeader(workMessage, channel);
-				break;
-			case THELEADERIS:
-				handleLeaderIs(workMessage, channel);
-				break;
-			case GETCLUSTERSIZE:
-				handleGetClusterSize(workMessage, channel);
-				break;
-			case SIZEIS:
-				handleSizeIs(workMessage, channel);
-				break;
-			case VOTEREQUEST:
-				handleVoteRequest(workMessage, channel);
-				break;
-			case VOTERESPONSE:
-				handleVoteResponse(workMessage, channel);
-				break;
-			case BEAT:
-				handleBeat (workMessage, channel);
-			default:
+		case WHOISTHELEADER:
+			handleWhoIsTheLeader(workMessage, channel);
+			break;
+		case THELEADERIS:
+			handleLeaderIs(workMessage, channel);
+			break;
+		case GETCLUSTERSIZE:
+			handleGetClusterSize(workMessage, channel);
+			break;
+		case SIZEIS:
+			handleSizeIs(workMessage, channel);
+			break;
+		case VOTEREQUEST:
+			handleVoteRequest(workMessage, channel);
+			break;
+		case VOTERESPONSE:
+			handleVoteResponse(workMessage, channel);
+			break;
+		case BEAT:
+			handleBeat(workMessage, channel);
+		default:
 		}
 	}
 }

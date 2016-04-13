@@ -2,6 +2,7 @@ package gash.router.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import pipe.common.Common.Header;
 import pipe.work.Work.WorkMessage;
 
@@ -10,6 +11,7 @@ import pipe.work.Work.WorkMessage;
  *
  */
 public class Router {
+
 	private final Logger logger = LoggerFactory.getLogger("Router");
 
 	private final ServerState state;
@@ -20,19 +22,19 @@ public class Router {
 
 	/**
 	 * Checks if message is coming back to this node.
+	 * 
 	 * @param msg
 	 * @return
 	 */
 	public WorkMessage route(WorkMessage msg) {
 
-// Message is for current node.
+		// Message is for current node.
 		if (msg.getHeader().getDestination() == state.getConf().getNodeId()) {
 			return msg;
 		}
 
 		if (msg.getHeader().getNodeId() == state.getConf().getNodeId()) {
-			logger.info(
-					"Same message received by source! Dropping message...");
+			logger.info("Same message received by source! Dropping message...");
 			return null;
 		}
 		return route0(msg);
@@ -44,6 +46,7 @@ public class Router {
 
 	/**
 	 * Just publishes messages without dropping boomrang messages.
+	 * 
 	 * @param msg
 	 * @return
 	 */

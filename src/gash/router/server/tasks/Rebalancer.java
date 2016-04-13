@@ -16,6 +16,7 @@
 package gash.router.server.tasks;
 
 public interface Rebalancer {
+
 	public abstract boolean allow();
 
 	public abstract float calcLoad();

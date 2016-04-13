@@ -64,8 +64,6 @@ public class CommandChannelHandler extends SimpleChannelInboundHandler<CommandMe
 
 		PrintUtil.printCommand(msg);
 
-		// TODO How can you implement this without if-else statements? - With
-		// COR
 		try {
 			cmdMessageHandler.handleMessage(msg, channel);
 		} catch (Exception e) {

@@ -1,18 +1,19 @@
 package election;
 
-import gash.router.server.ServerState;
-import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pipe.election.Election.LeaderStatus.LeaderQuery;
-import pipe.election.Election.LeaderStatus.LeaderState;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gash.router.server.ServerState;
+import gash.router.server.messages.wrk_messages.LeaderStatusMessage;
+import pipe.election.Election.LeaderStatus.LeaderQuery;
+import pipe.election.Election.LeaderStatus.LeaderState;
 
 /**
  * @author: codepenman.
@@ -45,14 +46,13 @@ public class FollowerHealthMonitor {
 	private AtomicBoolean stop;
 	private final long timeout;
 
-	public FollowerHealthMonitor(FollowerListener followerListener, ServerState state, long timeout) {
+	public FollowerHealthMonitor(FollowerListener followerListener, ServerState state,
+		long timeout) {
 		this.followerListener = followerListener;
 		this.state = state;
-		// this.interval = timeout - (long)(0.1 * timeout); // 10% lesser than
-		// the original timeout
 		this.timeout = timeout;
-		task = new HealthMonitorTask();
-		stop = new AtomicBoolean(false);
+		this.task = new HealthMonitorTask();
+		this.stop = new AtomicBoolean(false);
 		this.follower2BeatTimeMap = new ConcurrentHashMap<>();
 	}
 
@@ -62,22 +62,22 @@ public class FollowerHealthMonitor {
 
 	public void start() {
 		// Broadcast heartbeat to all the followers
-		LeaderStatusMessage beat = new LeaderStatusMessage (state.getConf().getNodeId());
-		beat.setElectionId (state.getElectionId ());
-		beat.setLeaderId (state.getLeaderId ());
-		beat.setMaxHops (state.getConf ().getMaxHops ());
+		LeaderStatusMessage beat = new LeaderStatusMessage(state.getConf().getNodeId());
+		beat.setElectionId(state.getElectionId());
+		beat.setLeaderId(state.getLeaderId());
+		beat.setMaxHops(state.getConf().getMaxHops());
 		beat.setLeaderAction(LeaderQuery.BEAT);
 		beat.setLeaderState(LeaderState.LEADERALIVE);
 
 		state.getEmon().broadcastMessage(beat.getMessage());
 
-		stop.getAndSet (false);
+		stop.getAndSet(false);
 		task.start();
 	}
 
 	public void cancel() {
 		stop.getAndSet(true);
-		task = new HealthMonitorTask ();
+		task = new HealthMonitorTask();
 	}
 
 	private class HealthMonitorTask extends Thread {
@@ -87,47 +87,52 @@ public class FollowerHealthMonitor {
 		@Override
 		public void run() {
 			try {
+				
 				while (!stop.get()) {
 
 					if (debug)
-						logger.info("********Started: " + new Date(System.currentTimeMillis()));
+						logger.info(
+							"********Started: " + new Date(System.currentTimeMillis()));
 
 					if (broadCastBeat) {
 						// Broadcast heartbeat to all the followers
-						logger.info ("#####Leader broadcasting heartbeat to all followers");
+						logger.info("#####Leader broadcasting heartbeat to all followers");
 
-						LeaderStatusMessage beat = new LeaderStatusMessage (state.getConf().getNodeId());
-						beat.setElectionId (state.getElectionId ());
-						beat.setLeaderId (state.getLeaderId ());
-						beat.setMaxHops (state.getConf ().getMaxHops ());
+						LeaderStatusMessage beat = new LeaderStatusMessage(
+							state.getConf().getNodeId());
+						beat.setElectionId(state.getElectionId());
+						beat.setLeaderId(state.getLeaderId());
+						beat.setMaxHops(state.getConf().getMaxHops());
 						beat.setLeaderAction(LeaderQuery.BEAT);
 						beat.setLeaderState(LeaderState.LEADERALIVE);
 
 						state.getEmon().broadcastMessage(beat.getMessage());
 						broadCastBeat = false;
+						
 						synchronized (this) {
-							wait((long)(timeout * 0.9));
+							wait((long) (timeout * 0.9));
 						}
 					} else {
 						long currentTime = System.currentTimeMillis();
 
-						ArrayList<Integer> nodes2Remove = new ArrayList<> ();
+						ArrayList<Integer> nodes2Remove = new ArrayList<>();
 
-						nodes2Remove.addAll (follower2BeatTimeMap.entrySet().stream()
-								.filter(entry -> currentTime - entry.getValue() > timeout).map (Map.Entry::getKey)
-								.collect(Collectors.toList()));
+						nodes2Remove.addAll(follower2BeatTimeMap.entrySet().stream()
+							.filter(entry -> currentTime - entry.getValue() > timeout)
+							.map(Map.Entry::getKey).collect(Collectors.toList()));
 
-						for(Integer nodeId : nodes2Remove)  {
-							follower2BeatTimeMap.remove (nodeId);
-							followerListener.removeFollower (nodeId);
+						for (Integer nodeId : nodes2Remove) {
+							follower2BeatTimeMap.remove(nodeId);
+							followerListener.removeFollower(nodeId);
 						}
 
-						logger.info ("####Follower heartbeats:" + follower2BeatTimeMap);
+						logger.info("####Follower heartbeats:" + follower2BeatTimeMap);
 						broadCastBeat = true;
 					}
 				}
 			} catch (InterruptedException e) {
-				logger.info("********Timer was interrupted: " + new Date(System.currentTimeMillis()));
+				logger.info("********Timer was interrupted: "
+					+ new Date(System.currentTimeMillis()));
 			}
 		}
 	}

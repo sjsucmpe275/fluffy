@@ -16,6 +16,7 @@
 package gash.router.server.edges;
 
 public interface EdgeListener {
+
 	public abstract void onAdd(EdgeInfo ei);
 
 	public abstract void onRemove(EdgeInfo ei);

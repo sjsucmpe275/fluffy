@@ -15,17 +15,17 @@ import routing.Pipe.CommandMessage;
  */
 public class MessageAdapter {
 
-	public static CommandMessage getCommandMessage(WorkMessage msg)
-		throws Exception {
-		
+	public static CommandMessage getCommandMessage(WorkMessage msg) throws Exception {
+
 		if (!msg.hasTask() || !msg.getTask().hasTaskMessage()) {
 			throw new Exception("Work message does not have task");
 		}
-		
+
 		return msg.getTask().getTaskMessage();
 	}
-	
-	public static WorkMessage getWorkMessageToLeader( ServerState state, CommandMessage msg) {
+
+	public static WorkMessage getWorkMessageToLeader(ServerState state,
+		CommandMessage msg) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
 		wb.setHeader(getGenericHeader(state.getConf(), state.getLeaderId()));
 
@@ -33,17 +33,17 @@ public class MessageAdapter {
 		if (msg.hasQuery()) {
 			tb.setSeqId(msg.getQuery().getSequenceNo());
 			tb.setSeriesId(msg.getQuery().getKey().hashCode());
-		} else if (msg.hasResponse()){
+		} else if (msg.hasResponse()) {
 			tb.setSeqId(msg.getResponse().getSequenceNo());
 			tb.setSeriesId(msg.getResponse().getKey().hashCode());
 		}
 		tb.setTaskMessage(msg);
-		
+
 		wb.setTask(tb.build());
 		wb.setSecret(state.getConf().getSecret());
 		return wb.build();
 	}
-	
+
 	public static Header getGenericHeader(RoutingConf conf, int destination) {
 		Header.Builder hb = Header.newBuilder();
 		hb.setDestination(destination);

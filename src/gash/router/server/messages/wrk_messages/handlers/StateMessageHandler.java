@@ -8,7 +8,6 @@ import io.netty.channel.Channel;
 import pipe.work.Work.WorkMessage;
 import pipe.work.Work.WorkState;
 
-
 /**
  * @author: codepenman
  * @date: 28/03/2016

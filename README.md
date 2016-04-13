@@ -69,10 +69,40 @@ is	not	possible.
 To	test	the	design	and	strengths	of	all	implementations,	each	team	need	to	interact	
 with	deployments	of	other	teams.	Each	team	should	support	two	storage	solutions	
 of	which	50%	cannot	overlap	another	team’s	choice.		
-	
-	
-###Source	code:	
-	
-The	baseline	code	for	the	project	is	the	code	you	have	been	using	in	the	class	labs.	
-Periodically,	new	releases	of	the	code	will	be	made	available	to	provide	you	
-examples	of	new	concepts.
+
+##Instruction to run the project
+Download the source code
+Install ant
+Download these libraries:
+1. commons-pool2-2.4.2.jar
+2. gemfire-core-1.0.0-incubating.M1.jar
+3. hamcrest-all-1.3.jar
+4. jackson-all-1.8.5.jar
+5. jedis-2.4.2.jar
+6. junit-4.12.jar
+7. leveldbjni-all-1.8.jar
+8. netty-all-4.0.15.Final.jar
+9. protobuf-java-2.5.0.jar
+10. slf4j-api-1.7.2.jar
+11. slf4j-simple-1.7.2.jar
+12. spymemcached-2.8.0.jar
+
+###How to build
+Go to project directory.
+Type "ant"
+Source code will be compiled.
+
+####How to start server
+Go to project directory
+Type "ant node-1" to start server node-1 which loads Server Configuration from
+"~/runtime/route-1.conf"
+Type "ant node-2" to start server node-2 which loads Server Configuration from
+"~/runtime/route-2.conf"
+Type "ant node-3" to start server node-3 which loads Server Configuration from
+"~/runtime/route-3.conf"
+Type "ant node-5" to start server node-5 which loads Server Configuration from
+"~/runtime/route-5.conf"
+Type "ant node-6" to start server node-6 which loads Server Configuration from
+"~/runtime/route-6.conf"
+
+Topology can be defined in route-*.conf files

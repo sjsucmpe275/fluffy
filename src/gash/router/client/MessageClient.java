@@ -30,6 +30,7 @@ import storage.Storage.Query;
  * 
  */
 public class MessageClient {
+
 	// track requests
 	private long curID = 0;
 
@@ -48,11 +49,11 @@ public class MessageClient {
 	public void ping() {
 		// construct the message to send
 		Header.Builder hb = buildHeader();
-		
+
 		CommandMessage.Builder rb = CommandMessage.newBuilder();
 		rb.setHeader(hb);
 		rb.setPing(true);
-		
+
 		try {
 			// direct no queue
 			// CommConnection.getInstance().write(rb.build());
@@ -75,7 +76,7 @@ public class MessageClient {
 		qb.setAction(Action.STORE);
 		qb.setData(data);
 		qb.setSequenceNo(1);
-	
+
 		cb.setQuery(qb);
 
 		try {
@@ -87,16 +88,16 @@ public class MessageClient {
 
 	public void get(String key) {
 		Header.Builder hb = buildHeader();
-	
+
 		CommandMessage.Builder cb = CommandMessage.newBuilder();
 		cb.setHeader(hb);
-	
+
 		Query.Builder qb = Query.newBuilder();
 		qb.setAction(Action.GET);
 		qb.setKey(key);
-	
+
 		cb.setQuery(qb);
-	
+
 		try {
 			CommConnection.getInstance().enqueue(cb.build());
 		} catch (Exception e) {
@@ -106,17 +107,17 @@ public class MessageClient {
 
 	public void put(String key, int sequenceNo, ByteString data) {
 		Header.Builder hb = buildHeader();
-	
+
 		CommandMessage.Builder cb = CommandMessage.newBuilder();
 		cb.setHeader(hb);
-	
+
 		Query.Builder qb = Query.newBuilder();
 		qb.setAction(Action.STORE);
 		qb.setKey(key);
 		qb.setSequenceNo(sequenceNo);
 		qb.setData(data);
 		cb.setQuery(qb);
-	
+
 		try {
 			CommConnection.getInstance().enqueue(cb.build());
 		} catch (Exception e) {
@@ -126,23 +127,23 @@ public class MessageClient {
 
 	public void putMetadata(String key, int seqSize, long fileLength) {
 		Header.Builder hb = buildHeader();
-	
+
 		CommandMessage.Builder cb = CommandMessage.newBuilder();
 		cb.setHeader(hb);
-	
+
 		Query.Builder qb = Query.newBuilder();
 		qb.setAction(Action.STORE);
 		qb.setKey(key);
 		qb.setSequenceNo(0);
-		
+
 		Metadata.Builder mb = Metadata.newBuilder();
 		mb.setSeqSize(seqSize);
 		mb.setSize(fileLength);
 		mb.setTime(System.currentTimeMillis());
-		
+
 		qb.setMetadata(mb);
 		cb.setQuery(qb);
-	
+
 		try {
 			CommConnection.getInstance().enqueue(cb.build());
 		} catch (Exception e) {

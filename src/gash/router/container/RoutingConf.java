@@ -46,24 +46,28 @@ public class RoutingConf  {
 	private AtomicInteger maxHops;
 	private AtomicInteger secret;
 
-	public RoutingConf(){
-		nodeId=new AtomicInteger();
-		internalNode=new AtomicBoolean(true);
-		heartbeatDt=new AtomicInteger(2000);
-		workPort=new AtomicInteger();
-		commandPort=new AtomicInteger();
-		database= new AtomicReference<> ("redis");
-		electionTimeout=new AtomicInteger();
-		maxHops = new AtomicInteger ();
-		adaptorPort = new AtomicInteger(0);
-		secret = new AtomicInteger(0);
+	public RoutingConf() {
+		this.nodeId = new AtomicInteger();
+		this.internalNode = new AtomicBoolean(true);
+		this.heartbeatDt = new AtomicInteger(2000);
+		this.workPort = new AtomicInteger();
+		this.commandPort = new AtomicInteger();
+		this.database = new AtomicReference<>("redis");
+		this.electionTimeout = new AtomicInteger();
+		this.maxHops = new AtomicInteger();
+		this.adaptorPort = new AtomicInteger(0);
+		this.secret = new AtomicInteger(0);
 	}
 
 	//private List<RoutingEntry> routing;
-	public List<RoutingEntry> routing = Collections.synchronizedList(new ArrayList<RoutingEntry>());
-	public List<RoutingEntry> adaptorRouting = Collections.synchronizedList(new ArrayList<RoutingEntry>());
+	public List<RoutingEntry> routing = Collections
+		.synchronizedList(new ArrayList<RoutingEntry>());
+	public List<RoutingEntry> adaptorRouting = Collections
+		.synchronizedList(new ArrayList<RoutingEntry>());
+
 	public HashMap<String, Integer> asHashMap() {
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		
 		if (routing != null) {
 			for (RoutingEntry entry : routing) {
 				map.put(entry.host, entry.port);
@@ -73,6 +77,7 @@ public class RoutingConf  {
 	}
 	public HashMap<String, Integer> asAdaptorHashMap() {
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
+		
 		if (adaptorRouting != null) {
 			for (RoutingEntry entry : routing) {
 				map.put(entry.host, entry.port);
@@ -103,12 +108,15 @@ public class RoutingConf  {
 	public int getNodeId() {
 		return nodeId.get();
 	}
+	
 	public int getAdaptorPort() {
 		return adaptorPort.get();
 	}
+	
 	public void setAdaptorPort(int adaptorPort) {
 		this.adaptorPort.getAndSet(adaptorPort);
 	}
+	
 	public void setNodeId(int nodeId) {
 		this.nodeId.getAndSet(nodeId);
 	}
@@ -160,6 +168,7 @@ public class RoutingConf  {
 	public void setAdaptorRouting(List<RoutingEntry> conf) {
 		this.adaptorRouting = conf;
 	}
+	
 	public String getDatabase() {
 		return database.get();
 	}
@@ -231,6 +240,5 @@ public class RoutingConf  {
 		public void setId(int id) {
 			this.id = id;
 		}
-
 	}
 }

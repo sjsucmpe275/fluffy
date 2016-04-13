@@ -3,13 +3,20 @@
  */
 package gash.router.server.tasks;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+
 import dbhandlers.DatabaseFactory;
 import dbhandlers.IDBHandler;
 import gash.router.server.ServerState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pipe.common.Common;
 import pipe.work.Work.Task;
 import pipe.work.Work.WorkMessage;
@@ -17,11 +24,6 @@ import routing.Pipe.CommandMessage;
 import storage.Storage;
 import storage.Storage.Metadata;
 import storage.Storage.Query;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.Map;
 
 /**
  * @author saurabh
@@ -42,8 +44,7 @@ public class TaskWorker extends Thread {
 
 		DatabaseFactory factory = new DatabaseFactory();
 		try {
-			this.dbHandler = factory
-				.getDatabaseHandler(state.getConf().getDatabase());
+			this.dbHandler = factory.getDatabaseHandler(state.getConf().getDatabase());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -89,21 +90,20 @@ public class TaskWorker extends Thread {
 						if (sequenceNo == 0) {
 
 							try {
-								rb.setMetaData(Metadata
-									.parseFrom(dataMap.get(sequenceNo)));
+								rb.setMetaData(
+									Metadata.parseFrom(dataMap.get(sequenceNo)));
 							} catch (InvalidProtocolBufferException e) {
 								e.printStackTrace();
 							}
 						} else {
-							rb.setData(
-								ByteString.copyFrom(dataMap.get(sequenceNo)));
+							rb.setData(ByteString.copyFrom(dataMap.get(sequenceNo)));
 						}
 						rb.setKey(key);
 						rb.setSequenceNo(sequenceNo);
 
 						cb.setHeader(hb);
 						cb.setResponse(rb);
-						
+
 						Task.Builder returnTask = Task.newBuilder();
 						returnTask.setTaskMessage(cb);
 						returnTask.setSeqId(task.getSeqId());
@@ -111,7 +111,7 @@ public class TaskWorker extends Thread {
 
 						WorkMessage workMessage = wrapMessage(returnTask.build());
 
-						state.getCurrentState ().handleCmdResponse(workMessage, null);
+						state.getCurrentState().handleCmdResponse(workMessage, null);
 					}
 					continue;
 				}
@@ -159,8 +159,7 @@ public class TaskWorker extends Thread {
 						dbHandler.put(query.getKey(), 0,
 							query.getMetadata().toByteArray());
 					} else {
-						key = dbHandler.put(query.getKey(),
-							query.getSequenceNo(),
+						key = dbHandler.put(query.getKey(), query.getSequenceNo(),
 							query.getData().toByteArray());
 					}
 				} else {
@@ -180,7 +179,7 @@ public class TaskWorker extends Thread {
 				rb.setSuccess(true);
 				rb.setSequenceNo(query.getSequenceNo());
 				rb.setInfomessage("Data stored successfully at key: " + key);
-				
+
 				cb.setHeader(hb.build());
 				cb.setResponse(rb.build());
 				break;
@@ -213,7 +212,7 @@ public class TaskWorker extends Thread {
 			returnTask.setSeriesId(task.getSeriesId());
 
 			WorkMessage workMessage = wrapMessage(returnTask.build());
-			state.getCurrentState ().handleCmdResponse (workMessage, null);
+			state.getCurrentState().handleCmdResponse(workMessage, null);
 		}
 	}
 

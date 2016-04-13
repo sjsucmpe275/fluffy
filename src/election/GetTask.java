@@ -30,14 +30,14 @@ public class GetTask extends AbstractTask implements Runnable {
 		state.getTasks().addTask(requestMsg.getTask());
 		state.getEmon().broadcastMessage(requestMsg);
 
-		run0 ();
+		run0();
 		cleanup();
 	}
 
 	@Override
 	protected void cleanup() {
 		receivedMessages.clear();
-		listener.notifyTaskCompletion (
+		listener.notifyTaskCompletion(
 			requestMsg.getTask().getTaskMessage().getQuery().getKey());
 	}
 

@@ -53,9 +53,6 @@ public class PrintUtil {
 			logger.info(PrintUtil.gap + "Msg:  " + msg.getMessage());
 		} else if (msg.hasQuery()) {
 			logger.info("Query");
-//			logger.info(msg.getQuery().getAction().name());
-//			logger.info(msg.getQuery().getKey());
-//			logger.info(msg.getQuery().getData());
 			logger.info("--------------------");
 		} else {
 			logger.info("Unknown");
@@ -80,8 +77,6 @@ public class PrintUtil {
 		} 
 		else
 			logger.info("Unknown");
-
-//		logger.info(PrintUtil.gap + "Secret:  " + msg.getSecret());
 	}
 
 	public static void printFailure(Failure f) {

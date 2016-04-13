@@ -3,21 +3,23 @@
  */
 package client;
 
-import com.google.protobuf.ByteString;
-import gash.router.client.CommListener;
-import gash.router.client.MessageClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import routing.Pipe.CommandMessage;
-import storage.Storage.Action;
-import storage.Storage.Response;
-import util.SerializationUtil;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.protobuf.ByteString;
+
+import gash.router.client.CommListener;
+import gash.router.client.MessageClient;
+import routing.Pipe.CommandMessage;
+import storage.Storage.Action;
+import storage.Storage.Response;
+import util.SerializationUtil;
 
 /**
  * @author saurabh
@@ -51,7 +53,7 @@ public class Client implements CommListener {
 	public void onMessage(CommandMessage msg) {
 
 		if (!fileOutput) {
-			logger.info(msg.toString ());
+			logger.info(msg.toString());
 		}
 
 		if (msg.getResponse().getAction() == Action.GET) {
@@ -62,14 +64,15 @@ public class Client implements CommListener {
 			} else {
 				ByteString data = msg.getResponse().getData();
 				String str = new String(data.toByteArray());
-				
+
 				if (!fileOutput) {
 					logger.info("Fetched data: " + str);
 				}
 				responseList.add(msg.getResponse());
 
 				if (responseList.size() == responseSize) {
-					Collections.sort(responseList, (o1, o2) -> o1.getSequenceNo() - o2.getSequenceNo());
+					Collections.sort(responseList,
+						(o1, o2) -> o1.getSequenceNo() - o2.getSequenceNo());
 
 					List<ByteString> list = new LinkedList<>();
 					for (Response response : responseList) {
@@ -91,13 +94,12 @@ public class Client implements CommListener {
 			return;
 		}
 
-		logger.info(Thread.currentThread() + ": Handling " + args[0] );
+		logger.info(Thread.currentThread() + ": Handling " + args[0]);
 		switch (args[0].toUpperCase()) {
 		case "GET":
 
 			if (args.length < 3) {
-				logger.info(
-					"Not enough params.\n->Key\n->Output File Location");
+				logger.info("Not enough params.\n->Key\n->Output File Location");
 				return;
 			}
 			fileOutput = true;
@@ -128,8 +130,7 @@ public class Client implements CommListener {
 
 		case "PUT":
 			if (args.length < 3) {
-				logger.info(
-					"Not enough params.\n->Key\n->Input File Location");
+				logger.info("Not enough params.\n->Key\n->Input File Location");
 				return;
 			}
 			key = args[1];
@@ -140,8 +141,7 @@ public class Client implements CommListener {
 				throw new FileNotFoundException(filepath);
 			}
 			long fileSize = tempFile.length();
-			mc.putMetadata(key, (int) (Math.ceil(1.0 * fileSize / M)),
-				fileSize);
+			mc.putMetadata(key, (int) (Math.ceil(1.0 * fileSize / M)), fileSize);
 			for (int i = 0; i < 1 + (fileSize / M / 10); i++) {
 				List<ByteString> dataList = util.readfile(filepath, 0, M, 10);
 
@@ -189,14 +189,12 @@ public class Client implements CommListener {
 			e.printStackTrace();
 		}
 
-		
 	}
-	
+
 	public void releaseClient() {
 		logger.info("Client closing...");
 		mc.release();
 	}
-	
 
 	/**
 	 * @param args

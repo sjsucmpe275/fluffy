@@ -23,12 +23,12 @@ public class WrkPingMessageHandler implements IWrkMessageHandler {
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if(workMessage.hasPing ())  {
+		if (workMessage.hasPing()) {
 			handle(workMessage, channel);
-		}else   {
-			if(nextHandler != null) {
-				nextHandler.handleMessage (workMessage, channel);
-			}else   {
+		} else {
+			if (nextHandler != null) {
+				nextHandler.handleMessage(workMessage, channel);
+			} else {
 				logger.info("*****No Handler available*****");
 			}
 		}

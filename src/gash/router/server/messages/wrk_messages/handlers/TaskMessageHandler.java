@@ -1,10 +1,11 @@
 package gash.router.server.messages.wrk_messages.handlers;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import gash.router.server.MessageAdapter;
 import gash.router.server.ServerState;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import pipe.work.Work.WorkMessage;
 import routing.Pipe.CommandMessage;
 
@@ -60,16 +61,15 @@ public class TaskMessageHandler implements IWrkMessageHandler, Runnable {
 		logger.info("Starting work server queue manager thread...");
 		while (forever) {
 			CommandMessage msg;
-			
+
 			try {
 				msg = state.getQueues().getToWorkServer().take();
-				WorkMessage wrkMsg = MessageAdapter
-					.getWorkMessageToLeader(state, msg);
+				WorkMessage wrkMsg = MessageAdapter.getWorkMessageToLeader(state, msg);
 
 				if (state.getLeaderId() == state.getConf().getNodeId()) {
 					handleMessage(wrkMsg, null);
 				}
-				state.getEmon ().broadcastMessage (wrkMsg);
+				state.getEmon().broadcastMessage(wrkMsg);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

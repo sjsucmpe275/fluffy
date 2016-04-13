@@ -1,13 +1,17 @@
 package gash.router.server;
 
-import election.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
+import election.Candidate;
+import election.Follower;
+import election.INodeState;
+import election.Leader;
+import election.NodeStateEnum;
 import gash.router.container.Observer;
 import gash.router.container.RoutingConf;
 import gash.router.server.edges.EdgeMonitor;
 import gash.router.server.tasks.TaskList;
-
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class ServerState implements Observer {
 
@@ -26,15 +30,15 @@ public class ServerState implements Observer {
 
 	public ServerState(RoutingConf conf) {
 		this.conf = conf;
-		leader = new Leader(this);
-		candidate = new Candidate(this);
-		follower = new Follower(this);
-		currentState = follower;
-		leaderId = new AtomicInteger(-1);
-		leaderHeartBeatdt = new AtomicLong(Long.MAX_VALUE);
+		this.leader = new Leader(this);
+		this.candidate = new Candidate(this);
+		this.follower = new Follower(this);
+		this.currentState = follower;
+		this.leaderId = new AtomicInteger(-1);
+		this.leaderHeartBeatdt = new AtomicLong(Long.MAX_VALUE);
 		// To ensure that I will wait for heart beat timeout
-		electionId = new AtomicInteger(0);
-		votedFor = new AtomicInteger(-1);
+		this.electionId = new AtomicInteger(0);
+		this.votedFor = new AtomicInteger(-1);
 	}
 
 	public RoutingConf getConf() {

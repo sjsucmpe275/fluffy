@@ -6,9 +6,9 @@ package election;
  */
 public interface FollowerListener {
 
-	/*
-	* followerId - This will be same as Node-Id
-	* */
+	/**
+	 * followerId - This will be same as Node-Id
+	 */
 	void addFollower(int followerId);
 
 	void removeFollower(int followerId);

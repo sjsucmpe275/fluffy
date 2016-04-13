@@ -12,24 +12,24 @@ import pipe.work.Work.WorkMessage;
  * @author: codepenman
  * @date: 28/03/2016
  */
-public class WrkFailureMessageHandler implements IWrkMessageHandler{
+public class WrkFailureMessageHandler implements IWrkMessageHandler {
 
 	private final ServerState state;
 	private final Logger logger = LoggerFactory.getLogger(WrkFailureMessageHandler.class);;
 	private IWrkMessageHandler nextHandler;
 
-	public WrkFailureMessageHandler(ServerState state)   {
+	public WrkFailureMessageHandler(ServerState state) {
 		this.state = state;
 	}
 
 	@Override
 	public void handleMessage(WorkMessage workMessage, Channel channel) {
-		if(workMessage.hasErr ())  {
+		if (workMessage.hasErr()) {
 			handle(workMessage, channel);
-		}else   {
-			if(nextHandler != null) {
-				nextHandler.handleMessage (workMessage, channel);
-			}else   {
+		} else {
+			if (nextHandler != null) {
+				nextHandler.handleMessage(workMessage, channel);
+			} else {
 				logger.info("*****No Handler available*****");
 			}
 		}

@@ -1,11 +1,11 @@
 package election;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author: codepenman.
@@ -24,22 +24,24 @@ public class LeaderHealthMonitor {
 	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout) {
 		this.healthListener = healthListener;
 		this.timeout = timeout;
-		task = new HealthMonitorTask();
-		stop = new AtomicBoolean(false);
-		beatTime = new AtomicLong(Long.MAX_VALUE);
+		this.task = new HealthMonitorTask();
+		this.stop = new AtomicBoolean(false);
+		this.beatTime = new AtomicLong(Long.MAX_VALUE);
 	}
 
 	public void start() {
 		/* Start the task, only if it is not started */
 		logger.info("~~~~~~~~Follower - Started Leader Monitor");
-		stop.getAndSet (false);
+		stop.getAndSet(false);
 		task.start();
 	}
 
-	/* This method will be called by the owner of Health Monitor to update the beat time of leader
-	* Internal task will be monitoring this time
-	* This time can be set to Long.MAX_VALUE if this thread has to be alive instead of creating
-	* montor multiple times..*/
+	/**
+	 * This method will be called by the owner of Health Monitor to update the
+	 * beat time of leader Internal task will be monitoring this time This time
+	 * can be set to Long.MAX_VALUE if this thread has to be alive instead of
+	 * creating montor multiple times..
+	 */
 	public void onBeat(long beatTime) {
 		this.beatTime.getAndSet(beatTime);
 	}
@@ -48,8 +50,11 @@ public class LeaderHealthMonitor {
 
 		@Override
 		public void run() {
+			
 			try {
+				
 				while (!stop.get()) {
+					
 					if (debug)
 						logger.info("********Started: " + new Date(System.currentTimeMillis()));
 

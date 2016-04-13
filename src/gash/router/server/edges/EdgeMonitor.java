@@ -57,7 +57,7 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 		this.inboundEdges = new EdgeList();
 		this.state = state;
 		this.state.setEmon(this);
-		group = new NioEventLoopGroup ();
+		this.group = new NioEventLoopGroup ();
 
 		if (state.getConf().getRouting() != null) {
 			for (RoutingEntry e : state.getConf().getRouting()) {
@@ -91,21 +91,22 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	public void run() {
 		while (forever) {
 			try {
-				for (EdgeInfo ei : outboundEdges.getEdgesMap ().values()) {
+				for (EdgeInfo ei : outboundEdges.getEdgesMap().values()) {
 					if (ei.isActive() && ei.getChannel() != null) {
 						if (debug)
-							logger.info ("*******Sending Heartbeat to: " + ei.getRef ());
-						BeatMessage beatMessage = new BeatMessage (state.getConf ().getNodeId ());
-						beatMessage.setDestination (ei.getRef ());
-						//beatMessage.setMaxHops (state.getConf ().getMaxHops ());
-						ei.getChannel().writeAndFlush(beatMessage.getMessage ());
+							logger.info("*******Sending Heartbeat to: " + ei.getRef());
+						BeatMessage beatMessage = new BeatMessage(
+							state.getConf().getNodeId());
+						beatMessage.setDestination(ei.getRef());
+						ei.getChannel().writeAndFlush(beatMessage.getMessage());
 					} else {
 						// TODO create a client to the node
 						if (debug)
 							logger.info("trying to connect to node " + ei.getRef());
 
 						try {
-							WorkChannelInitializer wi = new WorkChannelInitializer (state, false);
+							WorkChannelInitializer wi = new WorkChannelInitializer(state,
+								false);
 							Bootstrap b = new Bootstrap();
 							b.group(group).channel(NioSocketChannel.class).handler(wi);
 							b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
@@ -113,21 +114,25 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 							b.option(ChannelOption.SO_KEEPALIVE, true);
 
 							// Make the connection attempt.
-							ChannelFuture channel = b.connect(ei.getHost(), ei.getPort()).syncUninterruptibly();
+							ChannelFuture channel = b.connect(ei.getHost(), ei.getPort())
+								.syncUninterruptibly();
 
-							// want to monitor the connection to the server s.t. if we loose the
+							// want to monitor the connection to the server s.t.
+							// if we loose the
 							// connection, we can try to re-establish it.
-//							channel.channel().closeFuture();
+							// channel.channel().closeFuture();
 
 							ei.setChannel(channel.channel());
 							ei.setActive(channel.channel().isActive());
-							ei.setLastHeartbeat (System.currentTimeMillis ());
-							logger.info(channel.channel().localAddress() + " -> open: " + channel.channel().isOpen()
-									+ ", write: " + channel.channel().isWritable() + ", reg: " + channel.channel().isRegistered());
+							ei.setLastHeartbeat(System.currentTimeMillis());
+							logger.info(channel.channel().localAddress() + " -> open: "
+								+ channel.channel().isOpen() + ", write: "
+								+ channel.channel().isWritable() + ", reg: "
+								+ channel.channel().isRegistered());
 
 						} catch (Throwable ex) {
 							logger.error("failed to initialize the client connection");
-//							ex.printStackTrace();
+							// ex.printStackTrace();
 						}
 						logger.info("trying to connect to node " + ei.getRef());
 					}
@@ -206,8 +211,6 @@ public class EdgeMonitor implements EdgeListener, Runnable, Observer {
 	public Logger getLogger()  {
 		return logger;
 	}
-
-	
 
 	@Override
 	public void onFileChanged(RoutingConf configuration) {

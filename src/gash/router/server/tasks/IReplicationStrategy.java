@@ -11,7 +11,6 @@ import java.util.List;
  */
 public interface IReplicationStrategy {
 
-
 	List<Integer> getNodeIds(List<Integer> activeNodes);
-	
+
 }

@@ -7,6 +7,7 @@ import routing.Pipe.CommandMessage;
  * Created by codepenman on 3/27/16.
  */
 public interface ICmdMessageHandler {
+
 	void handleMessage(CommandMessage cmdMessage, Channel channel) throws Exception;
 
 	void setNextHandler(ICmdMessageHandler nextHandler);

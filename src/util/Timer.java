@@ -3,13 +3,12 @@ package util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
-* Gets a request to start election timer.
-* Know about the owner(person who starts it) of timer.
-* Owner should be able to cancel the task.
-* Owner should be notified once the timer is out
-* If owner cancel the task, timer should not notify the owner or should be interrupted
-* */
+/**
+ * Gets a request to start election timer. Know about the owner(person who
+ * starts it) of timer. Owner should be able to cancel the task. Owner should be
+ * notified once the timer is out If owner cancel the task, timer should not
+ * notify the owner or should be interrupted
+ */
 public class Timer {
 
 	private static final Logger logger = LoggerFactory.getLogger ("Timer");
@@ -25,12 +24,13 @@ public class Timer {
 		this.identifier = identifier;
 	}
 
-	public void start()   {
-		if(debug)
-			logger.info ("******** " + identifier+ ", Request to start timer: " + Thread.currentThread ().getName ());
+	public void start() {
+		if (debug)
+			logger.info("******** " + identifier + ", Request to start timer: "
+				+ Thread.currentThread().getName());
 
-		timerThread = new TimerThread ();
-		timerThread.start ();
+		timerThread = new TimerThread();
+		timerThread.start();
 	}
 
 	public void start(long timeout) {
@@ -44,35 +44,37 @@ public class Timer {
 		start ();
 	}
 
-	public void cancel()    {
-		if(timerThread == null) {
+	public void cancel() {
+		if (timerThread == null) {
 			return;
 		}
-		if(debug)
-			logger.info ("********" + identifier + ", Request to cancel timer: " + Thread.currentThread ().getName ());
+		if (debug)
+			logger.info("********" + identifier + ", Request to cancel timer: "
+				+ Thread.currentThread().getName());
 
-		timerThread.interrupt ();
+		timerThread.interrupt();
 	}
 
-	private class TimerThread extends Thread{
+	private class TimerThread extends Thread {
 
 		@Override
-		public void run(){
+		public void run() {
 			try {
-				if(debug)
-					logger.info ("********Timer started: " + Thread.currentThread ().getName ());
+				if (debug)
+					logger.info("********Timer started: " + Thread.currentThread().getName());
 
 				synchronized (this) {
 					wait(timeout);
 				}
 
-				if(debug)
-					logger.info ("********Timed out: " + Thread.currentThread ().getName ());
+				if (debug)
+					logger.info("********Timed out: " + Thread.currentThread().getName());
 
-				listener.notifyTimeout ();
+				listener.notifyTimeout();
 
 			} catch (InterruptedException e) {
-				logger.info ("********Timer was interrupted: " + Thread.currentThread ().getName ());
+				logger.info("********Timer was interrupted: " 
+					+ Thread.currentThread().getName());
 			}
 		}
 	}

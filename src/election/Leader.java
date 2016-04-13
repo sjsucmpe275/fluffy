@@ -1,19 +1,20 @@
 package election;
 
-import gash.router.server.ServerState;
-import gash.router.server.tasks.IReplicationStrategy;
-import gash.router.server.tasks.RoundRobinStrategy;
-import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import pipe.work.Work.WorkMessage;
-import routing.Pipe.CommandMessage;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import gash.router.server.ServerState;
+import gash.router.server.tasks.IReplicationStrategy;
+import gash.router.server.tasks.RoundRobinStrategy;
+import io.netty.channel.Channel;
+import pipe.work.Work.WorkMessage;
+import routing.Pipe.CommandMessage;
 
 public class Leader implements INodeState, FollowerListener, ITaskListener {
 
@@ -26,7 +27,6 @@ public class Leader implements INodeState, FollowerListener, ITaskListener {
 	private FollowerHealthMonitor followerMonitor;
 	private ElectionUtil util;
 	private IReplicationStrategy strategy;
-	//private ConcurrentHashMap<String, Integer> key2node;
 	private ExecutorService service = Executors.newFixedThreadPool(3);
 	private ConcurrentHashMap<String, GetTask> getTaskMap;
 	private ConcurrentHashMap<String, StoreTask> storeTaskMap;
@@ -39,7 +39,6 @@ public class Leader implements INodeState, FollowerListener, ITaskListener {
 				state.getConf().getElectionTimeout());
 		this.util = new ElectionUtil();
 		this.strategy = new RoundRobinStrategy(2);
-		//this.key2node = new ConcurrentHashMap<>();
 		this.getTaskMap = new ConcurrentHashMap<>();
 		this.storeTaskMap = new ConcurrentHashMap<> ();
 	}
@@ -61,34 +60,37 @@ public class Leader implements INodeState, FollowerListener, ITaskListener {
 		}
 
 		switch (taskMessage.getQuery().getAction()) {
-			case GET:
-				GetTask getTask = new GetTask (state, this, wrkMessage);
-				service.submit(getTask);
-				getTaskMap.put(taskMessage.getQuery().getKey(), getTask);
-				break;
-			case STORE:
-				/*Store task should be created only once for a particular key, which will be mostly for Meta Data. For Data Chunks existing task will be
-				* used for replication and task will finish execution when all the chunks are stored...*/
-				if(!storeTaskMap.containsKey (taskMessage.getQuery ().getKey ())) {
-					StoreTask storeTask = new StoreTask (state, this, wrkMessage, strategy, availableNodes);
-					service.submit (storeTask);
-					storeTaskMap.put(wrkMessage.getTask ().getTaskMessage ().getQuery ().getKey (), storeTask);
-					return;
-				}
+		case GET:
+			GetTask getTask = new GetTask(state, this, wrkMessage);
+			service.submit(getTask);
+			getTaskMap.put(taskMessage.getQuery().getKey(), getTask);
+			break;
+		case STORE:
+			/*
+			 * Store task should be created only once for a particular key,
+			 * which will be mostly for Meta Data. For Data Chunks existing task
+			 * will be used for replication and task will finish execution when
+			 * all the chunks are stored...
+			 */
+			if (!storeTaskMap.containsKey(taskMessage.getQuery().getKey())) {
+				StoreTask storeTask = new StoreTask(state, this, wrkMessage, strategy,
+					availableNodes);
+				service.submit(storeTask);
+				storeTaskMap.put(taskMessage.getQuery().getKey(), storeTask);
+				return;
+			}
 
-				String key = wrkMessage.getTask ().getTaskMessage ().getQuery ().getKey ();
-				if(storeTaskMap.containsKey (key))    {
-					//Update the task with new message to broad cast
-					storeTaskMap.get (key).handleRequest (wrkMessage, availableNodes);
-					return;
-				}
-				break;
-			case DELETE:
-				break;
-			case UPDATE:
-				break;
-			default:
-				break;
+			String key = taskMessage.getQuery().getKey();
+			if (storeTaskMap.containsKey(key)) {
+				// Update the task with new message to broad cast
+				storeTaskMap.get(key).handleRequest(wrkMessage, availableNodes);
+				return;
+			}
+			break;
+		case DELETE:
+		case UPDATE:
+		default:
+			break;
 		}
 	}
 	
@@ -96,29 +98,28 @@ public class Leader implements INodeState, FollowerListener, ITaskListener {
 	public synchronized void handleCmdResponse(WorkMessage workMessage, Channel channel) {
 
 		CommandMessage taskMessage = workMessage.getTask().getTaskMessage();
-		switch (taskMessage.getResponse ().getAction()) {
-		
+		switch (taskMessage.getResponse().getAction()) {
+
 		case GET:
 			if (getTaskMap.containsKey(taskMessage.getResponse().getKey())) {
 				AbstractTask task = getTaskMap.get(taskMessage.getResponse().getKey());
 				task.handleResponse(workMessage);
 			}
 			break;
-			
+
 		case STORE:
 			if (storeTaskMap.containsKey(taskMessage.getResponse().getKey())) {
 				AbstractTask task = storeTaskMap.get(taskMessage.getResponse().getKey());
 				task.handleResponse(workMessage);
 			}
 			break;
+			
 		case DELETE:
-			break;
 		case UPDATE:
-			break;
 		default:
 			break;
 		}
-	
+
 	}
 
 	@Override

@@ -16,7 +16,8 @@ public class ElectionUtil {
 
 	public WorkMessage createSizeIsMessage(ServerState state, int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
-		Header.Builder header = createHeader(state.getConf ().getNodeId (), destination, state.getConf ().getMaxHops ());
+		Header.Builder header = createHeader(state.getConf().getNodeId(), destination,
+			state.getConf().getMaxHops());
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.SIZEIS);
@@ -27,10 +28,10 @@ public class ElectionUtil {
 		return wb.build();
 	}
 
-	public WorkMessage createGetClusterSizeMessage(ServerState state,
-		int destination) {
+	public WorkMessage createGetClusterSizeMessage(ServerState state, int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
-		Header.Builder header = createHeader(state.getConf ().getNodeId (), destination, state.getConf ().getMaxHops ());
+		Header.Builder header = createHeader(state.getConf().getNodeId(), destination,
+			state.getConf().getMaxHops());
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.GETCLUSTERSIZE);
@@ -44,7 +45,8 @@ public class ElectionUtil {
 
 	public WorkMessage createVoteRequest(ServerState state, int electionId) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
-		Header.Builder header = createHeader(state.getConf().getNodeId(), -1, state.getConf ().getMaxHops ());
+		Header.Builder header = createHeader(state.getConf().getNodeId(), -1,
+			state.getConf().getMaxHops());
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.VOTEREQUEST);
@@ -61,7 +63,8 @@ public class ElectionUtil {
 	public WorkMessage createLeaderIsMessage(ServerState state) {
 
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
-		Header.Builder header = createHeader(state.getConf().getNodeId(), -1, state.getConf ().getMaxHops ());
+		Header.Builder header = createHeader(state.getConf().getNodeId(), -1,
+			state.getConf().getMaxHops());
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.THELEADERIS);
@@ -75,10 +78,10 @@ public class ElectionUtil {
 		return wb.build();
 	}
 
-	public WorkMessage createWhoIsTheLeaderMessage(ServerState  state,
-		int destination) {
+	public WorkMessage createWhoIsTheLeaderMessage(ServerState state, int destination) {
 		WorkMessage.Builder wb = WorkMessage.newBuilder();
-		Header.Builder header = createHeader(state.getConf ().getNodeId (), destination, state.getConf ().getMaxHops ());
+		Header.Builder header = createHeader(state.getConf().getNodeId(), destination,
+			state.getConf().getMaxHops());
 
 		LeaderStatus.Builder leaderStatus = LeaderStatus.newBuilder();
 		leaderStatus.setAction(LeaderQuery.WHOISTHELEADER);

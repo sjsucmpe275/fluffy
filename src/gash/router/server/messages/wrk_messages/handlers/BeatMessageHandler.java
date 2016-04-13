@@ -62,7 +62,6 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 			if (debug)
 				logger.info("Received reply for my beat, Dropping message");
 			oei.setLastHeartbeat(System.currentTimeMillis());
-			// oei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 			return;
 		}
 
@@ -72,15 +71,14 @@ public class BeatMessageHandler implements IWrkMessageHandler {
 
 		if (iei != null) {
 			iei.setLastHeartbeat(System.currentTimeMillis());
-			// iei.setLastHeartbeat (workMessage.getHeader ().getTime ());
 		}
 
 		if (debug)
 			logger.info("Sending Heartbeat to: " + workMessage.getHeader().getNodeId());
+		
 		// construct the message to reply heart beat - notifying I am alive
 		BeatMessage beatMessage = new BeatMessage(state.getConf().getNodeId());
 		beatMessage.setDestination(workMessage.getHeader().getNodeId());
-		//beatMessage.setMaxHops (state.getConf ().getMaxHops ());
 		channel.writeAndFlush(beatMessage.getMessage());
 	}
 
