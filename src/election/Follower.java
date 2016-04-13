@@ -136,13 +136,10 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 			/*Once I get a new leader, I will cancel my previous leader monitor task and start it again for
 			* new monitor*/
-			//leaderMonitor.cancel ();
 			long currentTime = System.currentTimeMillis ();
 
 			state.setLeaderHeartBeatdt (currentTime);
 			leaderMonitor.onBeat (currentTime); //Updating the beat time of leader once I receive Heart Beat and then I start to monitor
-
-			//leaderMonitor.start ();
 		}
 	}
 
@@ -150,8 +147,7 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 	public void handleVoteRequest(WorkMessage workMessage, Channel channel) {
 		logger.info("~~~~~~~~~Follower - Handler Vote Request Event ");
 
-		if (workMessage.getLeader().getElectionId() > state.getElectionId()/* &&
-				workMessage.getLeader ().getLeaderId () != state.getVotedFor ()*/) {
+		if (workMessage.getLeader().getElectionId() > state.getElectionId()) {
 
 			state.setElectionId (workMessage.getLeader ().getElectionId ());
 			state.setLeaderId (workMessage.getLeader ().getLeaderId ());
@@ -236,10 +232,8 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 			//Write it back to the channel from where I received it...
 			channel.writeAndFlush (leaderBeatResponse.getMessage ());
-
 			//Also update other nodes in outbound about the leader heart beat..
 			state.getEmon ().broadCastOutBound (leaderBeatResponse.getMessage ());
-
 			return;
 		}
 
@@ -251,15 +245,11 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 				state.setLeaderId (newLeaderId);
 			}
 
-			// Reset Leader Monitor Task
-			//leaderMonitor.cancel ();
-
 			long currentTime = System.currentTimeMillis ();
 
 			// Updating heartbeat..
 			state.setLeaderHeartBeatdt (currentTime);
 			leaderMonitor.onBeat(currentTime);
-			//leaderMonitor.start ();
 
 			//Return the response..
 			LeaderStatusMessage leaderBeatResponse = new LeaderStatusMessage (state.getConf ().getNodeId ());
@@ -274,8 +264,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 			//Also update other nodes in outbound about the leader heart beat..
 			state.getEmon ().broadCastOutBound (leaderBeatResponse.getMessage ());
-
-			return;
 		}
 		// TODO: Update visited nodes map
 	}
@@ -291,9 +279,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 	@Override
 	public void afterStateChange() {
-
-		//leaderMonitor.cancel ();
-
 		long leaderHeartBeatDt = state.getLeaderHeartBeatdt ();
 
 		if(leaderHeartBeatDt == Long.MAX_VALUE) {
@@ -302,7 +287,6 @@ public class Follower implements INodeState, TimeoutListener, LeaderHealthListen
 
 		// It might be the case, I came from either Candidate State or Leader State after receiving HB
 		leaderMonitor.onBeat (leaderHeartBeatDt);
-		//leaderMonitor.start();
 	}
 
 	private void onElectionTimeout() {
