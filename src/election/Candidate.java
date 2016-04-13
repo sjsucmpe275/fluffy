@@ -9,6 +9,7 @@ import pipe.work.Work.WorkMessage;
 import util.TimeoutListener;
 import util.Timer;
 
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Candidate implements INodeState, TimeoutListener {
@@ -159,7 +160,7 @@ public class Candidate implements INodeState, TimeoutListener {
 	public void afterStateChange() {
 		logger.info("~~~~~~~~Candidate - After State Change Event");
 		clear();
-		getClusterSize();
+		getClusterSize(); // Broadcasts GETCLUSTERSIZE message and starts a timer
 	}
 
 	@Override
@@ -187,7 +188,8 @@ public class Candidate implements INodeState, TimeoutListener {
 			logger.info("Votes I got: " + myVoteCount);
 			logger.info("#########################");
 
-			if (myVoteCount >= requiredVotes) {
+			if (myVoteCount > requiredVotes ||
+					(myVoteCount == 1 && requiredVotes == 1)) {
 				/*Update myself as a Leader in the new term and broad cast LEADERIS message*/
 				state.setElectionId(state.getElectionId () + 1);
 				state.setLeaderId (state.getConf ().getNodeId ());
@@ -197,6 +199,8 @@ public class Candidate implements INodeState, TimeoutListener {
 						.createLeaderIsMessage(state));
 				logger.info("State is leader now..");
 				state.setState(NodeStateEnum.LEADER);
+			}else	{
+				timer.start (this, 150 + new Random ().nextInt (150));
 			}
 
 			clear();

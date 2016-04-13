@@ -246,17 +246,22 @@ public class Leader implements INodeState, FollowerListener, ITaskListener {
 		logger.info("Leader - New Term: " + inComingTerm);
 		logger.info("Leader - Current Term: " + currentTerm);
 
+		/*This should never happen, but for safety this means there is another leader with greater term and I should
+		go back to Follower*/
 		if(inComingTerm > currentTerm)   {
 			state.setLeaderHeartBeatdt (System.currentTimeMillis ());
 			state.setState (NodeStateEnum.FOLLOWER);
 			return;
 		}
 
+		/*If I become a leader and find that there is another leader with equal term then I try to re start election*/
 		if(inComingTerm == currentTerm)   {
 			state.setState (NodeStateEnum.CANDIDATE);
 			return;
 		}
 
+		/*If not any of the cases above then it means I am getting beat response from my followers, so I
+		* add them to the list and also update their beat time*/
 		int followerId = workMessage.getHeader ().getNodeId ();
 		addFollower (followerId); // Add follower Id
 

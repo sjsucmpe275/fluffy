@@ -18,8 +18,6 @@ public class Timer {
 	private long timeout;
 	private TimeoutListener listener;
 	private TimerThread timerThread;
-	//private AtomicBoolean stop;
-	private Object lock;
 
 	public Timer(TimeoutListener listener, long timeout, String identifier) {
 		this.listener = listener;

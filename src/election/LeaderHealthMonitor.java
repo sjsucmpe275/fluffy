@@ -19,7 +19,6 @@ public class LeaderHealthMonitor {
 	private AtomicBoolean stop;
 	private HealthMonitorTask task;
 	private AtomicLong beatTime;
-	private AtomicBoolean isRunning;
 	private final long timeout;
 
 	public LeaderHealthMonitor(LeaderHealthListener healthListener, long timeout) {
@@ -27,40 +26,20 @@ public class LeaderHealthMonitor {
 		this.timeout = timeout;
 		task = new HealthMonitorTask();
 		stop = new AtomicBoolean(false);
-		isRunning = new AtomicBoolean (false);
 		beatTime = new AtomicLong(Long.MAX_VALUE);
 	}
 
 	public void start() {
 		/* Start the task, only if it is not started */
-		//if(!isRunning.get ())   {
 		logger.info("~~~~~~~~Follower - Started Leader Monitor");
 		stop.getAndSet (false);
 		task.start();
-		isRunning.getAndSet (true);
-		//}
-	}
-/*
-
-	public boolean isRunning() {
-		return isRunning.get ();
 	}
 
-	public void cancel() {
-		*/
-/* Cancel the task, only if it is not stopped before *//*
-
-		//if(stop.get ()) {
-		task.interrupt ();
-		stop.getAndSet(true);
-		isRunning.getAndSet (false);
-		task = new HealthMonitorTask ();
-		beatTime.getAndSet (Long.MAX_VALUE);
-		logger.info("~~~~~~~~Follower - Cancelled Leader Monitor");
-		//}
-	}
-*/
-
+	/* This method will be called by the owner of Health Monitor to update the beat time of leader
+	* Internal task will be monitoring this time
+	* This time can be set to Long.MAX_VALUE if this thread has to be alive instead of creating
+	* montor multiple times..*/
 	public void onBeat(long beatTime) {
 		this.beatTime.getAndSet(beatTime);
 	}
@@ -76,10 +55,8 @@ public class LeaderHealthMonitor {
 
 					long currentTime = System.currentTimeMillis();
 
-					//logger.info("*****Last heart beat received from Leader: " + (currentTime - beatTime.get()));
 					if ((currentTime - beatTime.get()) > timeout) {
 						healthListener.onLeaderBadHealth();
-						//break;
 					}
 					synchronized (this) {
 						wait((long) (timeout * 0.9));
