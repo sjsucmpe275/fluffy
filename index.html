@@ -1,34 +1,25 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Fluffy by sjsucmpe275</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/github-light.css">
-    <meta name="viewport" content="width=device-width">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Fluffy</h1>
-        <p>Distributed file storage system similar to Dropbox using Google Protobuf and Netty</p>
+    <section class="page-header">
+      <h1 class="project-name">Fluffy</h1>
+      <h2 class="project-tagline">Distributed file storage system similar to Dropbox using Google Protobuf and Netty</h2>
+      <a href="https://github.com/sjsucmpe275/fluffy" class="btn">View on GitHub</a>
+      <a href="https://github.com/sjsucmpe275/fluffy/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/sjsucmpe275/fluffy/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/sjsucmpe275/fluffy">View the Project on GitHub <small>sjsucmpe275/fluffy</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/sjsucmpe275/fluffy/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/sjsucmpe275/fluffy/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/sjsucmpe275/fluffy">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
+    <section class="main-content">
+      <h1>
 <a id="project----fluffy" class="anchor" href="#project----fluffy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Project    Fluffy</h1>
 
 <p>Storing data    in  the cloud   or  on  a   network of  servers share   a   common  challenge   -<br>
@@ -109,19 +100,57 @@ is  not possible.   </p>
 with    deployments of  other   teams.  Each    team    should  support two storage solutions<br>
 of  which   50% cannot  overlap another team’s    choice.     </p>
 
-<h3>
-<a id="source---code" class="anchor" href="#source---code" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Source   code:</h3>
+<h2>
+<a id="instruction-to-run-the-project" class="anchor" href="#instruction-to-run-the-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Instruction to run the project</h2>
 
-<p>The baseline    code    for the project is  the code    you have    been    using   in  the class   labs.<br>
-Periodically,   new releases    of  the code    will    be  made    available   to  provide you 
-examples    of  new concepts.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/sjsucmpe275">sjsucmpe275</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+<p>Download the source code
+Install ant
+Download these libraries:
+1. commons-pool2-2.4.2.jar
+2. gemfire-core-1.0.0-incubating.M1.jar
+3. hamcrest-all-1.3.jar
+4. jackson-all-1.8.5.jar
+5. jedis-2.4.2.jar
+6. junit-4.12.jar
+7. leveldbjni-all-1.8.jar
+8. netty-all-4.0.15.Final.jar
+9. protobuf-java-2.5.0.jar
+10. slf4j-api-1.7.2.jar
+11. slf4j-simple-1.7.2.jar
+12. spymemcached-2.8.0.jar</p>
+
+<h3>
+<a id="how-to-build" class="anchor" href="#how-to-build" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to build</h3>
+
+<p>Go to project directory.
+Type "ant"
+Source code will be compiled.</p>
+
+<h4>
+<a id="how-to-start-server" class="anchor" href="#how-to-start-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>How to start server</h4>
+
+<p>Go to project directory
+Type "ant node-1" to start server node-1 which loads Server Configuration from
+"~/runtime/route-1.conf"
+Type "ant node-2" to start server node-2 which loads Server Configuration from
+"~/runtime/route-2.conf"
+Type "ant node-3" to start server node-3 which loads Server Configuration from
+"~/runtime/route-3.conf"
+Type "ant node-5" to start server node-5 which loads Server Configuration from
+"~/runtime/route-5.conf"
+Type "ant node-6" to start server node-6 which loads Server Configuration from
+"~/runtime/route-6.conf"</p>
+
+<p>Topology can be defined in route-*.conf files</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/sjsucmpe275/fluffy">Fluffy</a> is maintained by <a href="https://github.com/sjsucmpe275">sjsucmpe275</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
